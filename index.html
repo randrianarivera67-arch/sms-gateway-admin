@@ -1754,12 +1754,7 @@ function applyTheme(t){
 function toggleTheme(){applyTheme(currentTheme==='dark'?'light':'dark');}
 
 // ══ LANG ══
-function toggleLang(){
-  currentLang=currentLang==='fr'?'mg':'fr';
-  localStorage.setItem('gw_lang',currentLang);
-  document.getElementById('langBtn').textContent=currentLang.toUpperCase();
-  showToast(currentLang==='mg'?'Fiteny: Malagasy':'Langue: Français');
-}
+
 
 
 // ══ USSD CONFIG ══
@@ -1974,6 +1969,124 @@ document.addEventListener('touchend', e => {
     if(ind) ind.style.top = '-60px';
   }
 }, {passive: true});
+
+const TRANSLATIONS = {
+  fr: {
+    dashboard: 'Tableau de bord',
+    sms_recus: 'SMS Reçus',
+    retraits: 'Retraits Mobile Money',
+    devices: 'Appareils connectés',
+    stats: 'Statistiques',
+    ussd: 'Codes USSD',
+    settings: 'Paramètres',
+    solde_actuel: 'Solde actuel',
+    solde_total: 'Solde Total disponible',
+    toutes_ops: 'Toutes opérations confondues',
+    disponible: 'Disponible',
+    en_attente: 'En attente',
+    reussis: 'Réussis',
+    appareils: 'Appareils',
+    sms_jour: 'SMS / JOUR',
+    sms_total: 'SMS TOTAL',
+    actualiser: 'Actualiser',
+    processus: 'SOLE D'ENSEMBLE DU PROCESSUS',
+    activite: 'ACTIVITÉ TEMPS RÉEL',
+    voir_tout: 'Voir tout',
+    client: 'Client',
+    paiement: 'Paiement Mobile',
+    sms_android: 'SMS Android',
+    gateway_api: 'Gateway API',
+    recu: 'Reçu',
+    transmis: 'Transmis',
+  },
+  mg: {
+    dashboard: 'Filan-tsonia',
+    sms_recus: 'SMS Noraisina',
+    retraits: 'Fialan-keloka Mobile',
+    devices: 'Fitaovana mifandray',
+    stats: 'Antontan-isa',
+    ussd: 'Kaody USSD',
+    settings: 'Fikirana',
+    solde_actuel: 'Vola ankehitriny',
+    solde_total: 'Vola Totaly Misy',
+    toutes_ops: 'Asa rehetra',
+    disponible: 'Misy',
+    en_attente: 'Miandry',
+    reussis: 'Vita',
+    appareils: 'Fitaovana',
+    sms_jour: 'SMS / ANDRO',
+    sms_total: 'SMS REHETRA',
+    actualiser: 'Havaozina',
+    processus: 'FANDAHARANA IRAY MANONTOLO',
+    activite: 'ASAN'NY FOTOANA TENA IZY',
+    voir_tout: 'Jereo rehetra',
+    client: 'Mpanjifa',
+    paiement: 'Fandoavana Mobile',
+    sms_android: 'SMS Android',
+    gateway_api: 'Gateway API',
+    recu: 'Noraisina',
+    transmis: 'Nalefa',
+  }
+};
+
+function applyTranslations() {
+  const t = TRANSLATIONS[currentLang];
+  const setT = (id, key) => { const el = document.getElementById(id); if(el && t[key]) el.textContent = t[key]; };
+  const setAll = (cls, key) => { document.querySelectorAll('.'+cls).forEach(el => { if(t[key]) el.textContent = t[key]; }); };
+
+  // Top title
+  setT('topTitle', 'dashboard');
+
+  // Sidebar
+  const sideItems = document.querySelectorAll('.sidebar-nav .nav-item');
+  const sideKeys = ['dashboard','sms_recus','retraits','devices','stats','ussd','settings'];
+  sideItems.forEach((el, i) => { if(sideKeys[i] && t[sideKeys[i]]) { const span = el.querySelector('span'); if(span) span.textContent = t[sideKeys[i]]; } });
+
+  // Solde section
+  document.querySelectorAll('.section-title').forEach(el => {
+    if(el.textContent.includes('Solde') || el.textContent.includes('Vola')) el.textContent = t.solde_actuel;
+    if(el.textContent.includes('ENSEMBLE') || el.textContent.includes('FANDAHARANA')) el.textContent = t.processus;
+    if(el.textContent.includes('ACTIVIT') || el.textContent.includes('ASAN')) el.textContent = t.activite;
+  });
+
+  // Op status
+  document.querySelectorAll('.op-status').forEach(el => { el.textContent = t.disponible; });
+
+  // Stats labels
+  document.querySelectorAll('.stat-mini-lbl').forEach((el, i) => {
+    const keys = ['en_attente','reussis','appareils'];
+    if(keys[i] && t[keys[i]]) el.textContent = t[keys[i]];
+  });
+
+  // Flow stats
+  document.querySelectorAll('.flow-stat').forEach((el, i) => {
+    const keys = ['en_attente','recu','recu','transmis'];
+    if(keys[i] && t[keys[i]]) el.textContent = t[keys[i]];
+  });
+
+  // Flow labels
+  document.querySelectorAll('.flow-label').forEach((el, i) => {
+    const keys = ['client','paiement','sms_android','gateway_api'];
+    if(keys[i] && t[keys[i]]) el.textContent = t[keys[i]];
+  });
+
+  // Voir tout
+  document.querySelectorAll('button').forEach(el => {
+    if(el.textContent.includes('Voir tout') || el.textContent.includes('Jereo')) el.textContent = t.voir_tout;
+  });
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'fr' ? 'mg' : 'fr';
+  localStorage.setItem('gw_lang', currentLang);
+  document.getElementById('langBtn').textContent = currentLang.toUpperCase();
+  showToast(currentLang === 'mg' ? 'Fiteny: Malagasy' : 'Langue: Français');
+  applyTranslations();
+}
+
+
+// Apply on load
+document.addEventListener("DOMContentLoaded", applyTranslations);
 </script>
 </body>
 </html>
