@@ -709,6 +709,10 @@ tbody tr{transition:background .1s !important}
       </button>
 
       <div class="nav-section">// Système</div>
+      <button class="nav-item" onclick="showPage('ussd')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Codes USSD
+      </button>
       <button class="nav-item" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         Paramètres
@@ -1095,6 +1099,115 @@ tbody tr{transition:background .1s !important}
         </div>
       </div>
 
+
+      <!-- USSD PAGE -->
+      <div class="page" id="page-ussd">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">
+          Codes USSD par opérateur
+        </div>
+        <div style="margin-bottom:12px;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:12px;color:var(--text2)">
+          Variables disponibles:
+          <code style="background:var(--surface);padding:2px 7px;border-radius:5px;color:var(--primary);font-family:monospace;margin:0 4px">{numero}</code>
+          <code style="background:var(--surface);padding:2px 7px;border-radius:5px;color:var(--primary);font-family:monospace;margin:0 4px">{montant}</code>
+        </div>
+
+        <!-- Orange -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid #FF6D00">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div id="ussdIconOr" style="width:44px;height:44px;border-radius:11px;background:#FFF3E0;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,109,0,.3);overflow:hidden">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--text)">Orange Money</div>
+              <div style="font-size:11px;color:var(--text2)">032 &middot; 037</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div>
+              <label class="field-label">Code Retrait</label>
+              <input class="field-input" id="ussd_orange_retrait" value="*111*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#FF6D00"/>
+            </div>
+            <div>
+              <label class="field-label">Code Depot</label>
+              <input class="field-input" id="ussd_orange_depot" value="*111*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#FF6D00"/>
+            </div>
+          </div>
+          <div class="action-btns">
+            <button class="btn btn-primary" onclick="saveUssd('orange')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Sauvegarder
+            </button>
+            <button class="btn btn-outline" onclick="testUssd('orange','retrait')">&#9654; Test Retrait</button>
+            <button class="btn btn-outline" onclick="testUssd('orange','depot')">&#9654; Test Depot</button>
+            <button class="btn btn-outline" onclick="resetUssd('orange')">&#8635; Reset</button>
+          </div>
+        </div>
+
+        <!-- MVola YAS -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid var(--primary)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div id="ussdIconMv" style="width:44px;height:44px;border-radius:11px;background:#E3F2FD;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(27,108,242,.3);overflow:hidden">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--text)">MVola &middot; YAS</div>
+              <div style="font-size:11px;color:var(--text2)">034 &middot; 038</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div>
+              <label class="field-label">Code Retrait</label>
+              <input class="field-input" id="ussd_mvola_retrait" value="*155*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--primary)"/>
+            </div>
+            <div>
+              <label class="field-label">Code Depot</label>
+              <input class="field-input" id="ussd_mvola_depot" value="*155*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--primary)"/>
+            </div>
+          </div>
+          <div class="action-btns">
+            <button class="btn btn-primary" onclick="saveUssd('mvola')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Sauvegarder
+            </button>
+            <button class="btn btn-outline" onclick="testUssd('mvola','retrait')">&#9654; Test Retrait</button>
+            <button class="btn btn-outline" onclick="testUssd('mvola','depot')">&#9654; Test Depot</button>
+            <button class="btn btn-outline" onclick="resetUssd('mvola')">&#8635; Reset</button>
+          </div>
+        </div>
+
+        <!-- Airtel -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid var(--error)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div id="ussdIconAi" style="width:44px;height:44px;border-radius:11px;background:#FFEBEE;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(244,67,54,.3);overflow:hidden">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--text)">Airtel Money</div>
+              <div style="font-size:11px;color:var(--text2)">033</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div>
+              <label class="field-label">Code Retrait</label>
+              <input class="field-input" id="ussd_airtel_retrait" value="*123*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--error)"/>
+            </div>
+            <div>
+              <label class="field-label">Code Depot</label>
+              <input class="field-input" id="ussd_airtel_depot" value="*123*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--error)"/>
+            </div>
+          </div>
+          <div class="action-btns">
+            <button class="btn btn-primary" onclick="saveUssd('airtel')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Sauvegarder
+            </button>
+            <button class="btn btn-outline" onclick="testUssd('airtel','retrait')">&#9654; Test Retrait</button>
+            <button class="btn btn-outline" onclick="testUssd('airtel','depot')">&#9654; Test Depot</button>
+            <button class="btn btn-outline" onclick="resetUssd('airtel')">&#8635; Reset</button>
+          </div>
+        </div>
+      </div><!-- /page-ussd -->
+
       <!-- ══ SETTINGS ══ -->
       <div class="page" id="page-settings">
         <div class="settings-grid">
@@ -1316,7 +1429,7 @@ function showPage(name){
   if(pg) pg.classList.add('active');
   const ni=document.querySelector(`.nav-item[onclick*="'${name}'"]`);
   if(ni) ni.classList.add('active');
-  const titles={dashboard:'Tableau de bord',sms:'SMS Reçus',retrait:'Retraits Mobile Money',devices:'Appareils connectés',stats:'Statistiques',settings:'Paramètres'};
+  const titles={dashboard:'Tableau de bord',sms:'SMS Reçus',retrait:'Retraits Mobile Money',devices:'Appareils connectés',stats:'Statistiques',ussd:'Codes USSD',settings:'Paramètres'};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
   ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats})[name]?.();
