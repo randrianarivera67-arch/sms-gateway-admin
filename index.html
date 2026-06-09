@@ -1933,7 +1933,7 @@ function createIndicator() {
 }
 
 // Target ilay .content div no scroll container
-const getScroller = () => document.querySelector('.content') || document.body;
+const getScroller = () => document.getElementById('content') || document.querySelector('.content') || document.body;
 
 document.addEventListener('touchstart', e => {
   const scroller = getScroller();
