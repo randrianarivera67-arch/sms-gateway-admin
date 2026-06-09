@@ -1308,7 +1308,7 @@ let TOKEN = localStorage.getItem('gw_token')||'';
 let BASE  = localStorage.getItem('gw_url')||'';
 let smsPage=1, smsOp='';
 let currentTheme = localStorage.getItem('gw_theme')||'light';
-let currentLang  = localStorage.getItem('gw_lang')||'fr';
+var currentLang = localStorage.getItem('gw_lang')||'fr';
 
 // ══ ICONS (embedded via base64 or path) ══
 const IC_GW     = localStorage.getItem('ic_gw')||'';
