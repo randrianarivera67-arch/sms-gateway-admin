@@ -1436,7 +1436,7 @@ function showPage(name){
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').style.display='block';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.display='none';}
-function refreshCurrent(){const id=document.querySelector('.page.active')?.id?.replace('page-','');if(id)showPage(id);}
+function refreshCurrent(){window.location.reload(true);}
 
 // ══ DASHBOARD ══
 async function loadDashboard(){
