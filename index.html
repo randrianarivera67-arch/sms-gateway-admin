@@ -1672,6 +1672,14 @@ async function loadStats(){
         </div>
       </div>`;
   }).join('');
+  // Solde update
+  if(d.balances){
+    const total=(d.balances?.orange||0)+(d.balances?.mvola||d.balances?.yas||0)+(d.balances?.airtel||0);
+    if(total>0) setTxt('soldeTotalEl',fmtAr(total));
+    if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
+    if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
+    if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
+  }
 }
 
 // ══ SETTINGS ══
