@@ -1720,7 +1720,7 @@ async function synchroniser(){
 }
 
 // ══ POLLING ══
-function startPolling(){setInterval(()=>{const pg=document.querySelector('.page.active')?.id?.replace('page-','');if(pg==='dashboard')loadDashboard();},30000);}
+function startPolling(){setInterval(()=>{const pg=document.querySelector('.page.active')?.id?.replace('page-','');if(pg==='dashboard')loadDashboard();updateBadges();},30000);}async function updateBadges(){const d=await api('/api/stats/dashboard');if(!d)return;const smsToday=d.sms?.today||0;const retPend=d.retrait?.pending||0;if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';}const nd=document.getElementById('notifDot');if(nd)nd.style.display='block';}}
 
 // ══ THEME ══
 function applyTheme(t){
