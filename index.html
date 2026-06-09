@@ -1648,6 +1648,104 @@ function toggleLang(){
   showToast(currentLang==='mg'?'Fiteny: Malagasy':'Langue: Français');
 }
 
+
+// ══ USSD CONFIG ══
+async function loadUssdConfig(){
+  const configs = await api('/api/ussd');
+  if(!configs) return;
+  const el = document.getElementById('ussdConfigCards');
+  if(!el) return;
+
+  const ops = [
+    {key:'orange', name:'Orange Money', color:'#ff6b35', icon:'icOrangeUssd'},
+    {key:'mvola',  name:'MVola / YAS',  color:'#2979ff', icon:'icYasUssd'},
+    {key:'airtel', name:'Airtel Money', color:'#f44336', icon:'icAirtelUssd'},
+  ];
+
+  el.innerHTML = ops.map(op => {
+    const cfg = configs.find(c => c.operator === op.key) || {
+      retrait: op.key==='orange'?'*111*1*{numero}*{montant}#':op.key==='mvola'?'*155*1*{numero}*{montant}#':'*123*1*{numero}*{montant}#',
+      depot:   op.key==='orange'?'*111*2*{numero}*{montant}#':op.key==='mvola'?'*155*2*{numero}*{montant}#':'*123*2*{numero}*{montant}#',
+    };
+    return `
+    <div class="tcard" style="padding:20px;border-left:3px solid ${op.color}">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:40px;height:40px;border-radius:10px;background:${op.color}22;display:flex;align-items:center;justify-content:center;border:2px solid #FFD70088;box-shadow:0 0 8px rgba(255,215,0,.3)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${op.color}" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"/></svg>
+        </div>
+        <div style="font-size:15px;font-weight:800;color:var(--white)">${op.name}</div>
+        <div style="margin-left:auto">
+          <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;background:${op.color}22;color:${op.color};border:1px solid ${op.color}44">ACTIF</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flbl">Code Retrait</label>
+        <div style="display:flex;gap:8px">
+          <input class="finp" id="ussd_${op.key}_retrait" value="${cfg.retrait}" placeholder="*xxx*1*{numero}*{montant}#" style="font-family:monospace;font-size:13px"/>
+          <button class="btn btn-out btn-sm" onclick="testUssd('${op.key}','retrait')" style="flex-shrink:0" title="Tester">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flbl">Code Dépôt</label>
+        <div style="display:flex;gap:8px">
+          <input class="finp" id="ussd_${op.key}_depot" value="${cfg.depot}" placeholder="*xxx*2*{numero}*{montant}#" style="font-family:monospace;font-size:13px"/>
+          <button class="btn btn-out btn-sm" onclick="testUssd('${op.key}','depot')" style="flex-shrink:0" title="Tester">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-blue btn-sm" onclick="saveUssd('${op.key}')" style="flex:1;justify-content:center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Sauvegarder
+        </button>
+        <button class="btn btn-out btn-sm" onclick="resetUssd('${op.key}')" style="flex-shrink:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Reset
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveUssd(opKey){
+  const retrait = document.getElementById(`ussd_${opKey}_retrait`)?.value?.trim();
+  const depot   = document.getElementById(`ussd_${opKey}_depot`)?.value?.trim();
+  if(!retrait||!depot){ alert('Remplissez les deux codes'); return; }
+  if(!retrait.includes('{numero}')||!retrait.includes('{montant}')||
+     !depot.includes('{numero}')||!depot.includes('{montant}')){
+    alert('⚠ Les codes doivent contenir {numero} et {montant}'); return;
+  }
+  const d = await api('/api/ussd', {
+    method:'POST',
+    body: JSON.stringify({ operator: opKey, retrait, depot })
+  });
+  if(d?.ok) alert('✅ Code USSD sauvegardé!');
+  else alert('Erreur: '+(d?.error||'Connexion'));
+}
+
+function testUssd(opKey, type){
+  const code = document.getElementById(`ussd_${opKey}_${type}`)?.value || '';
+  const preview = code.replace('{numero}','032XXXXXXX').replace('{montant}','10000');
+  alert(`📟 Aperçu du code USSD:\n\n${preview}\n\nCe code sera exécuté par l'APK Android`);
+}
+
+async function resetUssd(opKey){
+  const defaults = {
+    orange:{ retrait:'*111*1*{numero}*{montant}#', depot:'*111*2*{numero}*{montant}#' },
+    mvola: { retrait:'*155*1*{numero}*{montant}#', depot:'*155*2*{numero}*{montant}#' },
+    airtel:{ retrait:'*123*1*{numero}*{montant}#', depot:'*123*2*{numero}*{montant}#' },
+  };
+  if(!defaults[opKey]) return;
+  const r = document.getElementById(`ussd_${opKey}_retrait`);
+  const d = document.getElementById(`ussd_${opKey}_depot`);
+  if(r) r.value = defaults[opKey].retrait;
+  if(d) d.value = defaults[opKey].depot;
+  alert('✅ Valeurs par défaut restaurées — cliquez Sauvegarder pour confirmer');
+}
+
 // ══ HELPERS ══
 function statusBadge(s){return{success:'ok',sent:'sent',pending:'pend',failed:'fail',processing:'proc'}[s]||'pend';}
 function fmtAr(n){return Number(n||0).toLocaleString('fr-FR')+' Ar';}
