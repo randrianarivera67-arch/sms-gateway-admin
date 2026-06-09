@@ -1537,7 +1537,7 @@ async function loadRetraits(){
   const tb=document.getElementById('rTbody');
   if(!d?.data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   tb.innerHTML=d.data.map(r=>`<tr>
-    <td><span class="badge ${opClass(r.operator)}">${esc(r.operator||'?')}</span></td>
+    <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${r.operator?.toLowerCase().includes('orange')?'orange.png':r.operator?.toLowerCase().includes('airtel')?'airtel.png':'yas.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
     <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
     <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
     <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
