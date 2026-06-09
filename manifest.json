@@ -1,6 +1,6 @@
 {
-  "name": "SMS Gateway Admin",
-  "short_name": "SMS Gateway",
+  "name": "Gateway Admin Pro",
+  "short_name": "Gateway Admin Pro",
   "description": "SMS Gateway for Madagascar Mobile Money",
   "start_url": "/index.html",
   "display": "standalone",
