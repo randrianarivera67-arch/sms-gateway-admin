@@ -1453,7 +1453,7 @@ async function loadDashboard(){
   const total=(d.balances?.orange||0)+(d.balances?.yas||0)+(d.balances?.airtel||0);
   if(total>0) setTxt('soldeTotalEl',fmtAr(total));
   if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
-  if(d.balances?.yas)    setTxt('soldeTelma',fmtAr(d.balances.yas));
+  if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
   if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
