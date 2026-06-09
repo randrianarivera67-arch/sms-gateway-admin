@@ -1422,7 +1422,7 @@ async function api(path,opts={}){
 }
 
 // ══ NAVIGATION ══
-function showPage(name){
+function showPage(name){applyTranslations();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
