@@ -1289,9 +1289,17 @@ window.onload=()=>{
   createParticles();
 
   if(TOKEN&&BASE){
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('appShell').style.display='flex';
-    applyIcons(); loadDashboard(); startPolling();
+    fetch(BASE+'/api/stats/dashboard',{headers:{'Authorization':'Bearer '+TOKEN}})
+      .then(r=>{
+        if(r.ok){
+          document.getElementById('loginPage').style.display='none';
+          document.getElementById('appShell').style.display='flex';
+          applyIcons(); loadDashboard(); startPolling();
+        } else {
+          localStorage.removeItem('gw_token');
+          TOKEN='';
+        }
+      }).catch(()=>{localStorage.removeItem('gw_token');TOKEN='';});
   }
 };
 function updateClock(){
