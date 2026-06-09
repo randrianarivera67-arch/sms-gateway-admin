@@ -1792,6 +1792,67 @@ function opImgCircle(op,sz=28){
   return'';
 }
 
+    <div class="page" id="page-ussd">
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px">⚙️ Codes USSD</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Variables: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:#00CFFF">{numero}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:#00CFFF">{montant}</code></div>
+      <div style="display:grid;gap:14px">
+        <div class="tcard" style="padding:20px;border-left:4px solid #ff6b35">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:44px;height:44px;border-radius:10px;background:#ff6b3522;display:flex;align-items:center;justify-content:center;border:2px solid #FFD700;box-shadow:0 0 10px rgba(255,215,0,.4)" id="ussdIconOr">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            <div><div style="font-size:15px;font-weight:800">Orange Money</div><div style="font-size:11px;color:var(--text3)">032 · 037</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div><label class="flbl">💸 Retrait</label><input class="finp" id="ussd_orange_retrait" value="*111*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#ff6b35"/></div>
+            <div><label class="flbl">💰 Dépôt</label><input class="finp" id="ussd_orange_depot" value="*111*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#ff6b35"/></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" style="background:#ff6b35;color:#000;font-weight:700" onclick="saveUssd('orange')">💾 Sauvegarder</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('orange','retrait')">▶ Test Retrait</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('orange','depot')">▶ Test Dépôt</button>
+            <button class="btn btn-out btn-sm" onclick="resetUssd('orange')">↺ Reset</button>
+          </div>
+        </div>
+        <div class="tcard" style="padding:20px;border-left:4px solid #00CFFF">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:44px;height:44px;border-radius:10px;background:#00CFFF22;display:flex;align-items:center;justify-content:center;border:2px solid #FFD700;box-shadow:0 0 10px rgba(255,215,0,.4)" id="ussdIconMv">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00CFFF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div><div style="font-size:15px;font-weight:800">MVola · YAS</div><div style="font-size:11px;color:var(--text3)">034 · 038</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div><label class="flbl">💸 Retrait</label><input class="finp" id="ussd_mvola_retrait" value="*155*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#00CFFF"/></div>
+            <div><label class="flbl">💰 Dépôt</label><input class="finp" id="ussd_mvola_depot" value="*155*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#00CFFF"/></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" style="background:#00CFFF;color:#000;font-weight:700" onclick="saveUssd('mvola')">💾 Sauvegarder</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('mvola','retrait')">▶ Test Retrait</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('mvola','depot')">▶ Test Dépôt</button>
+            <button class="btn btn-out btn-sm" onclick="resetUssd('mvola')">↺ Reset</button>
+          </div>
+        </div>
+        <div class="tcard" style="padding:20px;border-left:4px solid #f44336">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:44px;height:44px;border-radius:10px;background:#f4433622;display:flex;align-items:center;justify-content:center;border:2px solid #FFD700;box-shadow:0 0 10px rgba(255,215,0,.4)" id="ussdIconAi">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f44336" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div><div style="font-size:15px;font-weight:800">Airtel Money</div><div style="font-size:11px;color:var(--text3)">033</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div><label class="flbl">💸 Retrait</label><input class="finp" id="ussd_airtel_retrait" value="*123*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#f44336"/></div>
+            <div><label class="flbl">💰 Dépôt</label><input class="finp" id="ussd_airtel_depot" value="*123*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#f44336"/></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" style="background:#f44336;color:#fff;font-weight:700" onclick="saveUssd('airtel')">💾 Sauvegarder</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('airtel','retrait')">▶ Test Retrait</button>
+            <button class="btn btn-out btn-sm" onclick="testUssd('airtel','depot')">▶ Test Dépôt</button>
+            <button class="btn btn-out btn-sm" onclick="resetUssd('airtel')">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </script>
 </body>
 </html>
