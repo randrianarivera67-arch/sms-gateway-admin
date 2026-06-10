@@ -1494,7 +1494,7 @@ async function loadDashboard(){
   setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',retPend);setTxt('s4',retOk);setTxt('s5',devCount);
   if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
   if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
-  const total=(d.balances?.orange||0)+(d.balances?.yas||0)+(d.balances?.airtel||0);
+  const total=(d.balances?.orange||0)+(d.balances?.mvola||d.balances?.yas||0)+(d.balances?.airtel||0);
   if(total>0) setTxt('soldeTotalEl',fmtAr(total));
   if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
   if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
