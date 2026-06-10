@@ -52,7 +52,6 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   height:100%;overflow:hidden;
   transition:transform .25s ease;
   z-index:200;
-  min-height:0;
 }
 .sidebar-head{
   padding:20px 18px 14px;
@@ -70,7 +69,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .logo-txt h1{font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px}
 .logo-txt p{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;font-family:'JetBrains Mono',monospace}
 
-.sidebar-nav{flex:1;overflow-y:auto;padding:10px 10px;display:flex;flex-direction:column;gap:2px;min-height:0}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 10px;display:flex;flex-direction:column;gap:2px}
 .nav-section{font-size:9px;font-weight:700;color:rgba(255,255,255,.28);letter-spacing:.12em;text-transform:uppercase;padding:10px 8px 5px}
 .nav-item{
   display:flex;align-items:center;gap:10px;
@@ -502,7 +501,7 @@ tbody tr:hover td{background:var(--blue-light)}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300;overflow-y:auto;height:100vh}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
   .tb-menu{display:flex}
   .solde-grid{grid-template-columns:1fr 1fr}
@@ -524,7 +523,7 @@ tbody tr:hover td{background:var(--blue-light)}
 }
 .overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.5);z-index:150;
+  background:rgba(0,0,0,.5);z-index:250;
 }
 
 /* ══ NEON EFFECTS ══ */
@@ -713,10 +712,6 @@ tbody tr{transition:background .1s !important}
       <button class="nav-item" onclick="showPage('ussd')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         Codes USSD
-      </button>
-      <button class="nav-item" onclick="showPage('template')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>SMS Templates</span>
       </button>
       <button class="nav-item" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
@@ -1214,50 +1209,6 @@ tbody tr{transition:background .1s !important}
       </div><!-- /page-ussd -->
 
       <!-- ══ SETTINGS ══ -->
-      <div class="page" id="page-template">
-        <div class="page-header">
-          <div class="page-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="url(#tGrad)" stroke-width="2"><defs><linearGradient id="tGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#7C4DFF"/></linearGradient></defs><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            SMS Templates
-          </div>
-        </div>
-        <div style="background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(124,77,255,.08));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden">
-          <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(0,229,255,.15),transparent 70%);pointer-events:none"></div>
-          <div style="font-size:11px;font-weight:700;color:rgba(0,229,255,.7);letter-spacing:2px;margin-bottom:6px">AUTO-VALIDATION</div>
-          <div style="font-size:13px;color:var(--text2);line-height:1.5">SMS avy amin'ny operator dia <strong style="color:#00E5FF">checked automatiquement</strong>. Mitovy → <span style="color:#00C853">✓ Validé</span> · Tsy mitovy → <span style="color:#F44336">✗ Refusé</span></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px">
-          <button onclick="setTplOp('orange')" id="tplTabOr" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#FF6D00,#FF9100);color:#fff;border:none;box-shadow:0 0 12px rgba(255,109,0,.3)"><img src="orange.png" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">Orange</button>
-          <button onclick="setTplOp('mvola')" id="tplTabMv" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;border:none;box-shadow:0 0 12px rgba(41,121,255,.3)"><img src="yas.png" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">MVola·YAS</button>
-          <button onclick="setTplOp('airtel')" id="tplTabAi" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#B71C1C,#F44336);color:#fff;border:none;box-shadow:0 0 12px rgba(244,67,54,.3)"><img src="airtel.png" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">Airtel</button>
-        </div>
-        <div style="background:var(--card);border:1px solid rgba(0,229,255,.15);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 0 20px rgba(0,229,255,.05)">
-          <div style="font-size:12px;font-weight:800;color:#00E5FF;letter-spacing:1px;margin-bottom:12px">+ AJOUTER TEMPLATE</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px">TYPE</div>
-              <select id="tplType" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px"><option value="retrait">Retrait</option><option value="depot">Depot</option></select>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px">OPERATEUR</div>
-              <select id="tplOpSelect" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px"><option value="orange">Orange</option><option value="mvola">MVola/YAS</option><option value="airtel">Airtel</option></select>
-            </div>
-          </div>
-          <div style="margin-bottom:10px">
-            <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px">KEYWORDS (separés par virgule)</div>
-            <input id="tplKeywords" class="field-input" placeholder="retiré, succès, solde" style="width:100%;font-size:13px"/>
-          </div>
-          <div style="margin-bottom:12px">
-            <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px">EXEMPLE SMS</div>
-            <textarea id="tplExemple" rows="3" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;resize:vertical" placeholder="Vous avez retiré 1000 Ar avec succès..."></textarea>
-          </div>
-          <button onclick="addTemplate()" class="btn btn-primary" style="width:100%;background:linear-gradient(135deg,#00E5FF,#7C4DFF);border:none;box-shadow:0 0 16px rgba(0,229,255,.3)">+ Ajouter Template</button>
-        </div>
-        <div id="tplList" style="display:flex;flex-direction:column;gap:10px">
-          <div style="text-align:center;padding:40px;color:var(--text3)">Chargement...</div>
-        </div>
-      </div>
-
       <div class="page" id="page-settings">
         <div class="settings-grid">
           <div>
@@ -1353,19 +1304,8 @@ tbody tr{transition:background .1s !important}
 
 <script>
 // ══ STATE ══
-let TOKEN = (function(){
-  const t = localStorage.getItem('gw_token');
-  if(!t) return '';
-  try {
-    const payload = JSON.parse(atob(t.split('.')[1]));
-    if(payload.exp && payload.exp < Date.now()/1000) {
-      localStorage.removeItem('gw_token');
-      return '';
-    }
-    return t;
-  } catch(e) { return t; }
-})();
-let BASE  = localStorage.getItem('gw_url')||'https://sms-gateway-admin-backend.onrender.com';
+let TOKEN = localStorage.getItem('gw_token')||'';
+let BASE  = localStorage.getItem('gw_url')||'';
 let smsPage=1, smsOp='';
 let currentTheme = localStorage.getItem('gw_theme')||'light';
 var currentLang = localStorage.getItem('gw_lang')||'fr';
@@ -1436,7 +1376,7 @@ function doLogout(){localStorage.removeItem('gw_token');location.reload();}
 // ══ INIT ══
 window.onload=()=>{
   document.getElementById('cfgUrl').value=BASE;
-  document.getElementById('loginUrl').value=BASE||'https://sms-gateway-admin-backend.onrender.com';
+  document.getElementById('loginUrl').value=BASE;
   document.getElementById('cfgKey').value=localStorage.getItem('gw_apikey')||'';
   document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
   applyTheme(currentTheme);
@@ -1482,7 +1422,7 @@ async function api(path,opts={}){
 }
 
 // ══ NAVIGATION ══
-function showPage(name){applyTranslations();
+function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
@@ -1492,7 +1432,7 @@ function showPage(name){applyTranslations();
   const titles={dashboard:'Tableau de bord',sms:'SMS Reçus',retrait:'Retraits Mobile Money',devices:'Appareils connectés',stats:'Statistiques',ussd:'Codes USSD',settings:'Paramètres'};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
-  ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates})[name]?.();
+  ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats})[name]?.();
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').style.display='block';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.display='none';}
@@ -1510,10 +1450,10 @@ async function loadDashboard(){
   setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',retPend);setTxt('s4',retOk);setTxt('s5',devCount);
   if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
   if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
-  const total=(d.balances?.orange||0)+(d.balances?.mvola||d.balances?.yas||0)+(d.balances?.airtel||0);
+  const total=(d.balances?.orange||0)+(d.balances?.yas||0)+(d.balances?.airtel||0);
   if(total>0) setTxt('soldeTotalEl',fmtAr(total));
   if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
-  if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
+  if(d.balances?.yas)    setTxt('soldeTelma',fmtAr(d.balances.yas));
   if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
@@ -1732,74 +1672,6 @@ async function loadStats(){
         </div>
       </div>`;
   }).join('');
-  // Solde update
-  if(d.balances){
-    const total=(d.balances?.orange||0)+(d.balances?.mvola||d.balances?.yas||0)+(d.balances?.airtel||0);
-    if(total>0) setTxt('soldeTotalEl',fmtAr(total));
-    if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
-    if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
-    if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
-  }
-}
-
-// ══ SMS TEMPLATES ══
-let currentTplOp = 'orange';
-
-function setTplOp(op) {
-  currentTplOp = op;
-  document.getElementById('tplOpSelect').value = op;
-  ['orange','mvola','airtel'].forEach(o => {
-    const id = o==='orange'?'tplTabOr':o==='mvola'?'tplTabMv':'tplTabAi';
-    const btn = document.getElementById(id);
-    if(btn) btn.style.opacity = o===op ? '1' : '0.5';
-  });
-  loadTemplates();
-}
-
-async function loadTemplates() {
-  const el = document.getElementById('tplList');
-  if(!el) return;
-  const data = await api('/api/template?operator=' + currentTplOp);
-  if(!data || !data.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);background:var(--card);border-radius:12px;border:1px dashed rgba(0,229,255,.2)">Tsy misy template — ampiana iray!</div>';
-    return;
-  }
-  const opColor = currentTplOp==='orange'?'#FF6D00':currentTplOp==='mvola'?'#2979FF':'#F44336';
-  el.innerHTML = data.map(t => `
-    <div style="background:var(--card);border:1px solid ${opColor}33;border-left:3px solid ${opColor};border-radius:12px;padding:14px;box-shadow:0 0 12px ${opColor}11">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span class="badge ${t.type==='retrait'?'or':'ok'}" style="font-size:10px">${t.type.toUpperCase()}</span>
-        <button onclick="deleteTemplate('${t._id}')" style="background:rgba(244,67,54,.1);border:1px solid rgba(244,67,54,.2);border-radius:6px;padding:3px 8px;color:#F44336;font-size:11px;cursor:pointer">✕</button>
-      </div>
-      <div style="margin-bottom:6px">
-        <div style="font-size:10px;font-weight:700;color:rgba(0,229,255,.6);letter-spacing:1px;margin-bottom:4px">KEYWORDS</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${t.keywords.map(k=>`<span style="background:${opColor}22;color:${opColor};border:1px solid ${opColor}44;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">${k}</span>`).join('')}</div>
-      </div>
-      ${t.exemple?`<div style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.2);border-radius:8px;font-size:11px;font-family:monospace;color:var(--text3)">"${esc(t.exemple)}"</div>`:''}
-    </div>
-  `).join('');
-}
-
-async function addTemplate() {
-  const operator = document.getElementById('tplOpSelect').value;
-  const type = document.getElementById('tplType').value;
-  const kwRaw = document.getElementById('tplKeywords').value;
-  const exemple = document.getElementById('tplExemple').value;
-  const keywords = kwRaw.split(',').map(k=>k.trim()).filter(Boolean);
-  if(!keywords.length){showToast('Ampidiro keywords!');return;}
-  const res = await api('/api/template',{method:'POST',body:JSON.stringify({operator,type,keywords,exemple})});
-  if(res?.ok){
-    showToast('Template voatahiry!');
-    document.getElementById('tplKeywords').value='';
-    document.getElementById('tplExemple').value='';
-    currentTplOp=operator;
-    loadTemplates();
-  }
-}
-
-async function deleteTemplate(id) {
-  const res = await api('/api/template/'+id,{method:'DELETE'});
-  if(res?.ok){showToast('Template voafafa!');loadTemplates();}
 }
 
 // ══ SETTINGS ══
@@ -2218,4 +2090,3 @@ document.addEventListener("DOMContentLoaded", applyTranslations);
 </script>
 </body>
 </html>
- 
