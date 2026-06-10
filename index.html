@@ -713,6 +713,10 @@ tbody tr{transition:background .1s !important}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         Codes USSD
       </button>
+      <button class="nav-item" onclick="showPage('template')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>SMS Templates</span>
+      </button>
       <button class="nav-item" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         Paramètres
@@ -1209,6 +1213,46 @@ tbody tr{transition:background .1s !important}
       </div><!-- /page-ussd -->
 
       <!-- ══ SETTINGS ══ -->
+      <div class="page" id="page-template">
+        <div class="page-header">
+          <div class="page-title">SMS Templates</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(124,77,255,.08));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:16px;margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:rgba(0,229,255,.7);letter-spacing:2px;margin-bottom:6px">AUTO-VALIDATION</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.5">SMS avy amin'ny operator dia <strong style="color:#00E5FF">checked automatiquement</strong>. Mitovy → <span style="color:#00C853">✓ Validé</span> · Tsy mitovy → <span style="color:#F44336">✗ Refusé</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto">
+          <button onclick="setTplOp('orange')" id="tplTabOr" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#FF6D00,#FF9100);color:#fff;border:none">🟠 Orange</button>
+          <button onclick="setTplOp('mvola')" id="tplTabMv" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;border:none;opacity:.5">🔵 MVola</button>
+          <button onclick="setTplOp('airtel')" id="tplTabAi" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#B71C1C,#F44336);color:#fff;border:none;opacity:.5">🔴 Airtel</button>
+        </div>
+        <div style="background:var(--card);border:1px solid rgba(0,229,255,.15);border-radius:16px;padding:16px;margin-bottom:16px">
+          <div style="font-size:12px;font-weight:800;color:#00E5FF;margin-bottom:12px">+ AJOUTER TEMPLATE</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">TYPE</div>
+              <select id="tplType" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px"><option value="retrait">Retrait</option><option value="depot">Depot</option></select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">OPERATEUR</div>
+              <select id="tplOpSelect" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px"><option value="orange">Orange</option><option value="mvola">MVola/YAS</option><option value="airtel">Airtel</option></select>
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">KEYWORDS (séparés par virgule)</div>
+            <input id="tplKeywords" class="field-input" placeholder="retiré, succès, solde" style="width:100%;font-size:13px"/>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">EXEMPLE SMS</div>
+            <textarea id="tplExemple" rows="3" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;resize:vertical" placeholder="Vous avez retiré 1000 Ar avec succès..."></textarea>
+          </div>
+          <button onclick="addTemplate()" class="btn btn-primary" style="width:100%;background:linear-gradient(135deg,#00E5FF,#7C4DFF);border:none">+ Ajouter</button>
+        </div>
+        <div id="tplList" style="display:flex;flex-direction:column;gap:10px">
+          <div style="text-align:center;padding:40px;color:var(--text3)">Chargement...</div>
+        </div>
+      </div>
+
       <div class="page" id="page-settings">
         <div class="settings-grid">
           <div>
@@ -1432,7 +1476,7 @@ function showPage(name){
   const titles={dashboard:'Tableau de bord',sms:'SMS Reçus',retrait:'Retraits Mobile Money',devices:'Appareils connectés',stats:'Statistiques',ussd:'Codes USSD',settings:'Paramètres'};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
-  ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats})[name]?.();
+  ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates})[name]?.();
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').style.display='block';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.display='none';}
@@ -1672,6 +1716,48 @@ async function loadStats(){
         </div>
       </div>`;
   }).join('');
+}
+
+// ══ SMS TEMPLATES ══
+let currentTplOp='orange';
+function setTplOp(op){
+  currentTplOp=op;
+  document.getElementById('tplOpSelect').value=op;
+  ['orange','mvola','airtel'].forEach(o=>{
+    const id=o==='orange'?'tplTabOr':o==='mvola'?'tplTabMv':'tplTabAi';
+    const b=document.getElementById(id);
+    if(b)b.style.opacity=o===op?'1':'0.5';
+  });
+  loadTemplates();
+}
+async function loadTemplates(){
+  const el=document.getElementById('tplList');
+  if(!el)return;
+  const data=await api('/api/template?operator='+currentTplOp);
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);border:1px dashed rgba(0,229,255,.2);border-radius:12px">Tsy misy template</div>';return;}
+  const c=currentTplOp==='orange'?'#FF6D00':currentTplOp==='mvola'?'#2979FF':'#F44336';
+  el.innerHTML=data.map(t=>`<div style="background:var(--card);border:1px solid ${c}33;border-left:3px solid ${c};border-radius:12px;padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="badge ${t.type==='retrait'?'or':'ok'}">${t.type.toUpperCase()}</span>
+      <button onclick="deleteTemplate('${t._id}')" style="background:rgba(244,67,54,.1);border:1px solid rgba(244,67,54,.3);border-radius:6px;padding:3px 8px;color:#F44336;font-size:11px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${t.keywords.map(k=>`<span style="background:${c}22;color:${c};border:1px solid ${c}44;border-radius:20px;padding:2px 8px;font-size:11px">${k}</span>`).join('')}</div>
+    ${t.exemple?`<div style="padding:8px;background:rgba(0,0,0,.2);border-radius:8px;font-size:11px;font-family:monospace;color:var(--text3)">"${esc(t.exemple)}"</div>`:''}
+  </div>`).join('');
+}
+async function addTemplate(){
+  const operator=document.getElementById('tplOpSelect').value;
+  const type=document.getElementById('tplType').value;
+  const kw=document.getElementById('tplKeywords').value;
+  const exemple=document.getElementById('tplExemple').value;
+  const keywords=kw.split(',').map(k=>k.trim()).filter(Boolean);
+  if(!keywords.length){showToast('Ampidiro keywords!');return;}
+  const res=await api('/api/template',{method:'POST',body:JSON.stringify({operator,type,keywords,exemple})});
+  if(res?.ok){showToast('Template voatahiry!');document.getElementById('tplKeywords').value='';document.getElementById('tplExemple').value='';currentTplOp=operator;loadTemplates();}
+}
+async function deleteTemplate(id){
+  const res=await api('/api/template/'+id,{method:'DELETE'});
+  if(res?.ok){showToast('Template voafafa!');loadTemplates();}
 }
 
 // ══ SETTINGS ══
