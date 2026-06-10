@@ -1222,11 +1222,11 @@ tbody tr{transition:background .1s !important}
           <div style="font-size:13px;color:var(--text);line-height:1.5">Les SMS de l'opérateur sont <strong style="color:#00BCD4">vérifiés automatiquement</strong>. Identique → <span style="color:#00C853;font-weight:700">✓ Validé</span> · Différent → <span style="color:#F44336;font-weight:700">✗ Refusé</span></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto">
-          <button onclick="setTplOp('orange')" id="tplTabOr" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#FF6D00,#FF9100);color:#fff;border:none;display:flex;align-items:center;gap:6px"><img src="orange.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Orange</button>
-          <button onclick="setTplOp('mvola')" id="tplTabMv" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;border:none;opacity:.5;display:flex;align-items:center;gap:6px"><img src="yas.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> MVola·YAS</button>
-          <button onclick="setTplOp('airtel')" id="tplTabAi" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#B71C1C,#F44336);color:#fff;border:none;opacity:.5;display:flex;align-items:center;gap:6px"><img src="airtel.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Airtel</button>
+          <button onclick="setTplOp('orange')" id="tplTabOr" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#FF6D00,#FF9100);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(255,109,0,.4)"><img src="orange.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Orange</button>
+          <button onclick="setTplOp('mvola')" id="tplTabMv" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(41,121,255,.4)"><img src="yas.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> MVola·YAS</button>
+          <button onclick="setTplOp('airtel')" id="tplTabAi" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#B71C1C,#F44336);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(244,67,54,.4)"><img src="airtel.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Airtel</button>
         </div>
-        <div style="background:var(--card);border:1px solid rgba(0,229,255,.15);border-radius:16px;padding:16px;margin-bottom:16px">
+        <div style="background:var(--card);border:1.5px solid rgba(0,229,255,.3);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 16px rgba(0,229,255,.08)">
           <div style="font-size:12px;font-weight:800;color:#00E5FF;margin-bottom:12px">+ AJOUTER TEMPLATE</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
             <div>
@@ -1726,7 +1726,7 @@ function setTplOp(op){
   ['orange','mvola','airtel'].forEach(o=>{
     const id=o==='orange'?'tplTabOr':o==='mvola'?'tplTabMv':'tplTabAi';
     const b=document.getElementById(id);
-    if(b)b.style.opacity=o===op?'1':'0.5';
+    if(b){b.style.opacity='1';b.style.transform=o===op?'scale(1.05)':'scale(1)';b.style.boxShadow=o===op?'0 4px 16px rgba(0,0,0,.3)':'0 2px 10px rgba(0,0,0,.2)';}
   });
   loadTemplates();
 }
