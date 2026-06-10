@@ -1425,7 +1425,7 @@ function doLogout(){localStorage.removeItem('gw_token');location.reload();}
 // ══ INIT ══
 window.onload=()=>{
   document.getElementById('cfgUrl').value=BASE;
-  document.getElementById('loginUrl').value=BASE;
+  document.getElementById('loginUrl').value=BASE||'https://sms-gateway-admin-backend.onrender.com';
   document.getElementById('cfgKey').value=localStorage.getItem('gw_apikey')||'';
   document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
   applyTheme(currentTheme);
