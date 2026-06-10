@@ -1019,6 +1019,10 @@ tbody tr{transition:background .1s !important}
             </div>
             <div class="field-group">
               <label class="field-label">Opérateur</label>
+              <select class="field-input" id="rType" style="cursor:pointer;margin-bottom:8px">
+                <option value="retrait">💸 Retrait</option>
+                <option value="depot">💰 Depot</option>
+              </select>
               <select class="field-input" id="rOp" onchange="updateUssd()" style="cursor:pointer">
                 <option value="orange">Orange Money</option>
                 <option value="yas">MVola / YAS</option>
@@ -1567,7 +1571,8 @@ async function doRetrait(){
   const montant=Number(document.getElementById('rMnt').value);
   if(!numero||!montant){showToast('Remplissez tous les champs');return;}
   if(montant<1000){showToast('Minimum 1000 Ar');return;}
-  const d=await api('/api/retrait',{method:'POST',body:JSON.stringify({operator,numero,montant})});
+  const type=document.getElementById('rType').value;
+  const d=await api('/api/retrait',{method:'POST',body:JSON.stringify({operator,numero,montant,type})});
   if(!d) return;
   if(d.error){showToast('Erreur: '+d.error);return;}
   showToast(`✅ Retrait créé! 📟 ${d.ussdCode||''}`);
