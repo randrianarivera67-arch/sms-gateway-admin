@@ -1353,7 +1353,18 @@ tbody tr{transition:background .1s !important}
 
 <script>
 // ══ STATE ══
-let TOKEN = localStorage.getItem('gw_token')||'';
+let TOKEN = (function(){
+  const t = localStorage.getItem('gw_token');
+  if(!t) return '';
+  try {
+    const payload = JSON.parse(atob(t.split('.')[1]));
+    if(payload.exp && payload.exp < Date.now()/1000) {
+      localStorage.removeItem('gw_token');
+      return '';
+    }
+    return t;
+  } catch(e) { return t; }
+})();
 let BASE  = localStorage.getItem('gw_url')||'https://sms-gateway-admin-backend.onrender.com';
 let smsPage=1, smsOp='';
 let currentTheme = localStorage.getItem('gw_theme')||'light';
