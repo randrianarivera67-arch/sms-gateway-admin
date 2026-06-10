@@ -1352,7 +1352,7 @@ let TOKEN = localStorage.getItem('gw_token')||'';
 let BASE  = localStorage.getItem('gw_url')||'';
 let smsPage=1, smsOp='';
 let currentTheme = localStorage.getItem('gw_theme')||'light';
-var currentLang = localStorage.getItem('gw_lang')||'fr';
+var currentLang = 'fr'; localStorage.setItem('gw_lang','fr');
 
 // ══ ICONS (embedded via base64 or path) ══
 const IC_GW     = localStorage.getItem('ic_gw')||'';
@@ -1497,7 +1497,7 @@ async function loadDashboard(){
   const total=(d.balances?.orange||0)+(d.balances?.yas||0)+(d.balances?.airtel||0);
   if(total>0) setTxt('soldeTotalEl',fmtAr(total));
   if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
-  if(d.balances?.yas)    setTxt('soldeTelma',fmtAr(d.balances.yas));
+  if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
   if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
