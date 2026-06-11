@@ -1489,7 +1489,15 @@ function refreshCurrent(){window.location.reload(true);}
 // ══ DASHBOARD ══
 async function loadDashboard(){
   const d=await api('/api/stats/dashboard');
-  if(!d) return;
+  if(!d){
+    // Serveur tsy connecté — solde indisponible
+    setTxt('soldeTotalEl','Indisponible');
+    setTxt('soldeOrange','Indisponible');
+    setTxt('soldeTelma','Indisponible');
+    setTxt('soldeAirtel','Indisponible');
+    setTxt('sysStatus','⚠ Serveur non connecté');
+    return;
+  }
   const smsToday=d.sms?.today||0;
   const smsTotal=d.sms?.total||0;
   const retPend=d.retrait?.pending||0;
@@ -1498,11 +1506,12 @@ async function loadDashboard(){
   setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',retPend);setTxt('s4',retOk);setTxt('s5',devCount);
   if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
   if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
-  const total=(d.balances?.orange||0)+(d.balances?.mvola||d.balances?.yas||0)+(d.balances?.airtel||0);
-  if(total>0) setTxt('soldeTotalEl',fmtAr(total));
-  if(d.balances?.orange) setTxt('soldeOrange',fmtAr(d.balances.orange));
-  if(d.balances?.mvola||d.balances?.yas) setTxt('soldeTelma',fmtAr(d.balances.mvola||d.balances.yas));
-  if(d.balances?.airtel) setTxt('soldeAirtel',fmtAr(d.balances.airtel));
+  const bal=d.balances||{};
+  const total=(bal.orange||0)+(bal.mvola||bal.yas||0)+(bal.airtel||0);
+  setTxt('soldeTotalEl',fmtAr(total));
+  setTxt('soldeOrange',fmtAr(bal.orange||0));
+  setTxt('soldeTelma',fmtAr(bal.mvola||bal.yas||0));
+  setTxt('soldeAirtel',fmtAr(bal.airtel||0));
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
   loadActSms(); loadActRet();
