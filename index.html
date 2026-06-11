@@ -1610,6 +1610,7 @@ async function loadDevices(){
         <div style="text-align:right">
           <span class="badge ${dev.online?'ok':'fail'}">${dev.online?'EN LIGNE':'HORS LIGNE'}</span>
           <div style="font-size:10px;color:var(--text3);margin-top:5px;font-family:'JetBrains Mono',monospace">${timeAgo(dev.lastSeen)}</div>
+          <button onclick="deleteDevice('${dev._id}')" style="margin-top:6px;background:rgba(244,67,54,.1);border:1px solid rgba(244,67,54,.3);border-radius:8px;padding:4px 8px;color:#F44336;font-size:11px;cursor:pointer;font-weight:700">✕ Suppr.</button>
         </div>
       </div>
       <div class="dev-mini-stats">
@@ -1770,6 +1771,12 @@ async function addTemplate(){
   if(!keywords.length){showToast('Ampidiro keywords!');return;}
   const res=await api('/api/template',{method:'POST',body:JSON.stringify({operator,type,keywords,exemple})});
   if(res?.ok){showToast('Template voatahiry!');document.getElementById('tplKeywords').value='';document.getElementById('tplExemple').value='';currentTplOp=operator;loadTemplates();}
+}
+async function deleteDevice(id){
+  if(!confirm('Fafana ilay device?')) return;
+  const res = await api('/api/device/'+id, {method:'DELETE'});
+  if(res?.ok){ showToast('Device voafafa!'); loadDevices(); }
+  else showToast('Erreur: '+(res?.error||'?'), true);
 }
 async function deleteTemplate(id){
   const res=await api('/api/template/'+id,{method:'DELETE'});
