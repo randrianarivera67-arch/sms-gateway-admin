@@ -790,7 +790,7 @@ tbody tr{transition:background .1s !important}
               <div class="op-name">Orange Money</div>
             </div>
             <div class="op-amount or" id="soldeOrange">— Ar</div>
-            <div class="op-status">Disponible</div>
+            <div class="op-status" id="statusOrange" style="color:var(--green)">● Disponible</div>
           </div>
           <div class="solde-op">
             <div class="solde-op-head">
@@ -800,7 +800,7 @@ tbody tr{transition:background .1s !important}
               <div class="op-name">MVola · YAS</div>
             </div>
             <div class="op-amount mv" id="soldeTelma">— Ar</div>
-            <div class="op-status">Disponible</div>
+            <div class="op-status" id="statusTelma" style="color:var(--green)">● Disponible</div>
           </div>
           <div class="solde-op">
             <div class="solde-op-head">
@@ -810,7 +810,7 @@ tbody tr{transition:background .1s !important}
               <div class="op-name">Airtel Money</div>
             </div>
             <div class="op-amount ai" id="soldeAirtel">— Ar</div>
-            <div class="op-status">Disponible</div>
+            <div class="op-status" id="statusAirtel" style="color:var(--green)">● Disponible</div>
           </div>
         </div>
 
@@ -1517,9 +1517,12 @@ async function loadDashboard(){
   const airtelVal = hasAirtel ? (bal.airtel||0) : null;
   const total = (orangeVal||0) + (mvolaVal||0) + (airtelVal||0);
   setTxt('soldeTotalEl', fmtAr(total));
-  setTxt('soldeOrange', orangeVal !== null ? fmtAr(orangeVal) : 'Indisponible');
-  setTxt('soldeTelma',  mvolaVal  !== null ? fmtAr(mvolaVal)  : 'Indisponible');
-  setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : 'Indisponible');
+  setTxt('soldeOrange', orangeVal !== null ? fmtAr(orangeVal) : '— Ar');
+  setTxt('soldeTelma',  mvolaVal  !== null ? fmtAr(mvolaVal)  : '— Ar');
+  setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : '— Ar');
+  setStatus('statusOrange', orangeVal !== null);
+  setStatus('statusTelma',  mvolaVal  !== null);
+  setStatus('statusAirtel', airtelVal !== null);
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
   loadActSms(); loadActRet();
@@ -1988,6 +1991,7 @@ function timeAgo(d){if(!d)return '—';const s=Math.floor((Date.now()-new Date(d
 function trunc(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function setTxt(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function setStatus(id,available){const el=document.getElementById(id);if(!el)return;el.textContent=available?'● Disponible':'● Indisponible';el.style.color=available?'var(--green)':'var(--red)';}
 function showToast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 
 // ══ PARTICLES ══
