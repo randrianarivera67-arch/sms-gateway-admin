@@ -1507,11 +1507,19 @@ async function loadDashboard(){
   if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
   if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
   const bal=d.balances||{};
-  const total=(bal.orange||0)+(bal.mvola||bal.yas||0)+(bal.airtel||0);
-  setTxt('soldeTotalEl',fmtAr(total));
-  setTxt('soldeOrange',fmtAr(bal.orange||0));
-  setTxt('soldeTelma',fmtAr(bal.mvola||bal.yas||0));
-  setTxt('soldeAirtel',fmtAr(bal.airtel||0));
+  // Operators connectés avy amin'ny devices online
+  const onlineSims = (d.devices||[]).filter(x=>x.online).map(x=>(x.sims||'').toLowerCase()).join(',');
+  const hasOrange = onlineSims.includes('orange');
+  const hasMvola  = onlineSims.includes('mvola') || onlineSims.includes('yas') || onlineSims.includes('telma');
+  const hasAirtel = onlineSims.includes('airtel');
+  const orangeVal = hasOrange ? (bal.orange||0) : null;
+  const mvolaVal  = hasMvola  ? (bal.mvola||bal.yas||0) : null;
+  const airtelVal = hasAirtel ? (bal.airtel||0) : null;
+  const total = (orangeVal||0) + (mvolaVal||0) + (airtelVal||0);
+  setTxt('soldeTotalEl', fmtAr(total));
+  setTxt('soldeOrange', orangeVal !== null ? fmtAr(orangeVal) : 'Indisponible');
+  setTxt('soldeTelma',  mvolaVal  !== null ? fmtAr(mvolaVal)  : 'Indisponible');
+  setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : 'Indisponible');
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
   loadActSms(); loadActRet();
