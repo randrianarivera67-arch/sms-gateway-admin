@@ -320,7 +320,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .bar-lbl{flex:1;text-align:center;font-size:9px;color:var(--text3);font-weight:600}
 
 /* ── TABLES ── */
-.table-wrap{overflow-x:auto;border-radius:var(--r2)}
+.table-wrap{overflow-x:auto;overflow-y:visible;border-radius:var(--r2)}
 table{width:100%;border-collapse:collapse}
 thead th{
   background:var(--bg);padding:10px 12px;
@@ -995,7 +995,7 @@ tbody tr{transition:background .1s !important}
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Expéditeur</th><th>Opérateur</th><th>Message</th><th>Statut</th><th>Date/Heure</th>
+                <th>Expéditeur</th><th>Opérateur</th><th>Message</th><th>Statut</th><th>Date/Heure</th><th style='width:36px'></th>
               </tr></thead>
               <tbody id="smsTbody"><tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text3)">Chargement...</td></tr></tbody>
             </table>
