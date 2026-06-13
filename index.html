@@ -603,6 +603,8 @@ tbody tr{transition:background .1s !important}
 /* Progress bars animated */
 .bar{animation:barGrow .8s ease forwards !important}
 
+@keyframes pulse{0%,100%{box-shadow:0 0 8px #FFD600,0 0 16px #FFD600}50%{box-shadow:0 0 4px #FFD600}}
+@keyframes neon-glow{0%,100%{opacity:1}50%{opacity:0.7}}
 /* Solde main shimmer */
 .solde-main{position:relative;overflow:hidden}
 .solde-main::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.08) 50%,transparent 60%);background-size:200% 100%;animation:shimmer 3s linear infinite}
@@ -745,18 +747,18 @@ tbody tr{transition:background .1s !important}
       </button>
       <div class="tb-title" id="topTitle">Tableau de bord</div>
       <div class="tb-actions">
-        <button class="tb-btn" onclick="refreshCurrent()" title="Actualiser">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <button class="tb-btn neon-btn" onclick="refreshCurrent()" title="Actualiser" style="position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #00E5FF)"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
-        <button class="tb-btn" id="langBtn" onclick="toggleLang()" style="font-size:11px;font-weight:800;color:var(--blue)">FR</button>
+        <button class="tb-btn" id="langBtn" onclick="toggleLang()" style="font-size:11px;font-weight:900;background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.4);color:#00E5FF;text-shadow:0 0 8px #00E5FF;box-shadow:0 0 10px rgba(0,229,255,0.3)">FR</button>
         <button class="tb-btn" onclick="toggleTheme()" title="Thème" id="themeBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
         <button class="tb-btn" onclick="showPage('sms')" title="Notifications" style="position:relative">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <div class="tb-notif-dot" id="notifDot"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#FFD600" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #FFD600)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div id="notifDot" style="display:none;position:absolute;top:3px;right:3px;min-width:16px;height:16px;border-radius:8px;background:#FFD600;color:#000;font-size:9px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 0 8px #FFD600"></div>
         </button>
-        <div class="tb-avatar" id="avatarEl">A</div>
+        <div class="tb-avatar" id="avatarEl" style="background:linear-gradient(135deg,#1B6CF2,#00E5FF);box-shadow:0 0 12px rgba(0,229,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
       </div>
     </div>
 
