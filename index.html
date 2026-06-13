@@ -1542,7 +1542,7 @@ async function loadDashboard(){
   setOpStatus('statusAirtel', airtelVal !== null);
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
-  loadActSms(); loadActRet();
+  loadActSms(); loadActRet(); loadDevices();
 }
 async function loadActSms(){
   const d=await api('/api/sms?limit=5');
