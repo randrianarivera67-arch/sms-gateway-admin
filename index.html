@@ -1493,7 +1493,8 @@ function showPage(name){
   if(pg) pg.classList.add('active');
   const ni=document.querySelector(`.nav-item[onclick*="'${name}'"]`);
   if(ni) ni.classList.add('active');
-  const titles={dashboard:'Tableau de bord',sms:'SMS Reçus',retrait:'Retraits Mobile Money',devices:'Appareils connectés',stats:'Statistiques',ussd:'Codes USSD',settings:'Paramètres'};
+  const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
+  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
   ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates})[name]?.();
