@@ -1602,7 +1602,7 @@ async function loadSms(){
   const d=await api(`/api/sms?page=${smsPage}&limit=20${smsOp?'&operator='+encodeURIComponent(smsOp):''}`);
   const tb=document.getElementById('smsTbody');
   if(!d?.data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr>';return;}
-  tb.innerHTML=d.data.map(s=>`<tr>
+  tb.innerHTML=d.data.map(s=>`<tr style='cursor:pointer' onclick="showSmsDetail(${JSON.stringify(s).replace(/"/g,'&quot;')})">
     <td style="font-weight:700;font-family:'JetBrains Mono',monospace;font-size:12px">${esc(s.from||'—')}</td>
     <td><span class="badge ${opClass(s.operator)}">${esc(s.operator||'?')}</span></td>
     <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)">${esc(s.message||'')}</td>
@@ -1611,6 +1611,46 @@ async function loadSms(){
     <td><button onclick="deleteSmsById('${s._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
   </tr>`).join('');
   document.getElementById('smsPag').textContent=`${(smsPage-1)*20+1}–${Math.min(smsPage*20,d.total||0)} / ${d.total||0}`;
+}
+function showSmsDetail(s) {
+  const existing = document.getElementById('smsModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'smsModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px;padding:24px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);position:relative">
+      <button onclick="document.getElementById('smsModal').remove()" style="position:absolute;top:12px;right:12px;background:rgba(239,68,68,0.1);border:none;border-radius:50%;width:32px;height:32px;color:#EF4444;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Détail SMS</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px">
+          <span style="font-size:11px;color:var(--text3);font-weight:600">EXPÉDITEUR</span>
+          <span style="font-weight:800;font-family:'JetBrains Mono',monospace">\${esc(s.from||'—')}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px">
+          <span style="font-size:11px;color:var(--text3);font-weight:600">OPÉRATEUR</span>
+          <span class="badge \${opClass(s.operator)}">\${esc(s.operator||'?')}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px">
+          <span style="font-size:11px;color:var(--text3);font-weight:600">STATUT</span>
+          <span class="badge \${statusBadge(s.status)}">\${s.status||'?'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px">
+          <span style="font-size:11px;color:var(--text3);font-weight:600">DATE</span>
+          <span style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace">\${fmtDate(s.receivedAt)}</span>
+        </div>
+        <div style="padding:14px;background:var(--bg);border-radius:10px">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">MESSAGE</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6;word-break:break-word">\${esc(s.message||'')}</div>
+        </div>
+        <button onclick="deleteSmsById('\${s._id}');document.getElementById('smsModal').remove()" style="width:100%;padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;color:#EF4444;font-weight:700;cursor:pointer;font-size:13px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+          Supprimer ce SMS
+        </button>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
 }
 function filterSms(op){smsOp=op;smsPage=1;loadSms();}
 function smsPrev(){if(smsPage>1){smsPage--;loadSms();}}
