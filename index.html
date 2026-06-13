@@ -1074,6 +1074,12 @@ tbody tr{transition:background .1s !important}
 
       <!-- ══ STATS ══ -->
       <div class="page" id="page-stats">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn" style="background:rgba(239,68,68,0.12);color:#EF4444;border:none;padding:8px 16px;font-size:12px;font-weight:700;border-radius:10px" onclick="reinitialiserStats()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:13px;height:13px;vertical-align:middle;margin-right:4px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+            Réinitialiser les statistiques
+          </button>
+        </div>
         <div class="stats-big-grid" id="statsCards"></div>
 
         <div class="charts-grid">
@@ -1677,6 +1683,12 @@ async function loadDevices(){
 }
 
 // ══ STATS ══
+async function reinitialiserStats(){
+  if(!confirm('Réinitialiser toutes les statistiques ?')) return;
+  const d=await api('/api/stats/reset',{method:'DELETE'});
+  if(d?.ok){showToast('✅ Statistiques réinitialisées');loadStats();loadDashboard();}
+  else showToast('❌ Erreur');
+}
 async function loadStats(){
   const d=await api('/api/stats/dashboard');
   if(!d) return;
