@@ -1371,7 +1371,7 @@ let TOKEN = localStorage.getItem('gw_token')||'';
 let BASE  = localStorage.getItem('gw_url')||'';
 let smsPage=1, smsOp='';
 let currentTheme = localStorage.getItem('gw_theme')||'light';
-var currentLang = localStorage.getItem('gw_lang')||'fr'; document.getElementById('langBtn')&&(document.getElementById('langBtn').textContent=currentLang.toUpperCase());
+var currentLang = localStorage.getItem('gw_lang')||'fr';
 
 // ══ ICONS (embedded via base64 or path) ══
 const IC_GW     = localStorage.getItem('ic_gw')||'';
@@ -2306,7 +2306,11 @@ function toggleLang() {
 
 
 // Apply on load
-document.addEventListener("DOMContentLoaded", applyTranslations);
+document.addEventListener("DOMContentLoaded", function(){
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = currentLang.toUpperCase();
+  applyTranslations();
+});
 </script>
 </body>
 </html>
