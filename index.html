@@ -984,6 +984,10 @@ tbody tr{transition:background .1s !important}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                 Actualiser
               </button>
+              <button class="btn" style="padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderSms()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Vider tout
+              </button>
             </div>
           </div>
           <div class="table-wrap">
@@ -1046,6 +1050,10 @@ tbody tr{transition:background .1s !important}
             <div class="card-title">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Historique des retraits
+              <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Vider
+              </button>
             </div>
             <div class="table-wrap">
               <table>
@@ -1557,6 +1565,30 @@ async function loadActRet(){
 }
 
 // ══ SMS ══
+async function viderSms(){
+  if(!confirm('Vider tout l\'historique SMS ?')) return;
+  const d=await api('/api/sms/clear',{method:'DELETE'});
+  if(d?.ok){showToast('✅ Historique SMS vidé');loadSms();}
+  else showToast('❌ Erreur');
+}
+async function deleteSmsById(id){
+  if(!confirm('Supprimer ce SMS ?')) return;
+  const d=await api('/api/sms/'+id,{method:'DELETE'});
+  if(d?.ok){showToast('✅ SMS supprimé');loadSms();}
+  else showToast('❌ Erreur');
+}
+async function viderRetraits(){
+  if(!confirm('Vider tout l\'historique des retraits ?')) return;
+  const d=await api('/api/retrait/clear',{method:'DELETE'});
+  if(d?.ok){showToast('✅ Historique retraits vidé');loadRetraits();}
+  else showToast('❌ Erreur');
+}
+async function deleteRetraitById(id){
+  if(!confirm('Supprimer ce retrait ?')) return;
+  const d=await api('/api/retrait/'+id,{method:'DELETE'});
+  if(d?.ok){showToast('✅ Retrait supprimé');loadRetraits();}
+  else showToast('❌ Erreur');
+}
 async function loadSms(){
   const d=await api(`/api/sms?page=${smsPage}&limit=20${smsOp?'&operator='+encodeURIComponent(smsOp):''}`);
   const tb=document.getElementById('smsTbody');
@@ -1567,6 +1599,7 @@ async function loadSms(){
     <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)">${esc(s.message||'')}</td>
     <td><span class="badge ${statusBadge(s.status)}">${s.status||'?'}</span></td>
     <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(s.receivedAt)}</td>
+    <td><button onclick="deleteSmsById('${s._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
   </tr>`).join('');
   document.getElementById('smsPag').textContent=`${(smsPage-1)*20+1}–${Math.min(smsPage*20,d.total||0)} / ${d.total||0}`;
 }
@@ -1611,6 +1644,7 @@ async function loadRetraits(){
     <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
     <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
     <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
+    <td><button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
   </tr>`).join('');
 }
 
