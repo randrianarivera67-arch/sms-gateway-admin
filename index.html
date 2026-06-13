@@ -2167,6 +2167,7 @@ const TRANSLATIONS = {
     devices: 'Appareils connectés',
     stats: 'Statistiques',
     ussd: 'Codes USSD',
+    template: 'SMS Templates',
     settings: 'Paramètres',
     solde_actuel: 'Solde actuel',
     solde_total: 'Solde Total disponible',
@@ -2195,6 +2196,7 @@ const TRANSLATIONS = {
     devices: 'Fitaovana mifandray',
     stats: 'Antontan-isa',
     ussd: 'Kaody USSD',
+    template: 'SMS Templates',
     settings: 'Fikirana',
     solde_actuel: 'Vola ankehitriny',
     solde_total: 'Vola Totaly Misy',
@@ -2228,8 +2230,14 @@ function applyTranslations() {
 
   // Sidebar
   const sideItems = document.querySelectorAll('.sidebar-nav .nav-item');
-  const sideKeys = ['dashboard','sms_recus','retraits','devices','stats','ussd','settings'];
-  sideItems.forEach((el, i) => { if(sideKeys[i] && t[sideKeys[i]]) { const span = el.querySelector('span'); if(span) span.textContent = t[sideKeys[i]]; } });
+  const sideKeys = ['dashboard','sms_recus','retraits','devices','stats','ussd','template','settings'];
+  sideItems.forEach((el, i) => {
+    if(!sideKeys[i] || !t[sideKeys[i]]) return;
+    const span = el.querySelector('span');
+    if(span) { span.textContent = t[sideKeys[i]]; return; }
+    const nodes = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
+    if(nodes.length) nodes[0].textContent = ' ' + t[sideKeys[i]];
+  });
 
   // Solde section
   document.querySelectorAll('.section-title').forEach(el => {
