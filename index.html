@@ -1471,6 +1471,7 @@ async function api(path,opts={}){
 
 // ══ NAVIGATION ══
 function showPage(name){
+  if(name==='settings') loadOptions();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
@@ -1813,6 +1814,16 @@ function saveSettings(){
 
 // ══ OPTIONS TERMINAL ══
 const optState={tpe:true,tpe_ret:true,cash:false,ret_aut:true,ussd:true};
+async function loadOptions(){
+  const d=await api('/api/settings/options');
+  if(!d) return;
+  Object.assign(optState,d);
+  const keys=['tpe','tpe_ret','cash','ret_aut','ussd'];
+  keys.forEach(k=>{
+    const btns=document.querySelectorAll(`[onclick*="'${k}'"]`);
+    btns.forEach(b=>b.className='toggle'+(optState[k]?' on':''));
+  });
+}
 function toggleOpt(btn,key){
   optState[key]=!optState[key];
   btn.className='toggle'+(optState[key]?' on':'');
