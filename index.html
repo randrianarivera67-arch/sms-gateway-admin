@@ -510,7 +510,7 @@ tbody tr:hover td{background:var(--blue-light)}
   .stats-big-grid{grid-template-columns:repeat(2,1fr)}
   .settings-grid{grid-template-columns:1fr}
   .opts-grid{grid-template-columns:1fr}
-  .overlay{display:block}
+  .overlay{visibility:visible}
 }
 @media(max-width:480px){
   .solde-grid{grid-template-columns:1fr 1fr}
@@ -521,7 +521,7 @@ tbody tr:hover td{background:var(--blue-light)}
   .flow-track{overflow-x:auto}
 }
 .overlay{
-  display:none;position:fixed;inset:0;
+  display:block;visibility:hidden;position:fixed;inset:0;
   background:rgba(0,0,0,.5);z-index:250;
 }
 
@@ -928,23 +928,23 @@ tbody tr{transition:background .1s !important}
           <div class="opts-grid" style="margin-bottom:14px" id="dashOpts">
             <div class="opt-row">
               <div class="opt-info"><h4>TPE</h4><p>Terminal de paiement</p></div>
-              <button class="toggle on" id="dopt-tpe" onclick="toggleOpt(this,'tpe')"></button>
+              <button class="toggle on" id="dopt-tpe" data-optkey="tpe" onclick="toggleOpt(this,'tpe')"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
-              <button class="toggle on" id="dopt-tpe-ret" onclick="toggleOpt(this,'tpe_ret')"></button>
+              <button class="toggle on" id="dopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
-              <button class="toggle" id="dopt-cash" onclick="toggleOpt(this,'cash')"></button>
+              <button class="toggle" id="dopt-cash" data-optkey="cash" onclick="toggleOpt(this,'cash')"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>Retrait autorisé</h4><p>Retraits mobile money</p></div>
-              <button class="toggle on" id="dopt-ret" onclick="toggleOpt(this,'ret_aut')"></button>
+              <button class="toggle on" id="dopt-ret" data-optkey="ret_aut" onclick="toggleOpt(this,'ret_aut')"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>USSD autorisé</h4><p>Commandes USSD auto</p></div>
-              <button class="toggle on" id="dopt-ussd" onclick="toggleOpt(this,'ussd')"></button>
+              <button class="toggle on" id="dopt-ussd" data-optkey="ussd" onclick="toggleOpt(this,'ussd')"></button>
             </div>
           </div>
           <div class="action-btns" style="margin-top:12px;padding-bottom:80px">
@@ -1317,23 +1317,23 @@ tbody tr{transition:background .1s !important}
               <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE</h4><p>Terminal de paiement</p></div>
-                  <button class="toggle on" id="sopt-tpe" onclick="toggleOpt(this,'tpe')"></button>
+                  <button class="toggle on" id="sopt-tpe" data-optkey="tpe" onclick="toggleOpt(this,'tpe')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
-                  <button class="toggle on" id="sopt-tpe-ret" onclick="toggleOpt(this,'tpe_ret')"></button>
+                  <button class="toggle on" id="sopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
-                  <button class="toggle" id="sopt-cash" onclick="toggleOpt(this,'cash')"></button>
+                  <button class="toggle" id="sopt-cash" data-optkey="cash" onclick="toggleOpt(this,'cash')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>Retrait autorisé</h4><p>Retraits mobile money</p></div>
-                  <button class="toggle on" id="sopt-ret" onclick="toggleOpt(this,'ret_aut')"></button>
+                  <button class="toggle on" id="sopt-ret" data-optkey="ret_aut" onclick="toggleOpt(this,'ret_aut')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>USSD autorisé</h4><p>Commandes USSD auto</p></div>
-                  <button class="toggle on" id="sopt-ussd" onclick="toggleOpt(this,'ussd')"></button>
+                  <button class="toggle on" id="sopt-ussd" data-optkey="ussd" onclick="toggleOpt(this,'ussd')"></button>
                 </div>
               </div>
               <div class="action-btns" style="margin-top:12px;padding-bottom:80px">
@@ -1499,8 +1499,8 @@ function showPage(name){
   closeSidebar();
   ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates})[name]?.();
 }
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').style.display='block';}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.display='none';}
+function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('open');document.getElementById('overlay').style.visibility=s.classList.contains('open')?'visible':'hidden';}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.visibility='hidden';}
 function refreshCurrent(){window.location.reload(true);}
 
 // ══ DASHBOARD ══
