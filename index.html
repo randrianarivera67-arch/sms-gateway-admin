@@ -1957,17 +1957,63 @@ async function synchroniser(){
 
 // ══ POLLING ══
 function startPolling(){
-  // Refresh dashboard toutes les 30s
+  // Refresh page active toutes les 15s
   setInterval(()=>{
     const pg=document.querySelector('.page.active')?.id?.replace('page-','');
     if(pg==='dashboard') loadDashboard();
+    else if(pg==='sms') loadSms();
+    else if(pg==='retrait') loadRetraits();
+    else if(pg==='stats') loadStats();
     updateBadges();
-  },30000);
+  },15000);
   // Keep-alive ping Render toutes les 4 minutes
   setInterval(()=>{
     if(BASE) fetch(BASE+'/health').catch(()=>{});
   },240000);
-}async function updateBadges(){const d=await api('/api/stats/dashboard');if(!d)return;const smsToday=d.sms?.today||0;const retPend=d.retrait?.pending||0;if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';}const nd=document.getElementById('notifDot');if(nd)nd.style.display='block';}}
+}let _lastSmsTotal=0;
+async function updateBadges(){
+  const d=await api('/api/stats/dashboard');
+  if(!d) return;
+  const smsToday=d.sms?.today||0;
+  const smsTotal=d.sms?.total||0;
+  const retPend=d.retrait?.pending||0;
+
+  // Badge SMS
+  if(smsToday>0){
+    const b=document.getElementById('smsBadge');
+    if(b){b.textContent=smsToday;b.style.display='';}
+  }
+  // Badge retrait
+  if(retPend>0){
+    const b=document.getElementById('retraitBadge');
+    if(b){b.textContent=retPend;b.style.display='';}
+    const nd=document.getElementById('notifDot');
+    if(nd) nd.style.display='block';
+  }
+
+  // Push notification Web si SMS vaovao
+  if(_lastSmsTotal>0 && smsTotal>_lastSmsTotal){
+    const diff=smsTotal-_lastSmsTotal;
+    // Badge cloche
+    const nb=document.getElementById('notifDot');
+    if(nb) nb.style.display='block';
+    // Notification browser
+    if(Notification.permission==='granted'){
+      new Notification('📨 '+diff+' nouveau'+(diff>1?'x':'')+' SMS reçu'+(diff>1?'s':''),{
+        body:'Cliquez pour voir les SMS reçus',
+        icon:'/icon-192.png',
+        badge:'/icon-192.png',
+        tag:'sms-new',
+        renotify:true
+      });
+    } else if(Notification.permission==='default'){
+      Notification.requestPermission();
+    }
+    // Son natif si disponible
+    try{ const a=new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA'); a.volume=0.3; a.play().catch(()=>{}); }catch(e){}
+  }
+  _lastSmsTotal=smsTotal;
+}
 
 // ══ THEME ══
 function applyTheme(t){
