@@ -1478,15 +1478,24 @@ function updateClock(){
 // ══ API ══
 async function api(path,opts={}){
   try{
-    const r=await fetch(BASE+path,{...opts,headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN,...(opts.headers||{})}});
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),15000);
+    const r=await fetch(BASE+path,{...opts,signal:ctrl.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN,...(opts.headers||{})}});
+    clearTimeout(tid);
     if(r.status===401){doLogout();return null;}
     return r.json();
-  }catch(e){console.error('API:',path,e);return null;}
+  }catch(e){
+    if(e.name==='AbortError'){
+      showToast('⏱ Serveur lent — réessayez dans quelques secondes');
+    } else {
+      console.error('API:',path,e);
+    }
+    return null;
+  }
 }
 
 // ══ NAVIGATION ══
 function showPage(name){
-  if(name==='settings') loadOptions();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
@@ -1497,7 +1506,8 @@ function showPage(name){
   const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
-  ({dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates})[name]?.();
+  const loaders={dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
+  loaders[name]?.();
 }
 function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('open');document.getElementById('overlay').style.visibility=s.classList.contains('open')?'visible':'hidden';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.visibility='hidden';}
@@ -1505,8 +1515,11 @@ function refreshCurrent(){window.location.reload(true);}
 
 // ══ DASHBOARD ══
 async function loadDashboard(){
+  // Wake up Render si endormi
   const d=await api('/api/stats/dashboard');
   if(!d){
+    showToast('⚠ Serveur hors ligne — nouvelle tentative...');
+    setTimeout(loadDashboard, 8000); // retry après 8s
     // Serveur tsy connecté — solde indisponible
     setTxt('soldeTotalEl','Indisponible');
     setTxt('soldeOrange','Indisponible');
@@ -1930,7 +1943,18 @@ async function synchroniser(){
 }
 
 // ══ POLLING ══
-function startPolling(){setInterval(()=>{const pg=document.querySelector('.page.active')?.id?.replace('page-','');if(pg==='dashboard')loadDashboard();updateBadges();},30000);}async function updateBadges(){const d=await api('/api/stats/dashboard');if(!d)return;const smsToday=d.sms?.today||0;const retPend=d.retrait?.pending||0;if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';}const nd=document.getElementById('notifDot');if(nd)nd.style.display='block';}}
+function startPolling(){
+  // Refresh dashboard toutes les 30s
+  setInterval(()=>{
+    const pg=document.querySelector('.page.active')?.id?.replace('page-','');
+    if(pg==='dashboard') loadDashboard();
+    updateBadges();
+  },30000);
+  // Keep-alive ping Render toutes les 4 minutes
+  setInterval(()=>{
+    if(BASE) fetch(BASE+'/health').catch(()=>{});
+  },240000);
+}async function updateBadges(){const d=await api('/api/stats/dashboard');if(!d)return;const smsToday=d.sms?.today||0;const retPend=d.retrait?.pending||0;if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';}const nd=document.getElementById('notifDot');if(nd)nd.style.display='block';}}
 
 // ══ THEME ══
 function applyTheme(t){
