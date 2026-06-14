@@ -997,7 +997,7 @@ tbody tr{transition:background .1s !important}
               <thead><tr>
                 <th>Expéditeur</th><th>Opérateur</th><th>Message</th><th>Statut</th><th>Date/Heure</th><th style='width:36px'></th>
               </tr></thead>
-              <tbody id="smsTbody"><tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text3)">Chargement...</td></tr></tbody>
+              <tbody id="smsTbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr></tbody>
             </table>
           </div>
           <div class="pag">
@@ -1060,7 +1060,7 @@ tbody tr{transition:background .1s !important}
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
-                <tbody id="rTbody"><tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3)">Chargement...</td></tr></tbody>
+                <tbody id="rTbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -1614,7 +1614,8 @@ async function deleteRetraitById(id){
 async function loadSms(){
   const d=await api(`/api/sms?page=${smsPage}&limit=20${smsOp?'&operator='+encodeURIComponent(smsOp):''}`);
   const tb=document.getElementById('smsTbody');
-  if(!d?.data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr>';return;}
+  if(!d){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr>';return;}
   tb.innerHTML=d.data.map(s=>`<tr style='cursor:pointer' onclick="showSmsDetail(${JSON.stringify(s).replace(/"/g,'&quot;')})">
     <td style="font-weight:700;font-family:'JetBrains Mono',monospace;font-size:12px">${esc(s.from||'—')}</td>
     <td><span class="badge ${opClass(s.operator)}">${esc(s.operator||'?')}</span></td>
@@ -1681,7 +1682,8 @@ async function doRetrait(){
 async function loadRetraits(){
   const d=await api('/api/retrait?limit=50');
   const tb=document.getElementById('rTbody');
-  if(!d?.data?.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  if(!d){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   tb.innerHTML=d.data.map(r=>`<tr>
     <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${r.operator?.toLowerCase().includes('orange')?'orange.png':r.operator?.toLowerCase().includes('airtel')?'airtel.png':'yas.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
     <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
@@ -1729,7 +1731,11 @@ async function reinitialiserStats(){
 }
 async function loadStats(){
   const d=await api('/api/stats/dashboard');
-  if(!d) return;
+  if(!d){
+    const el=document.getElementById('statsCards');
+    if(el) el.innerHTML='<div style="text-align:center;padding:40px;color:var(--error);grid-column:1/-1">Erreur serveur — réessayez</div>';
+    return;
+  }
   const smsTotal=d.sms?.total||0;
   const retOk=d.retrait?.success||0;
   const retTotal=d.retrait?.total||0;
