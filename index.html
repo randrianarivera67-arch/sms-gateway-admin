@@ -1128,113 +1128,176 @@ tbody tr{transition:background .1s !important}
 
       <!-- USSD PAGE -->
       <div class="page" id="page-ussd">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">
-          Codes USSD par opérateur
-        </div>
-        <div style="margin-bottom:12px;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:12px;color:var(--text2)">
-          Variables disponibles:
-          <code style="background:var(--surface);padding:2px 7px;border-radius:5px;color:var(--primary);font-family:monospace;margin:0 4px">{numero}</code>
-          <code style="background:var(--surface);padding:2px 7px;border-radius:5px;color:var(--primary);font-family:monospace;margin:0 4px">{montant}</code>
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:13px;font-weight:900;color:var(--text);letter-spacing:-.2px">Codes USSD</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">GP = Grand Public &nbsp;·&nbsp; TPE = Terminal de Paiement</div>
+          </div>
+          <button class="btn btn-primary" onclick="loadUssdConfig()" style="padding:8px 14px;font-size:11px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualiser
+          </button>
         </div>
 
-        <!-- Orange -->
-        <div class="card" style="margin-bottom:12px;border-left:4px solid #FF6D00">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <div id="ussdIconOr" style="width:44px;height:44px;border-radius:11px;background:#FFF3E0;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,109,0,.3);overflow:hidden"><img src="orange.png" style="width:100%;height:100%;object-fit:cover;border-radius:9px">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            </div>
-            <div>
-              <div style="font-size:15px;font-weight:800;color:var(--text)">Orange Money</div>
-              <div style="font-size:11px;color:var(--text2)">032 &middot; 037</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-            <div>
-              <label class="field-label">Code Retrait</label>
-              <input class="field-input" id="ussd_orange_retrait" value="*111*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#FF6D00"/>
-            </div>
-            <div>
-              <label class="field-label">Code Depot</label>
-              <input class="field-input" id="ussd_orange_depot" value="*111*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:#FF6D00"/>
-            </div>
-          </div>
-          <div class="action-btns">
-            <button class="btn btn-primary" onclick="saveUssd('orange')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Sauvegarder
-            </button>
-            <button class="btn btn-outline" onclick="testUssd('orange','retrait')">&#9654; Test Retrait</button>
-            <button class="btn btn-outline" onclick="testUssd('orange','depot')">&#9654; Test Depot</button>
-            <button class="btn btn-outline" onclick="resetUssd('orange')">&#8635; Reset</button>
-          </div>
+        <!-- Info -->
+        <div style="padding:10px 14px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(41,121,255,.05));border:1px solid rgba(0,229,255,.2);border-radius:12px;font-size:12px;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;filter:drop-shadow(0 0 4px #00E5FF)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Les codes USSD sont utilisés pour effectuer les retraits et dépôts via l'APK Android</span>
         </div>
 
-        <!-- MVola YAS -->
-        <div class="card" style="margin-bottom:12px;border-left:4px solid #1B6CF2">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <div id="ussdIconMv" style="width:44px;height:44px;border-radius:11px;background:#E3F2FD;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(27,108,242,.3);overflow:hidden"><img src="yas.png" style="width:100%;height:100%;object-fit:cover;border-radius:9px">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <!-- ORANGE MONEY -->
+        <div class="card" style="margin-bottom:14px;border-left:3px solid #FF6D00;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(255,109,0,.08) 0%,transparent 70%);pointer-events:none"></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+            <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#FF6D00,#FF9100);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(255,109,0,.4),0 0 32px rgba(255,109,0,.15);flex-shrink:0;overflow:hidden">
+              <img src="orange.png" style="width:100%;height:100%;object-fit:cover;border-radius:11px" onerror="this.parentElement.innerHTML='<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;white&quot; stroke-width=&quot;2&quot; style=&quot;width:24px;height:24px&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M12 8v4l3 3&quot;/></svg>'">
             </div>
-            <div>
-              <div style="font-size:15px;font-weight:800;color:var(--text)">MVola &middot; YAS</div>
-              <div style="font-size:11px;color:var(--text2)">034 &middot; 038</div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:900;color:var(--text)">Orange Money</div>
+              <div style="font-size:11px;color:#FF6D00;font-weight:700;margin-top:2px">032 · 037</div>
             </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-            <div>
-              <label class="field-label">Code Retrait</label>
-              <input class="field-input" id="ussd_mvola_retrait" value="*155*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--primary)"/>
-            </div>
-            <div>
-              <label class="field-label">Code Depot</label>
-              <input class="field-input" id="ussd_mvola_depot" value="*155*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--primary)"/>
+            <div style="display:flex;gap:6px">
+              <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(255,109,0,.1);color:#FF6D00;border:1px solid rgba(255,109,0,.3)">ORANGE</span>
             </div>
           </div>
-          <div class="action-btns">
-            <button class="btn btn-primary" onclick="saveUssd('mvola')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Sauvegarder
-            </button>
-            <button class="btn btn-outline" onclick="testUssd('mvola','retrait')">&#9654; Test Retrait</button>
-            <button class="btn btn-outline" onclick="testUssd('mvola','depot')">&#9654; Test Depot</button>
-            <button class="btn btn-outline" onclick="resetUssd('mvola')">&#8635; Reset</button>
+
+          <!-- GP -->
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(255,109,0,.6))"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#FF6D00;text-transform:uppercase;letter-spacing:.08em">Grand Public</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
+                <input class="field-input" id="ussd_orange_gp_depot" value="#144*1" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
+                <input class="field-input" id="ussd_orange_gp_retrait" value="#145*" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+              </div>
+            </div>
           </div>
+
+          <!-- TPE -->
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6D00" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(255,109,0,.6))"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#FF6D00;text-transform:uppercase;letter-spacing:.08em">TPE</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
+                <input class="field-input" id="ussd_orange_tpe_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
+                <input class="field-input" id="ussd_orange_tpe_retrait" value="#145*" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveUssdFull('orange')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(255,109,0,.3);display:flex;align-items:center;justify-content:center;gap:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer Orange Money
+          </button>
         </div>
 
-        <!-- Airtel -->
-        <div class="card" style="margin-bottom:12px;border-left:4px solid #F44336">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <div id="ussdIconAi" style="width:44px;height:44px;border-radius:11px;background:#FFEBEE;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(244,67,54,.3);overflow:hidden"><img src="airtel.png" style="width:100%;height:100%;object-fit:cover;border-radius:9px">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <!-- MVOLA YAS -->
+        <div class="card" style="margin-bottom:14px;border-left:3px solid #2979FF;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(41,121,255,.08) 0%,transparent 70%);pointer-events:none"></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+            <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#1565C0,#2979FF);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(41,121,255,.4),0 0 32px rgba(41,121,255,.15);flex-shrink:0;overflow:hidden">
+              <img src="yas.png" style="width:100%;height:100%;object-fit:cover;border-radius:11px" onerror="this.parentElement.innerHTML='<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;white&quot; stroke-width=&quot;2&quot; style=&quot;width:24px;height:24px&quot;><path d=&quot;M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5&quot;/></svg>'">
             </div>
-            <div>
-              <div style="font-size:15px;font-weight:800;color:var(--text)">Airtel Money</div>
-              <div style="font-size:11px;color:var(--text2)">033</div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:900;color:var(--text)">MVola · YAS</div>
+              <div style="font-size:11px;color:#2979FF;font-weight:700;margin-top:2px">034 · 038</div>
             </div>
+            <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(41,121,255,.1);color:#2979FF;border:1px solid rgba(41,121,255,.3)">MVOLA</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-            <div>
-              <label class="field-label">Code Retrait</label>
-              <input class="field-input" id="ussd_airtel_retrait" value="*123*1*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--error)"/>
-            </div>
-            <div>
-              <label class="field-label">Code Depot</label>
-              <input class="field-input" id="ussd_airtel_depot" value="*123*2*{numero}*{montant}#" style="font-family:monospace;font-size:12px;color:var(--error)"/>
-            </div>
-          </div>
-          <div class="action-btns">
-            <button class="btn btn-primary" onclick="saveUssd('airtel')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Sauvegarder
-            </button>
-            <button class="btn btn-outline" onclick="testUssd('airtel','retrait')">&#9654; Test Retrait</button>
-            <button class="btn btn-outline" onclick="testUssd('airtel','depot')">&#9654; Test Depot</button>
-            <button class="btn btn-outline" onclick="resetUssd('airtel')">&#8635; Reset</button>
-          </div>
-        </div>
-      </div><!-- /page-ussd -->
 
-      <!-- ══ SETTINGS ══ -->
+          <!-- GP -->
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(41,121,255,.6))"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#2979FF;text-transform:uppercase;letter-spacing:.08em">Grand Public</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
+                <input class="field-input" id="ussd_mvola_gp_depot" value="#111*" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
+                <input class="field-input" id="ussd_mvola_gp_retrait" value="#144#" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- TPE -->
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(41,121,255,.6))"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#2979FF;text-transform:uppercase;letter-spacing:.08em">TPE</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
+                <input class="field-input" id="ussd_mvola_tpe_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
+                <input class="field-input" id="ussd_mvola_tpe_retrait" value="#144*" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveUssdFull('mvola')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(41,121,255,.3);display:flex;align-items:center;justify-content:center;gap:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer MVola YAS
+          </button>
+        </div>
+
+        <!-- AIRTEL MONEY -->
+        <div class="card" style="margin-bottom:14px;border-left:3px solid #D32F2F;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(211,47,47,.08) 0%,transparent 70%);pointer-events:none"></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+            <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#B71C1C,#D32F2F);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(211,47,47,.4),0 0 32px rgba(211,47,47,.15);flex-shrink:0;overflow:hidden">
+              <img src="airtel.png" style="width:100%;height:100%;object-fit:cover;border-radius:11px" onerror="this.parentElement.innerHTML='<svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;white&quot; stroke-width=&quot;2&quot; style=&quot;width:24px;height:24px&quot;><path d=&quot;M22 12h-4l-3 9L9 3l-3 9H2&quot;/></svg>'">
+            </div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:900;color:var(--text)">Airtel Money</div>
+              <div style="font-size:11px;color:#D32F2F;font-weight:700;margin-top:2px">033</div>
+            </div>
+            <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(211,47,47,.1);color:#D32F2F;border:1px solid rgba(211,47,47,.3)">AIRTEL</span>
+          </div>
+
+          <!-- GP -->
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#D32F2F" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(211,47,47,.6))"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#D32F2F;text-transform:uppercase;letter-spacing:.08em">Grand Public</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
+                <input class="field-input" id="ussd_airtel_gp_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
+                <input class="field-input" id="ussd_airtel_gp_retrait" value="#144*" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveUssdFull('airtel')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3);display:flex;align-items:center;justify-content:center;gap:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer Airtel Money
+          </button>
+        </div>
+
       <div class="page" id="page-template" style="background:var(--bg)">
         <div class="page-header">
           <div class="page-title">SMS Templates</div>
