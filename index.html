@@ -1269,33 +1269,26 @@ tbody tr{transition:background .1s !important}
             </div>
             <div style="flex:1">
               <div style="font-size:16px;font-weight:900;color:var(--text)">Airtel Money</div>
-              <div style="font-size:11px;color:#D32F2F;font-weight:700;margin-top:2px">033</div>
+              <div style="font-size:11px;color:#D32F2F;font-weight:700;margin-top:2px">033 — Flow USSD étape par étape</div>
             </div>
             <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(211,47,47,.1);color:#D32F2F;border:1px solid rgba(211,47,47,.3)">AIRTEL</span>
           </div>
 
-          <!-- GP -->
-          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#D32F2F" stroke-width="2" style="width:14px;height:14px;filter:drop-shadow(0 0 4px rgba(211,47,47,.6))"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span style="font-size:11px;font-weight:800;color:#D32F2F;text-transform:uppercase;letter-spacing:.08em">Grand Public</span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div>
-                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
-                <input class="field-input" id="ussd_airtel_gp_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/>
-              </div>
-              <div>
-                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
-                <input class="field-input" id="ussd_airtel_gp_retrait" value="#144*" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/>
-              </div>
-            </div>
-          </div>
+          <!-- STEPS CONTAINER -->
+          <div id="airtel-steps-container" style="margin-bottom:12px"></div>
 
-          <button onclick="saveUssdFull('airtel')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3);display:flex;align-items:center;justify-content:center;gap:8px">
+          <!-- AJOUTER CASE -->
+          <button onclick="airtelAddStep()" style="width:100%;padding:10px;border-radius:10px;border:1.5px dashed rgba(211,47,47,.4);background:rgba(211,47,47,.05);color:#D32F2F;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter une étape
+          </button>
+
+          <!-- SAVE -->
+          <button onclick="saveAirtelSteps()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer Airtel Money
           </button>
+        </div>
         </div>
       </div><!-- /page-ussd -->
 
@@ -2128,6 +2121,73 @@ function toggleTheme(){applyTheme(currentTheme==='dark'?'light':'dark');}
 
 
 // ══ USSD CONFIG ══
+// ===== AIRTEL STEPS =====
+let airtelSteps = JSON.parse(localStorage.getItem('airtel_steps') || '[]');
+
+function airtelRenderSteps() {
+  const c = document.getElementById('airtel-steps-container');
+  if (!c) return;
+  if (airtelSteps.length === 0) {
+    airtelSteps = [
+      {label:'Code USSD initial', value:'*436#', type:'dial'},
+      {label:'Étape 1', value:'2', type:'input'},
+      {label:'Étape 2', value:'1', type:'input'},
+      {label:'Étape 3', value:'1', type:'input'},
+      {label:'Numéro destinataire', value:'{numero}', type:'input'},
+      {label:'Confirmer numéro', value:'{numero}', type:'input'},
+      {label:'Montant', value:'{montant}', type:'input'},
+      {label:'Étape finale', value:'2', type:'input'},
+      {label:'Code secret', value:'{pin}', type:'input'},
+    ];
+  }
+  c.innerHTML = airtelSteps.map((s,i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;background:rgba(211,47,47,.05);border:1px solid rgba(211,47,47,.15);border-radius:10px;padding:8px 10px">
+      <div style="width:22px;height:22px;border-radius:50%;background:#D32F2F;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+      <input value="${s.label}" onchange="airtelSteps[${i}].label=this.value"
+        style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid rgba(211,47,47,.2);background:var(--bg);color:var(--text);font-size:11px;font-weight:700"/>
+      <input value="${s.value}" onchange="airtelSteps[${i}].value=this.value"
+        style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid rgba(211,47,47,.3);background:var(--bg);color:#D32F2F;font-size:12px;font-weight:800;font-family:monospace"/>
+      <select onchange="airtelSteps[${i}].type=this.value" style="padding:5px;border-radius:7px;border:1px solid rgba(211,47,47,.2);background:var(--bg);color:var(--text);font-size:11px">
+        <option value="dial" ${s.type==='dial'?'selected':''}>📞 Dial</option>
+        <option value="input" ${s.type==='input'?'selected':''}>⌨️ Input</option>
+        <option value="wait" ${s.type==='wait'?'selected':''}>⏳ Wait</option>
+      </select>
+      <button onclick="airtelRemoveStep(${i})" style="width:26px;height:26px;border-radius:50%;border:none;background:rgba(211,47,47,.15);color:#D32F2F;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+function airtelAddStep() {
+  airtelSteps.push({label:'Nouvelle étape', value:'', type:'input'});
+  airtelRenderSteps();
+}
+
+function airtelRemoveStep(i) {
+  airtelSteps.splice(i, 1);
+  airtelRenderSteps();
+}
+
+async function saveAirtelSteps() {
+  localStorage.setItem('airtel_steps', JSON.stringify(airtelSteps));
+  const d = await api('/api/ussd', { method:'POST', body: JSON.stringify({
+    operator: 'airtel',
+    steps: airtelSteps,
+    gp_depot: airtelSteps.map(s=>s.value).join('|'),
+    gp_retrait: airtelSteps.map(s=>s.value).join('|'),
+  })});
+  if (d?.ok) showToast('✅ Étapes Airtel enregistrées');
+  else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('airtel_steps');
+  if (saved) airtelSteps = JSON.parse(saved);
+  airtelRenderSteps();
+});
+// ===== FIN AIRTEL STEPS =====
+
 async function saveUssdFull(operator){
   const get = id => document.getElementById(id)?.value?.trim();
   const gp_depot   = get(`ussd_${operator}_gp_depot`);
