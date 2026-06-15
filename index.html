@@ -929,12 +929,12 @@ tbody tr{transition:background .1s !important}
           </div>
           <div class="opts-grid" style="margin-bottom:14px" id="dashOpts">
             <div class="opt-row">
-              <div class="opt-info"><h4>TPE</h4><p>Terminal de paiement</p></div>
-              <button class="toggle on" id="dopt-tpe" data-optkey="tpe" onclick="toggleOpt(this,'tpe')"></button>
+              <div class="opt-info"><h4>TPE Dépôt</h4><p>Grand Public par défaut (OFF = GP)</p></div>
+              <button class="toggle on" id="dopt-tpe-depot" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')" data-default="off"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
-              <button class="toggle on" id="dopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
+              <button class="toggle on" id="dopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')" data-default="off"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
@@ -1383,7 +1383,7 @@ tbody tr{transition:background .1s !important}
               </div>
               <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
                 <div class="opt-row">
-                  <div class="opt-info"><h4>TPE</h4><p>Terminal de paiement</p></div>
+                  <div class="opt-info"><h4>TPE Dépôt</h4><p>Grand Public par défaut (OFF = GP)</p></div>
                   <button class="toggle on" id="sopt-tpe" data-optkey="tpe" onclick="toggleOpt(this,'tpe')"></button>
                 </div>
                 <div class="opt-row">
@@ -1987,11 +1987,22 @@ async function loadOptions(){
   });
 }
 function toggleOpt(btn,key){
+  // Mahaleo tena tsirairay — tsy mifandray tpe_depot sy tpe_ret
   optState[key]=!optState[key];
-  btn.className='toggle'+(optState[key]?' on':'');
-  // Sync les deux toggles (dashboard + settings)
-  const allBtns=document.querySelectorAll(`[onclick*="'${key}'"]`);
+  // Update tous les boutons du meme key uniquement
+  const allBtns=document.querySelectorAll(`[data-optkey="${key}"]`);
   allBtns.forEach(b=>b.className='toggle'+(optState[key]?' on':''));
+  // Label: OFF=Grand Public, ON=TPE
+  const label = (key==='tpe_depot'||key==='tpe_ret')
+    ? (optState[key] ? 'TPE' : 'Grand Public')
+    : null;
+  if(label){
+    const row=btn.closest('.opt-row');
+    if(row){
+      const p=row.querySelector('p');
+      if(p) p.textContent='OFF = Grand Public · ON = TPE · Actuel: '+label;
+    }
+  }
   syncOptToServer(key,optState[key]);
 }
 async function syncOptToServer(key,val){
@@ -2117,6 +2128,32 @@ function toggleTheme(){applyTheme(currentTheme==='dark'?'light':'dark');}
 
 
 // ══ USSD CONFIG ══
+async function saveUssdFull(operator){
+  const get = id => document.getElementById(id)?.value?.trim();
+  const gp_depot   = get(`ussd_${operator}_gp_depot`);
+  const gp_retrait = get(`ussd_${operator}_gp_retrait`);
+  const tpe_depot   = get(`ussd_${operator}_tpe_depot`);
+  const tpe_retrait = get(`ussd_${operator}_tpe_retrait`);
+  const body = { operator, gp_depot, gp_retrait };
+  if (tpe_depot)   body.tpe_depot = tpe_depot;
+  if (tpe_retrait) body.tpe_retrait = tpe_retrait;
+  const d = await api('/api/ussd', { method:'POST', body: JSON.stringify(body) });
+  if (d?.ok) showToast('✅ Codes USSD enregistrés');
+  else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
+}
+async function saveUssdFull(operator){
+  const get = id => document.getElementById(id)?.value?.trim();
+  const gp_depot   = get(`ussd_${operator}_gp_depot`);
+  const gp_retrait = get(`ussd_${operator}_gp_retrait`);
+  const tpe_depot   = get(`ussd_${operator}_tpe_depot`);
+  const tpe_retrait = get(`ussd_${operator}_tpe_retrait`);
+  const body = { operator, gp_depot, gp_retrait };
+  if (tpe_depot)   body.tpe_depot = tpe_depot;
+  if (tpe_retrait) body.tpe_retrait = tpe_retrait;
+  const d = await api('/api/ussd', { method:'POST', body: JSON.stringify(body) });
+  if (d?.ok) showToast('✅ Codes USSD enregistrés');
+  else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
+}
 async function loadUssdConfig(){
   const configs = await api('/api/ussd');
   if(!configs) return;
