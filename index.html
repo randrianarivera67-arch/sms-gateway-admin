@@ -1577,9 +1577,10 @@ async function loadDashboard(){
   setTxt('soldeOrange', orangeVal !== null ? fmtAr(orangeVal) : '— Ar');
   setTxt('soldeTelma',  mvolaVal  !== null ? fmtAr(mvolaVal)  : '— Ar');
   setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : '— Ar');
-  setOpStatus('statusOrange', orangeVal !== null);
-  setOpStatus('statusTelma',  mvolaVal  !== null);
-  setOpStatus('statusAirtel', airtelVal !== null);
+  const bv = d.balancesVerified||{};
+  setOpStatus('statusOrange', orangeVal !== null, hasOrange ? bv.orange : null);
+  setOpStatus('statusTelma',  mvolaVal  !== null, hasMvola  ? bv.mvola  : null);
+  setOpStatus('statusAirtel', airtelVal !== null, hasAirtel ? bv.airtel : null);
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
   loadActSms(); loadActRet(); loadDevices();
@@ -2289,7 +2290,22 @@ function trunc(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function setTxt(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 function setStatus(id,available){const el=document.getElementById(id);if(!el)return;el.textContent=available?'● Disponible':'● Indisponible';el.style.color=available?'var(--green)':'var(--red)';}
-function setOpStatus(id,available){const el=document.getElementById(id);if(!el)return;el.textContent=available?'● Disponible':'● Indisponible';el.style.color=available?'var(--green)':'var(--red)';}
+function setOpStatus(id,available,verifiedAt){
+  const el=document.getElementById(id);if(!el)return;
+  const dispo = available ? '● Disponible' : '● Indisponible';
+  let badge = '';
+  if(available){
+    if(verifiedAt){
+      const d = new Date(verifiedAt);
+      const hAgo = Math.floor((Date.now()-d.getTime())/3600000);
+      badge = `<span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;background:rgba(0,200,83,.15);color:var(--green)">✓ Vérifié ${hAgo<1?'<1h':hAgo+'h'}</span>`;
+    } else {
+      badge = '<span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;background:rgba(255,160,0,.15);color:#FF9800">≈ Estimé</span>';
+    }
+  }
+  el.innerHTML = dispo + badge;
+  el.style.color=available?'var(--green)':'var(--red)';
+}
 function showToast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 
 // ══ PARTICLES ══
