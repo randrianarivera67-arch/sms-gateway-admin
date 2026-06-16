@@ -1017,53 +1017,22 @@ tbody tr{transition:background .1s !important}
 
       <!-- ══ RETRAIT ══ -->
       <div class="page" id="page-retrait">
-        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:14px">
-          <div class="card">
-            <div class="card-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Nouveau Retrait
-            </div>
-            <div class="field-group">
-              <label class="field-label">Opérateur</label>
-              <select class="field-input" id="rType" style="cursor:pointer;margin-bottom:8px">
-                <option value="retrait">💸 Retrait</option>
-                <option value="depot">💰 Depot</option>
-              </select>
-              <select class="field-input" id="rOp" onchange="updateUssd()" style="cursor:pointer">
-                <option value="orange">Orange Money</option>
-                <option value="yas">MVola / YAS</option>
-                <option value="airtel">Airtel Money</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Numéro bénéficiaire</label>
-              <input class="field-input" id="rNum" type="tel" placeholder="032XXXXXXX" oninput="updateUssd()"/>
-            </div>
-            <div class="field-group">
-              <label class="field-label">Montant (Ar)</label>
-              <input class="field-input" id="rMnt" type="number" placeholder="10000" oninput="updateUssd()"/>
-            </div>
-            <div class="ussd-box" id="ussdBox"></div>
-            <button class="btn btn-primary" style="width:100%" onclick="doRetrait()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              ENVOYER LE RETRAIT
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2.5" style="width:18px;height:18px;filter:drop-shadow(0 0 6px #B388FF)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:15px">SMS Dépôt / Retrait</span>
+            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Vider
             </button>
           </div>
-          <div class="card">
-            <div class="card-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Historique des retraits
-              <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                Vider
-              </button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
-                <tbody id="rTbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Type</th><th>Statut</th><th>Date</th><th style="width:36px"></th>
+              </tr></thead>
+              <tbody id="rTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1740,12 +1709,13 @@ async function doRetrait(){
 async function loadRetraits(){
   const d=await api('/api/retrait?limit=50');
   const tb=document.getElementById('rTbody');
-  if(!d){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
-  if(!d.data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  if(!d){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   tb.innerHTML=d.data.map(r=>`<tr>
     <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${r.operator?.toLowerCase().includes('orange')?'orange.png':r.operator?.toLowerCase().includes('airtel')?'airtel.png':'yas.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
     <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
     <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
+    <td><span class="badge" style="background:${r.type==='depot'?'rgba(0,200,83,.15)':'rgba(255,109,0,.15)'};color:${r.type==='depot'?'#00C853':'#FF6D00'};border:1px solid ${r.type==='depot'?'rgba(0,200,83,.3)':'rgba(255,109,0,.3)'}">${(r.type||'retrait').toUpperCase()}</span></td>
     <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
     <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
     <td><button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
@@ -2432,7 +2402,7 @@ const TRANSLATIONS = {
   fr: {
     dashboard: 'Tableau de bord',
     sms_recus: 'SMS Reçus',
-    retraits: 'Retraits Mobile Money',
+    retraits: 'SMS Dépôt / Retrait',
     devices: 'Appareils connectés',
     stats: 'Statistiques',
     ussd: 'Codes USSD',
@@ -2461,7 +2431,7 @@ const TRANSLATIONS = {
   mg: {
     dashboard: 'Filan-tsonia',
     sms_recus: 'SMS Noraisina',
-    retraits: 'Fialan-keloka Mobile',
+    retraits: 'SMS Dépôt / Retrait',
     devices: 'Fitaovana mifandray',
     stats: 'Antontan-isa',
     ussd: 'Kaody USSD',
