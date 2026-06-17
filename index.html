@@ -624,6 +624,59 @@ tbody tr{transition:background .1s !important}
 }
 
 @media(max-width:900px){.action-btns{display:flex !important;flex-wrap:wrap !important;gap:8px !important;padding-bottom:80px !important;overflow:visible !important}.action-btns .btn{flex:1 1 calc(50% - 8px) !important;min-width:120px !important;justify-content:center !important}}
+
+/* ══ LOADING SPINNER ══ */
+#loadingOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+}
+#loadingOverlay.show{display:flex;}
+.spinner-ring{
+  width:72px;height:72px;position:relative;
+}
+.spinner-ring::before,.spinner-ring::after{
+  content:'';position:absolute;border-radius:50%;
+}
+.spinner-ring::before{
+  inset:0;
+  border:4px solid rgba(255,215,0,.15);
+}
+.spinner-ring::after{
+  inset:0;
+  border:4px solid transparent;
+  border-top-color:#FFD700;
+  border-right-color:#FFA500;
+  animation:spinGold 1s cubic-bezier(.6,.2,.4,.8) infinite;
+  filter:drop-shadow(0 0 8px #FFD700) drop-shadow(0 0 16px #FFA500);
+}
+.spinner-inner{
+  position:absolute;inset:12px;border-radius:50%;
+  border:3px solid transparent;
+  border-bottom-color:#FFD700;
+  border-left-color:#FFF8DC;
+  animation:spinGold .7s cubic-bezier(.6,.2,.4,.8) infinite reverse;
+  filter:drop-shadow(0 0 6px #FFD700);
+}
+.spinner-dot{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+}
+.spinner-dot::after{
+  content:'';width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle,#FFF8DC,#FFD700);
+  box-shadow:0 0 12px #FFD700,0 0 24px #FFA500;
+  animation:pulseDot 1s ease-in-out infinite;
+}
+@keyframes spinGold{to{transform:rotate(360deg)}}
+@keyframes pulseDot{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.2);opacity:1}}
+.spinner-text{
+  font-size:13px;font-weight:700;letter-spacing:.1em;
+  background:linear-gradient(90deg,#FFD700,#FFA500,#FFD700);
+  background-size:200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmerText 1.5s linear infinite;
+}
+@keyframes shimmerText{to{background-position:200%}}
 </style>
 </head>
 <body>
@@ -745,7 +798,14 @@ tbody tr{transition:background .1s !important}
   </aside>
 
   <!-- MAIN -->
-  <div class="main">
+  <div id="loadingOverlay">
+  <div class="spinner-ring">
+    <div class="spinner-inner"></div>
+    <div class="spinner-dot"></div>
+  </div>
+  <div class="spinner-text">CHARGEMENT...</div>
+</div>
+<div class="main">
     <div class="topbar">
       <button class="tb-menu" onclick="toggleSidebar()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -1542,7 +1602,11 @@ function showPage(name){
 }
 function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('open');document.getElementById('overlay').style.visibility=s.classList.contains('open')?'visible':'hidden';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.visibility='hidden';}
-function refreshCurrent(){window.location.reload(true);}
+function refreshCurrent(){
+  const ov=document.getElementById('loadingOverlay');
+  if(ov){ov.classList.add('show');setTimeout(()=>window.location.reload(true),600);}
+  else window.location.reload(true);
+}
 
 // ══ DASHBOARD ══
 async function loadDashboard(){
