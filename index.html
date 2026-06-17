@@ -118,7 +118,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
 /* ── TOPBAR ── */
-.topbar{position:relative;height:58px;flex-shrink:0;background:url('hero.png') center/cover no-repeat;border-bottom:none;display:flex;align-items:center;padding:0 20px;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,.3);overflow:hidden;}
+.topbar{position:relative;height:58px;flex-shrink:0;background:linear-gradient(135deg,#0D47A1 0%,#1565C0 40%,#1B6CF2 100%);border-bottom:none;display:flex;align-items:center;padding:0 20px;gap:12px;box-shadow:0 2px 16px rgba(13,71,161,.5);overflow:hidden;}
 .topbar>*{position:relative;z-index:1}
 .tb-menu{
   width:36px;height:36px;border-radius:8px;
@@ -2291,10 +2291,13 @@ function setOpStatus(id,available,verifiedAt){
   if(available){
     if(verifiedAt){
       const d = new Date(verifiedAt);
-      const hAgo = Math.floor((Date.now()-d.getTime())/3600000);
+      const diffMs = Date.now()-d.getTime();
+                  const hAgo = Math.floor(diffMs/3600000);
+                  const mAgo = Math.floor(diffMs/60000);
+                  const timeStr = hAgo<1?(mAgo<1?'<1min':mAgo+'min'):hAgo<24?hAgo+'h':(Math.floor(hAgo/24))+'j';
       badge = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:10px;font-weight:700;padding:3px 9px 3px 6px;border-radius:20px;background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(14,165,233,.15));border:1px solid rgba(56,189,248,.4);color:#38BDF8;box-shadow:0 0 8px rgba(56,189,248,.35)">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="3" style="filter:drop-shadow(0 0 3px rgba(56,189,248,.8))"><circle cx="12" cy="12" r="10" fill="rgba(56,189,248,.12)"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
-        Vérifié ${hAgo<1?'<1h':hAgo+'h'}</span>`;
+        Vérifié ${timeStr}</span>`;
     } else {
       badge = '<span style="margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;background:rgba(255,160,0,.15);color:#FF9800">≈ Estimé</span>';
     }
