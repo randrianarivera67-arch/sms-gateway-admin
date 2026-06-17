@@ -1346,7 +1346,7 @@ tbody tr{transition:background .1s !important}
               <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE Dépôt</h4><p>Grand Public par défaut (OFF = GP)</p></div>
-                  <button class="toggle on" id="sopt-tpe" data-optkey="tpe" onclick="toggleOpt(this,'tpe')"></button>
+                  <button class="toggle on" id="sopt-tpe" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
@@ -1939,7 +1939,7 @@ function saveSettings(){
 }
 
 // ══ OPTIONS TERMINAL ══
-const optState={tpe:true,tpe_ret:true,cash:false,ret_aut:true,ussd:true};
+const optState={tpe:true,tpe_depot:true,tpe_ret:true,cash:false,ret_aut:true,ussd:true};
 async function loadOptions(){
   const d=await api('/api/settings/options');
   if(!d) return;
