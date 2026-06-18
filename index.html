@@ -1810,7 +1810,7 @@ function updateDeviceInfoBar(devices){
   bar.style.display='flex';
   bar.innerHTML = online.map(d => {
     const bat = d.battery||0;
-    const batColor = bat>=50?'#00E676':bat>=20?'#FFB300':'#F44336';
+    const batColor = bat>=50?'#1B5E20':bat>=20?'#E65100':'#B71C1C';
     const batGlow = bat>=50?'rgba(0,230,118,.6)':bat>=20?'rgba(255,179,0,.6)':'rgba(244,67,54,.6)';
     const batW = Math.round(bat/100*14);
     const sig = d.signalLevel||0;
@@ -1887,7 +1887,7 @@ async function loadDevices(){
         <div class="dv-st"><div class="dv-val" style="color:var(--blue2)">${dev.smsReceived||0}</div><div class="dv-lbl">SMS reçus</div></div>
         <div class="dv-st"><div class="dv-val" style="color:var(--green)">${dev.smsSent||0}</div><div class="dv-lbl">Transmis</div></div>
         <div class="dv-st">
-            <div class="dv-val" style="color:${(dev.battery||0)>=50?'#00C853':(dev.battery||0)>=20?'#FF9800':'#E53935'};font-weight:900">
+            <div class="dv-val" style="color:${(dev.battery||0)>=50?'#1B5E20':(dev.battery||0)>=20?'#E65100':'#B71C1C'};font-weight:900;background:${(dev.battery||0)>=50?'rgba(27,94,32,.12)':(dev.battery||0)>=20?'rgba(230,81,0,.12)':'rgba(183,28,28,.12)'};padding:2px 8px;border-radius:6px;display:inline-block">
             ${dev.battery||0}%
           </div>
           <div class="dv-lbl">Batterie</div>
