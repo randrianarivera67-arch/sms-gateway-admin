@@ -1838,7 +1838,7 @@ function updateDeviceInfoBar(devices){
     return `<div style="display:flex;align-items:center;gap:6px">
       ${simBadges}
       <div style="display:flex;align-items:center;gap:3px">${sigSvg}<span style="font-size:10px;font-weight:900;color:#0277BD;background:rgba(2,119,189,.12);padding:1px 5px;border-radius:5px">${net}</span></div>
-      <div style="display:flex;align-items:center;gap:3px">${batSvg}<span style="font-size:9px;font-weight:800;color:${batColor};text-shadow:0 0 6px ${batGlow}">${bat}%</span></div>
+      <div style="display:flex;align-items:center;gap:3px">${batSvg}<span style="font-size:10px;font-weight:900;color:${batColor};background:${batColor}1F;padding:1px 5px;border-radius:5px">${bat}%</span></div>
     </div>`;
   }).join('<div style="width:1px;height:20px;background:rgba(0,229,255,.2)"></div>');
 }
@@ -1887,7 +1887,7 @@ async function loadDevices(){
         <div class="dv-st"><div class="dv-val" style="color:var(--blue2)">${dev.smsReceived||0}</div><div class="dv-lbl">SMS reçus</div></div>
         <div class="dv-st"><div class="dv-val" style="color:var(--green)">${dev.smsSent||0}</div><div class="dv-lbl">Transmis</div></div>
         <div class="dv-st">
-          <div class="dv-val" style="color:${(dev.battery||0)>=50?'#00E676':(dev.battery||0)>=20?'#FFB300':'#F44336'};filter:drop-shadow(0 0 6px ${(dev.battery||0)>=50?'#00E676':(dev.battery||0)>=20?'#FFB300':'#F44336'})">
+            <div class="dv-val" style="color:${(dev.battery||0)>=50?'#00C853':(dev.battery||0)>=20?'#FF9800':'#E53935'};font-weight:900">
             ${dev.battery||0}%
           </div>
           <div class="dv-lbl">Batterie</div>
