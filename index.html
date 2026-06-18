@@ -1792,6 +1792,32 @@ async function loadRetraits(){
 }
 
 // ══ DEVICES ══
+function batteryIcon(b){
+  if(b>=80) return '🔋';
+  if(b>=50) return '🔋';
+  if(b>=20) return '🪫';
+  return '🪫';
+}
+function signalBars(level){
+  const bars=4;
+  let html='';
+  for(let i=1;i<=bars;i++){
+    const active=i<=level;
+    const h=6+i*4;
+    html+=`<div style="width:4px;height:${h}px;border-radius:2px;background:${active?'#00E5FF':'rgba(255,255,255,0.15)'};${active?'box-shadow:0 0 4px #00E5FF':''}"></div>`;
+  }
+  return html;
+}
+function signalBars(level){
+  const bars=4;
+  let html='';
+  for(let i=1;i<=bars;i++){
+    const active=i<=level;
+    const h=5+i*4;
+    html+=`<div style="width:4px;height:${h}px;border-radius:2px;background:${active?'#00E5FF':'rgba(255,255,255,0.15)'};${active?'box-shadow:0 0 4px #00E5FF,0 0 8px rgba(0,229,255,0.5)':''}"></div>`;
+  }
+  return html;
+}
 async function loadDevices(){
   const d=await api('/api/device/stats');
   const el=document.getElementById('devList');
@@ -1813,7 +1839,17 @@ async function loadDevices(){
       <div class="dev-mini-stats">
         <div class="dv-st"><div class="dv-val" style="color:var(--blue2)">${dev.smsReceived||0}</div><div class="dv-lbl">SMS reçus</div></div>
         <div class="dv-st"><div class="dv-val" style="color:var(--green)">${dev.smsSent||0}</div><div class="dv-lbl">Transmis</div></div>
-        <div class="dv-st"><div class="dv-val" style="color:var(--orange2)">${dev.battery||0}%</div><div class="dv-lbl">Batterie</div></div>
+        <div class="dv-st">
+          <div class="dv-val" style="color:${(dev.battery||0)>=50?'#00E676':(dev.battery||0)>=20?'#FFB300':'#F44336'};filter:drop-shadow(0 0 6px ${(dev.battery||0)>=50?'#00E676':(dev.battery||0)>=20?'#FFB300':'#F44336'})">
+            ${(dev.battery||0)>=80?'🔋':(dev.battery||0)>=20?'🪫':'🔴'} ${dev.battery||0}%
+          </div>
+          <div class="dv-lbl">Batterie</div>
+        </div>
+        <div class="dv-st">
+          <div class="dv-val" style="color:#00E5FF;filter:drop-shadow(0 0 6px #00E5FF);font-size:12px;font-weight:900;letter-spacing:.05em">${dev.networkType||'?'}</div>
+          <div style="display:flex;gap:2px;justify-content:center;margin-top:3px">${signalBars(dev.signalLevel||0)}</div>
+          <div class="dv-lbl">Réseau</div>
+        </div>
         <div class="dv-st"><div class="dv-val" style="color:var(--text);font-size:14px">${timeAgo(dev.lastSeen)}</div><div class="dv-lbl">Activité</div></div>
       </div>
     </div>`).join('');
