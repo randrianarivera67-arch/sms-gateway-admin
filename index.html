@@ -677,6 +677,14 @@ tbody tr{transition:background .1s !important}
   animation:shimmerText 1.5s linear infinite;
 }
 @keyframes shimmerText{to{background-position:200%}}
+
+.btn-neon{border:none;border-radius:8px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;gap:4px;margin-right:5px;transition:.15s;background:transparent}
+.btn-neon svg{width:13px;height:13px}
+.btn-neon.ok{color:#00E676;border:1px solid rgba(0,230,118,.5);box-shadow:0 0 8px rgba(0,230,118,.4),inset 0 0 6px rgba(0,230,118,.15)}
+.btn-neon.ok:hover{box-shadow:0 0 14px rgba(0,230,118,.8),inset 0 0 10px rgba(0,230,118,.3)}
+.btn-neon.no{color:#FF1744;border:1px solid rgba(255,23,68,.5);box-shadow:0 0 8px rgba(255,23,68,.4),inset 0 0 6px rgba(255,23,68,.15)}
+.btn-neon.no:hover{box-shadow:0 0 14px rgba(255,23,68,.8),inset 0 0 10px rgba(255,23,68,.3)}
 </style>
 </head>
 <body>
@@ -1705,6 +1713,16 @@ async function viderRetraits(){
   if(d?.ok){showToast('✅ Historique retraits vidé');loadRetraits();}
   else showToast('❌ Erreur');
 }
+async function valideRetrait(id){
+  if(!confirm('Valider ce retrait/dépôt ?'))return;
+  const d=await api('/api/retrait/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:'success'})});
+  if(d){showToast('✅ Validé');loadRetraits();updateBadges();}else showToast('❌ Erreur');
+}
+async function refuseRetrait(id){
+  if(!confirm('Refuser ce retrait/dépôt ?'))return;
+  const d=await api('/api/retrait/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:'failed'})});
+  if(d){showToast('⛔ Refusé');loadRetraits();updateBadges();}else showToast('❌ Erreur');
+}
 async function deleteRetraitById(id){
   if(!confirm('Supprimer ce retrait ?')) return;
   const d=await api('/api/retrait/'+id,{method:'DELETE'});
@@ -1791,7 +1809,7 @@ async function loadRetraits(){
     <td><span class="badge" style="background:${r.type==='depot'?'rgba(0,200,83,.15)':'rgba(255,109,0,.15)'};color:${r.type==='depot'?'#00C853':'#FF6D00'};border:1px solid ${r.type==='depot'?'rgba(0,200,83,.3)':'rgba(255,109,0,.3)'}">${(r.type||'retrait').toUpperCase()}</span></td>
     <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
     <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
-    <td><button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    <td>${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Valider</button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Refuser</button>`:''}<button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
   </tr>`).join('');
 }
 
