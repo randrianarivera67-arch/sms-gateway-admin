@@ -1101,12 +1101,16 @@ tbody tr{transition:background .1s !important}
               Vider
             </button>
           </div>
+          <div style="margin-bottom:14px;position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #B388FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input id="rSearch" type="text" oninput="filterRetraits(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
+          </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Type</th><th>Statut</th><th>Date</th><th style="width:36px"></th>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Type</th><th>N° session</th><th>ID client</th><th>Deriv</th><th>Statut</th><th>Date</th><th style="width:36px"></th>
               </tr></thead>
-              <tbody id="rTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
+              <tbody id="rTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1797,20 +1801,74 @@ async function doRetrait(){
   document.getElementById('ussdBox').style.display='none';
   loadRetraits();
 }
+let _retraits=[];
 async function loadRetraits(){
   const d=await api('/api/retrait?limit=50');
   const tb=document.getElementById('rTbody');
   if(!d){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
   if(!d.data?.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
-  tb.innerHTML=d.data.map(r=>`<tr>
+  _retraits = d.data;
+  renderRetraits(_retraits);
+}
+
+function escAttr(v){return String(v||'').replace(/'/g,"\\'");}
+
+function renderRetraits(list){
+  const tb=document.getElementById('rTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  tb.innerHTML=list.map(r=>{
+    const cid=r.clientId?String(r.clientId):'';
+    const cidShort=cid?cid.slice(0,8)+'…':'—';
+    const deriv=(r.provider||r.providerId)?((r.provider||'')+(r.providerId?(' '+r.providerId):'')):'—';
+    return `<tr style="cursor:pointer" onclick="showRetraitDetail('${r._id}')">
     <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${r.operator?.toLowerCase().includes('orange')?'orange.png':r.operator?.toLowerCase().includes('airtel')?'airtel.png':'yas.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
     <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
     <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
     <td><span class="badge" style="background:${r.type==='depot'?'rgba(0,200,83,.15)':'rgba(255,109,0,.15)'};color:${r.type==='depot'?'#00C853':'#FF6D00'};border:1px solid ${r.type==='depot'?'rgba(0,200,83,.3)':'rgba(255,109,0,.3)'}">${(r.type||'retrait').toUpperCase()}</span></td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#B388FF">${esc(r.sessionId||'—')}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
+    <td style="font-size:11px;color:var(--text2)">${esc(deriv)}</td>
     <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
     <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
-    <td>${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Valider</button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Refuser</button>`:''}<button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
-  </tr>`).join('');
+    <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Valider</button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Refuser</button>`:''}<button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
+  </tr>`}).join('');
+}
+
+function filterRetraits(q){
+  q=(q||'').toLowerCase().trim();
+  if(!q){renderRetraits(_retraits);return;}
+  const f=_retraits.filter(r=>
+    (r.numero||'').toLowerCase().includes(q) ||
+    (r.sessionId||'').toLowerCase().includes(q) ||
+    String(r.clientId||'').toLowerCase().includes(q)
+  );
+  renderRetraits(f);
+}
+
+function showRetraitDetail(id){
+  const r=_retraits.find(x=>x._id===id); if(!r)return;
+  const rows=[
+    ['Opérateur', r.operator||'—'],
+    ['Numéro client (autorisé)', r.numero||'—'],
+    ['Montant', fmtAr(r.montant)],
+    ['Type', (r.type||'').toUpperCase()],
+    ['N° session', r.sessionId||'—'],
+    ['ID client', r.clientId||'—'],
+    ['Fournisseur', r.provider||'—'],
+    ['ID fournisseur', r.providerId||'—'],
+    ['Code USSD', r.ussdCode||'—'],
+    ['Statut', r.status||'—'],
+    ['Date', fmtDate(r.createdAt)]
+  ];
+  const html=`<div onclick="this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div onclick="event.stopPropagation()" style="background:var(--card,#0d1b3e);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Détail transaction</div>
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;width:30px;height:30px;color:#EF4444;cursor:pointer;font-size:18px">×</button>
+      </div>
+      ${rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3);font-size:12px">${k}</span><span style="font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:right;word-break:break-all">${esc(String(v))}</span></div>`).join('')}
+    </div></div>`;
+  const div=document.createElement('div'); div.innerHTML=html; document.body.appendChild(div.firstElementChild);
 }
 
 // ══ DEVICES ══
