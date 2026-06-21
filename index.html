@@ -986,7 +986,7 @@ tbody tr{transition:background .1s !important}
           <div class="card">
             <div class="card-title">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              Retraits récents
+              Dépôt/Retrait récente
               <button class="btn btn-outline" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showPage('retrait')">Voir tout</button>
             </div>
             <div class="activity-list" id="retraitRecent">
@@ -1096,7 +1096,11 @@ tbody tr{transition:background .1s !important}
           <div class="card-title" style="margin-bottom:16px">
             <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2.5" style="width:18px;height:18px;filter:drop-shadow(0 0 6px #B388FF)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span style="background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:15px">SMS Dépôt / Retrait</span>
-            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
+            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(41,121,255,0.12);color:#2979FF;border:none;margin-right:8px" onclick="loadRetraits()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Actualiser
+            </button>
+            <button class="btn" style="padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
               <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
               Vider
             </button>
