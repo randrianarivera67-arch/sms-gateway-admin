@@ -1619,8 +1619,17 @@ function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').style.visibility='hidden';}
 function refreshCurrent(){
   const ov=document.getElementById('loadingOverlay');
-  if(ov){ov.classList.add('show');setTimeout(()=>window.location.reload(true),600);}
-  else window.location.reload(true);
+  if(ov) ov.classList.add('show');
+  try{ refreshData(); }catch(e){}
+  setTimeout(()=>{ if(ov) ov.classList.remove('show'); }, 700);
+}
+function refreshData(){
+  // Maka data indray ny page misy (tsy reload page → tsy mivoaka login)
+  const active=document.querySelector('.page.active');
+  const id=active?active.id.replace('page-',''):'dashboard';
+  const loaders={dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
+  (loaders[id]||loadDashboard)();
+  if(typeof updateBadges==='function') updateBadges();
 }
 
 // ══ DASHBOARD ══
@@ -2640,7 +2649,7 @@ document.addEventListener('touchend', e => {
   const ind = document.getElementById('pull-indicator');
   if(diff > 80) {
     if(ind) ind.style.top = '0px';
-    setTimeout(() => window.location.reload(true), 300);
+    setTimeout(() => { if(ind) ind.style.top='-60px'; try{refreshData();}catch(e){} }, 300);
   } else {
     if(ind) ind.style.top = '-60px';
   }
