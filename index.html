@@ -690,7 +690,7 @@ tbody tr{transition:background .1s !important}
 <body>
 
 <!-- LOGIN -->
-<div class="login-page" id="loginPage">
+<div class="login-page" id="loginPage" style="display:none">
   <div id="loginParticles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0"></div>
   <div class="login-card" style="position:relative;z-index:1">
     <div class="login-logo">
@@ -1572,8 +1572,10 @@ window.onload=()=>{
     document.getElementById('loginPage').style.display='none';
     document.getElementById('appShell').style.display='flex';
     applyIcons(); loadDashboard(); startPolling();
-  // Pre-load stats
-  setTimeout(loadStats, 2000);
+    setTimeout(loadStats, 2000);
+  } else {
+    document.getElementById('loginPage').style.display='flex';
+    document.getElementById('appShell').style.display='none';
   }
 };
 function updateClock(){
@@ -2613,11 +2615,16 @@ function createIndicator() {
 }
 
 // Target ilay .content div no scroll container
-const getScroller = () => document.getElementById('content') || document.querySelector('.content') || document.body;
+const getScroller = () => {
+  const active = document.querySelector('.page.active');
+  if (active && active.scrollHeight > active.clientHeight) return active;
+  return document.getElementById('content') || document.querySelector('.content') || document.scrollingElement || document.body;
+};
+const getScrollTop = () => { const sc=getScroller(); return sc.scrollTop || window.pageYOffset || 0; };
 
 document.addEventListener('touchstart', e => {
   const scroller = getScroller();
-  if(scroller.scrollTop === 0) {
+  if(getScrollTop() <= 0) {
     startY = e.touches[0].clientY;
     isPulling = true;
     createIndicator();
@@ -2627,7 +2634,7 @@ document.addEventListener('touchstart', e => {
 document.addEventListener('touchmove', e => {
   if(!isPulling) return;
   const scroller = getScroller();
-  if(scroller.scrollTop > 0) { isPulling = false; return; }
+  if(getScrollTop() > 0) { isPulling = false; return; }
   const diff = e.touches[0].clientY - startY;
   const ind = document.getElementById('pull-indicator');
   if(diff > 10 && ind) {
