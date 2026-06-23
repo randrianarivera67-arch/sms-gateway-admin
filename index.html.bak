@@ -495,7 +495,7 @@ tbody tr:hover td{background:var(--blue-light)}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300;background:var(--sidebar)!important}.main{position:relative;z-index:1}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300}.main{position:relative;z-index:1}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
   .tb-menu{display:flex}
   .solde-grid{grid-template-columns:1fr 1fr}
@@ -726,7 +726,6 @@ tbody tr{transition:background .1s !important}
       <input class="login-input" id="loginPass" type="password" placeholder="••••••••"/>
     </div>
     <button class="login-btn" onclick="doLogin()">CONNEXION</button>
-    <button class="login-btn" id="passkeyBtn" onclick="doLoginPasskey()" style="margin-top:10px;background:transparent;border:1px solid var(--blue2);color:var(--blue2)">&#128273; PASSKEY</button>
   </div>
 </div>
 
@@ -785,9 +784,9 @@ tbody tr{transition:background .1s !important}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>SMS Templates</span>
       </button>
-      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100)">
+      <button class="nav-item" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-        <span>Paramètres</span>
+        Paramètres
       </button>
     </nav>
 
@@ -1403,12 +1402,6 @@ tbody tr{transition:background .1s !important}
               </button>
             </div>
 
-            <div class="card" style="margin-bottom:14px">
-              <div class="card-title">&#128273; Passkeys (WebAuthn)</div>
-              <div id="passkeyList" style="font-size:13px;color:var(--text2);margin-bottom:10px">&mdash;</div>
-              <button class="btn btn-primary" onclick="registerPasskey()">+ Enregistrer un passkey</button>
-            </div>
-
             <div class="card">
               <div class="card-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
@@ -1548,66 +1541,6 @@ async function doLogin(){
     applyIcons(); loadDashboard(); startPolling();
   }catch(e){err.textContent='Serveur inaccessible: '+e.message;err.style.display='block';}
   finally{btn.textContent='CONNEXION';btn.disabled=false;}
-}
-let _swaP=null;
-function loadSWA(){
-  if(window.SimpleWebAuthnBrowser) return Promise.resolve();
-  if(_swaP) return _swaP;
-  _swaP=new Promise((res,rej)=>{
-    const sc=document.createElement('script');
-    sc.src='https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@13/dist/bundle/index.umd.min.js';
-    sc.onload=res; sc.onerror=()=>rej(new Error('Echec chargement WebAuthn'));
-    document.head.appendChild(sc);
-  });
-  return _swaP;
-}
-async function doLoginPasskey(){
-  const url=document.getElementById('loginUrl').value.trim().replace(/\/+$/,'');
-  const u=document.getElementById('loginUser').value.trim();
-  const err=document.getElementById('loginErr'); err.style.display='none';
-  if(!url||!u){err.textContent="URL + nom d'utilisateur requis";err.style.display='block';return;}
-  localStorage.setItem('gw_url',url); BASE=url;
-  const btn=document.getElementById('passkeyBtn'); const old=btn.textContent;
-  btn.textContent='Passkey...'; btn.disabled=true;
-  try{
-    await loadSWA();
-    const ro=await fetch(url+'/api/auth/passkey/login/options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u})});
-    const opts=await ro.json();
-    if(!ro.ok) throw new Error(opts.error||'Aucun passkey');
-    const asse=await SimpleWebAuthnBrowser.startAuthentication({optionsJSON:opts});
-    const rv=await fetch(url+'/api/auth/passkey/login/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,response:asse})});
-    const d=await rv.json();
-    if(!rv.ok) throw new Error(d.error||'Echec passkey');
-    TOKEN=d.token; localStorage.setItem('gw_token',TOKEN);
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('appShell').style.display='flex';
-    document.getElementById('avatarEl').textContent=u[0].toUpperCase();
-    applyIcons(); loadDashboard(); startPolling();
-  }catch(e){err.textContent='Passkey: '+e.message;err.style.display='block';}
-  finally{btn.textContent=old;btn.disabled=false;}
-}
-async function registerPasskey(){
-  const name=prompt('Nom du passkey (ex: Mon telephone):','Passkey')||'Passkey';
-  try{
-    await loadSWA();
-    const opts=await api('/api/auth/passkey/register/options',{method:'POST'});
-    if(!opts||opts.error) throw new Error((opts&&opts.error)||'options');
-    const att=await SimpleWebAuthnBrowser.startRegistration({optionsJSON:opts});
-    const res=await api('/api/auth/passkey/register/verify',{method:'POST',body:JSON.stringify({response:att,name})});
-    if(res&&res.verified){showToast('Passkey enregistre');loadPasskeys();}
-    else throw new Error((res&&res.error)||'verification');
-  }catch(e){showToast('Passkey erreur: '+e.message);}
-}
-async function loadPasskeys(){
-  const el=document.getElementById('passkeyList'); if(!el) return;
-  const list=await api('/api/auth/passkey/list');
-  if(!list||!list.length){el.textContent='Aucun passkey enregistre';return;}
-  el.innerHTML=list.map(p=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)"><span>&#128273; '+(p.name||'Passkey')+'</span><button onclick="delPasskey(\''+p.id+'\')" style="background:none;border:none;color:#e44;cursor:pointer">&#10005;</button></div>').join('');
-}
-async function delPasskey(id){
-  if(!confirm('Supprimer ce passkey ?')) return;
-  await api('/api/auth/passkey/'+encodeURIComponent(id),{method:'DELETE'});
-  loadPasskeys();
 }
 function doLogout(){localStorage.removeItem('gw_token');location.reload();}
 
