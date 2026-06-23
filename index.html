@@ -2711,7 +2711,7 @@ document.addEventListener('touchmove', e => {
   if(diff > 10 && ind) {
     ind.style.top = Math.min(diff - 40, 10) + 'px';
     if(diff > 80) {
-      ind.innerHTML = '✅ Relâchez pour actualiser';
+      ind.innerHTML = 'Relâchez pour actualiser';
       ind.style.background = '#00C853';
     } else {
       ind.innerHTML = '🔄 Tirez pour actualiser';
@@ -2727,7 +2727,7 @@ document.addEventListener('touchend', e => {
   const ind = document.getElementById('pull-indicator');
   if(diff > 80) {
     if(ind) ind.style.top = '0px';
-    setTimeout(() => { if(ind) ind.style.top='-60px'; try{refreshData();}catch(e){} }, 300);
+    setTimeout(() => { if(ind) ind.style.top='-60px'; try{showPage('dashboard');}catch(e){} }, 300);
   } else {
     if(ind) ind.style.top = '-60px';
   }
