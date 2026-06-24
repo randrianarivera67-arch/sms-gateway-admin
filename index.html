@@ -1318,25 +1318,13 @@ tbody tr{transition:background .1s !important}
         <div class="card" style="margin-bottom:14px;border-left:3px solid #D32F2F;position:relative;overflow:hidden">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
             <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#B71C1C,#D32F2F);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden"><img src="airtel.png" style="width:100%;height:100%;object-fit:cover;border-radius:11px" onerror="this.style.display='none'"></div>
-            <div style="flex:1"><div style="font-size:16px;font-weight:900;color:var(--text)">Airtel Money</div><div style="font-size:11px;color:#D32F2F;font-weight:700;margin-top:2px">033</div></div>
+            <div style="flex:1"><div style="font-size:16px;font-weight:900;color:var(--text)">Airtel Money</div><div style="font-size:11px;color:#D32F2F;font-weight:700;margin-top:2px">033 &mdash; Flow USSD &eacute;tape par &eacute;tape</div></div>
             <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(211,47,47,.1);color:#D32F2F;border:1px solid rgba(211,47,47,.3)">AIRTEL</span>
           </div>
-          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
-            <div style="font-size:11px;font-weight:800;color:#D32F2F;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Grand Public</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t</div><input class="field-input" id="ussd_airtel_gp_depot" placeholder="*436#|2|1|1|{numero}|{numero}|{montant}|2" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/></div>
-              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div><input class="field-input" id="ussd_airtel_gp_retrait" placeholder="*436#|2|1|1|{numero}|{numero}|{montant}|2" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/></div>
-            </div>
-          </div>
-          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
-            <div style="font-size:11px;font-weight:800;color:#D32F2F;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">TPE</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t</div><input class="field-input" id="ussd_airtel_tpe_depot" placeholder="*436#|...|{numero}|{numero}|{montant}|2" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/></div>
-              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div><input class="field-input" id="ussd_airtel_tpe_retrait" placeholder="*436#|...|{numero}|{numero}|{montant}|2" style="font-family:monospace;font-size:13px;color:#D32F2F;font-weight:700"/></div>
-            </div>
-          </div>
-          <div class="fg" style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro D&eacute;p&ocirc;t (gateway)</div><input class="field-input" id="ussd_airtel_gateway" placeholder="033 XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <button onclick="saveUssdFull('airtel')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3)">Enregistrer Airtel Money</button>
+          <div id="airtel-steps-container"></div>
+          <button onclick="airtelAddStep()" style="width:100%;padding:10px;border-radius:10px;border:1.5px dashed rgba(211,47,47,.4);background:transparent;color:#D32F2F;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:12px">+ Ajouter une &eacute;tape</button>
+          <div class="fg" style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro Airtel Gateway</div><input class="field-input" id="ussd_airtel_gateway" placeholder="033 XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
+          <button onclick="saveAirtelSteps()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3)">Enregistrer Airtel Money</button>
         </div>
         </div>
       </div><!-- /page-ussd -->
@@ -2466,11 +2454,13 @@ function airtelRemoveStep(i) {
 
 async function saveAirtelSteps() {
   localStorage.setItem('airtel_steps', JSON.stringify(airtelSteps));
+  const gw = document.getElementById('ussd_airtel_gateway')?.value?.trim() || '';
   const d = await api('/api/ussd', { method:'POST', body: JSON.stringify({
     operator: 'airtel',
     steps: airtelSteps,
     gp_depot: airtelSteps.map(s=>s.value).join('|'),
     gp_retrait: airtelSteps.map(s=>s.value).join('|'),
+    gatewayNumero: gw,
   })});
   if (d?.ok) showToast('✅ Étapes Airtel enregistrées');
   else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
