@@ -764,7 +764,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </button>
       <button class="nav-item" onclick="showPage('retrait')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        <span>SMS Dépôt/Retrait</span>
+        <span>SMS Retrait</span>
         <span class="nav-badge yellow" id="retraitBadge" style="display:none">0</span>
       </button>
 
@@ -979,7 +979,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div class="card">
             <div class="card-title">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              Activité temps réel
+              SMS Dépôt récent
               <button class="btn btn-outline" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showPage('sms')">Voir tout</button>
             </div>
             <div class="activity-list" id="actList">
@@ -989,7 +989,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div class="card">
             <div class="card-title">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              Dépôt/Retrait récente
+              SMS Retrait récent
               <button class="btn btn-outline" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showPage('retrait')">Voir tout</button>
             </div>
             <div class="activity-list" id="retraitRecent">
@@ -2856,8 +2856,8 @@ document.addEventListener('touchend', e => {
 const TRANSLATIONS = {
   fr: {
     dashboard: 'Tableau de bord',
-    sms_recus: 'SMS Reçus',
-    retraits: 'SMS Dépôt / Retrait',
+    sms_recus: 'SMS Dépôt',
+    retraits: 'SMS Retrait',
     devices: 'Appareils connectés',
     stats: 'Statistiques',
     ussd: 'Codes USSD',
@@ -2885,8 +2885,8 @@ const TRANSLATIONS = {
   },
   mg: {
     dashboard: 'Filan-tsonia',
-    sms_recus: 'SMS Noraisina',
-    retraits: 'SMS Dépôt / Retrait',
+    sms_recus: 'SMS Depot',
+    retraits: 'SMS Retrait',
     devices: 'Fitaovana mifandray',
     stats: 'Antontan-isa',
     ussd: 'Kaody USSD',
