@@ -2753,8 +2753,39 @@ function opImgCircle(op,sz=28){
 if("serviceWorker" in navigator){
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js")
-      .then(r => console.log("SW registered"))
+      .then(reg => {
+        console.log("SW registered");
+
+        // FIX: mizaha version vaovao isaky mise au premier plan (focus)
+        // ary periodique isaky 60s.
+        reg.update();
+        setInterval(() => reg.update(), 60000);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+
+        // FIX: rehefa misy SW vaovao "waiting" (installed fa tsy mbola
+        // active), mandefa SKIP_WAITING dia reload automatique.
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      })
       .catch(e => console.log("SW error", e));
+
+    // FIX: rehefa miova ny controller (SW vaovao lasa active), reload
+    // automatique mba ho azo ny version farany.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   });
 }
 </script>

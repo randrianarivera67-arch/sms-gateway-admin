@@ -6,7 +6,14 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+});
+
+// FIX: rehefa mandray SKIP_WAITING avy amin'ny page (rehefa misy version
+// vaovao installed fa "waiting" ihany), lasa active avy hatrany.
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', e => {
