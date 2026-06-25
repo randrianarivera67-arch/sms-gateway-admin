@@ -785,7 +785,7 @@ tbody tr{transition:background .1s !important}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>SMS Templates</span>
       </button>
-      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150)">
+      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150);setTimeout(loadRate,150)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         <span>Paramètres</span>
       </button>
@@ -1404,7 +1404,13 @@ tbody tr{transition:background .1s !important}
             </div>
 
             <div class="card" style="margin-bottom:14px">
-              <div class="card-title">&#127974; API Deriv (Payment Agent)</div>
+              <div class="card-title">&#128176; Cours d'&eacute;change (Deriv USD &rarr; Ar)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours D&eacute;p&ocirc;t (1 USD = ? Ar)</div><input class="field-input" id="rate_depot" type="number" placeholder="4300" style="font-family:monospace"/></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Ar)</div><input class="field-input" id="rate_retrait" type="number" placeholder="4250" style="font-family:monospace"/></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
+            <div class="card-title">&#127974; API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
@@ -1616,6 +1622,16 @@ async function delPasskey(id){
   if(!confirm('Supprimer ce passkey ?')) return;
   await api('/api/auth/passkey/'+encodeURIComponent(id),{method:'DELETE'});
   loadPasskeys();
+}
+async function loadRate(){
+  const c=await api('/api/rate'); if(!c) return;
+  const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=(v||v===0)?v:'';};
+  set('rate_depot',c.rate_depot); set('rate_retrait',c.rate_retrait);
+}
+async function saveRate(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const res=await api('/api/rate',{method:'POST',body:JSON.stringify({rate_depot:g('rate_depot'),rate_retrait:g('rate_retrait')})});
+  if(res&&res.ok) showToast('Cours enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 async function loadDeriv(){
   const c=await api('/api/deriv/config'); if(!c) return;
