@@ -1049,41 +1049,41 @@ tbody tr{transition:background .1s !important}
       <!-- ══ SMS ══ -->
       <div class="page" id="page-sms">
         <div class="card">
-          <div class="card-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-            SMS Reçus
-            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-              <select id="smsOpFilter" onchange="filterSms(this.value)" style="height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--text);outline:none">
-                <option value="">Tous les opérateurs</option>
-                <option value="Orange Money">Orange Money</option>
-                <option value="YAS (Telma)">YAS / MVola</option>
-                <option value="Airtel Money">Airtel Money</option>
-              </select>
-              <button class="btn btn-outline" style="padding:6px 12px;font-size:11px" onclick="loadSms()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                Actualiser
-              </button>
-              <button class="btn" style="padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderSms()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                Vider tout
-              </button>
+          <div class="card-title" style="margin-bottom:16px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.5" style="width:18px;height:18px;filter:drop-shadow(0 0 6px #00E5FF)"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            <span style="background:linear-gradient(135deg,#00E5FF,#1B6CF2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:15px">SMS Reçus Dépôt</span>
+            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(0,229,255,0.12);color:#00E5FF;border:none" onclick="loadDepots()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Actualiser
+            </button>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px;position:relative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #00E5FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input id="dSearch" type="text" oninput="filterDepots(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
             </div>
+            <select id="dOpFilter" onchange="filterDepotsOp(this.value)" style="height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
+              <option value="">Tous les opérateurs</option>
+              <option value="orange">Orange Money</option>
+              <option value="mvola">MVola / YAS</option>
+              <option value="airtel">Airtel Money</option>
+            </select>
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Expéditeur</th><th>Opérateur</th><th>Message</th><th>Statut</th><th>Date/Heure</th><th style='width:36px'></th>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Statut</th><th>Date</th><th style="width:90px"></th>
               </tr></thead>
-              <tbody id="smsTbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr></tbody>
+              <tbody id="dTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr></tbody>
             </table>
           </div>
           <div class="pag">
-            <button class="pag-btn" onclick="smsPrev()">
+            <button class="pag-btn" onclick="depotPrev()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="15 18 9 12 15 6"/></svg>
               Préc.
             </button>
-            <span class="pag-info" id="smsPag">—</span>
-            <button class="pag-btn" onclick="smsNext()">
+            <span class="pag-info" id="dPag">—</span>
+            <button class="pag-btn" onclick="depotNext()">
               Suiv.
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
@@ -1096,27 +1096,42 @@ tbody tr{transition:background .1s !important}
         <div class="card">
           <div class="card-title" style="margin-bottom:16px">
             <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2.5" style="width:18px;height:18px;filter:drop-shadow(0 0 6px #B388FF)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span style="background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:15px">SMS Dépôt / Retrait</span>
-            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(41,121,255,0.12);color:#2979FF;border:none;margin-right:8px" onclick="loadRetraits()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#2979FF" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span style="background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:15px">SMS Retrait</span>
+            <button class="btn" style="margin-left:auto;padding:6px 12px;font-size:11px;background:rgba(179,136,255,0.12);color:#B388FF;border:none" onclick="loadRetraits()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               Actualiser
             </button>
-            <button class="btn" style="padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.12);color:#EF4444;border:none" onclick="viderRetraits()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              Vider
-            </button>
           </div>
-          <div style="margin-bottom:14px;position:relative">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #B388FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input id="rSearch" type="text" oninput="filterRetraits(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px;position:relative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #B388FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input id="rSearch" type="text" oninput="filterRetraits(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
+            </div>
+            <select id="rOpFilter" onchange="filterRetraitsOp(this.value)" style="height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
+              <option value="">Tous les opérateurs</option>
+              <option value="orange">Orange Money</option>
+              <option value="mvola">MVola / YAS</option>
+              <option value="airtel">Airtel Money</option>
+            </select>
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>Type</th><th>N° session</th><th>ID client</th><th>Deriv</th><th>Statut</th><th>Date</th><th style="width:36px"></th>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Deriv</th><th>Statut</th><th>Date</th><th style="width:130px"></th>
               </tr></thead>
               <tbody id="rTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
             </table>
+          </div>
+          <div class="pag">
+            <button class="pag-btn" onclick="retraitPrev()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="15 18 9 12 15 6"/></svg>
+              Préc.
+            </button>
+            <span class="pag-info" id="rPag">—</span>
+            <button class="pag-btn" onclick="retraitNext()">
+              Suiv.
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
         </div>
       </div>
