@@ -678,8 +678,10 @@ tbody tr{transition:background .1s !important}
 }
 @keyframes shimmerText{to{background-position:200%}}
 
-.btn-neon{border:none;border-radius:8px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:800;
-  display:inline-flex;align-items:center;gap:4px;margin-right:5px;transition:.15s;background:transparent}
+.btn-neon{border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;transition:.15s;background:transparent;min-width:30px}
+td .btn-neon{margin:2px}
+td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .btn-neon svg{width:13px;height:13px}
 .btn-neon.ok{color:#00E676;border:1px solid rgba(0,230,118,.5);box-shadow:0 0 8px rgba(0,230,118,.4),inset 0 0 6px rgba(0,230,118,.15)}
 .btn-neon.ok:hover{box-shadow:0 0 14px rgba(0,230,118,.8),inset 0 0 10px rgba(0,230,118,.3)}
@@ -1498,7 +1500,7 @@ tbody tr{transition:background .1s !important}
 // ══ STATE ══
 let TOKEN = localStorage.getItem('gw_token')||'';
 let BASE  = localStorage.getItem('gw_url')||'';
-let smsPage=1, smsOp='';
+
 let currentTheme = localStorage.getItem('gw_theme')||'light';
 var currentLang = localStorage.getItem('gw_lang')||'fr';
 
@@ -1719,7 +1721,7 @@ function showPage(name){
   const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   document.getElementById('topTitle').textContent=titles[name]||name;
   closeSidebar();
-  const loaders={dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
+  const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
   loaders[name]?.();
 }
 function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('open');document.getElementById('overlay').style.visibility=s.classList.contains('open')?'visible':'hidden';}
@@ -1734,7 +1736,7 @@ function refreshData(){
   // Maka data indray ny page misy (tsy reload page → tsy mivoaka login)
   const active=document.querySelector('.page.active');
   const id=active?active.id.replace('page-',''):'dashboard';
-  const loaders={dashboard:loadDashboard,sms:loadSms,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
+  const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
   (loaders[id]||loadDashboard)();
   if(typeof updateBadges==='function') updateBadges();
 }
@@ -1814,81 +1816,24 @@ async function loadActRet(){
     </div>`).join('');
 }
 
-// ══ SMS ══
-async function viderSms(){
-  if(!confirm('Vider tout l\'historique SMS ?')) return;
-  const d=await api('/api/sms/clear',{method:'DELETE'});
-  if(d?.ok){showToast('✅ Historique SMS vidé');loadSms();}
-  else showToast('❌ Erreur');
-}
-async function deleteSmsById(id){
-  if(!confirm('Supprimer ce SMS ?')) return;
-  const d=await api('/api/sms/'+id,{method:'DELETE'});
-  if(d?.ok){showToast('✅ SMS supprimé');loadSms();}
-  else showToast('❌ Erreur');
-}
-async function viderRetraits(){
-  if(!confirm('Vider tout l\'historique des retraits ?')) return;
-  const d=await api('/api/retrait/clear',{method:'DELETE'});
-  if(d?.ok){showToast('✅ Historique retraits vidé');loadRetraits();}
-  else showToast('❌ Erreur');
+// FIX: refresh la page active (depot ou retrait) apres validation
+function refreshDepotRetraitPages(){
+  const active = document.querySelector('.page.active');
+  if(active?.id==='page-sms') loadDepots();
+  else if(active?.id==='page-retrait') loadRetraits();
+  updateBadges();
 }
 async function valideRetrait(id){
-  if(!confirm('Valider ce retrait/dépôt ?'))return;
+  if(!confirm('Valider cette transaction ?'))return;
   const d=await api('/api/retrait/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:'success'})});
-  if(d){showToast('✅ Validé');loadRetraits();updateBadges();}else showToast('❌ Erreur');
+  if(d){showToast('✅ Validé');refreshDepotRetraitPages();}else showToast('❌ Erreur');
 }
 async function refuseRetrait(id){
-  if(!confirm('Refuser ce retrait/dépôt ?'))return;
+  if(!confirm('Refuser cette transaction ?'))return;
   const d=await api('/api/retrait/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:'failed'})});
-  if(d){showToast('⛔ Refusé');loadRetraits();updateBadges();}else showToast('❌ Erreur');
+  if(d){showToast('⛔ Refusé');refreshDepotRetraitPages();}else showToast('❌ Erreur');
 }
-async function deleteRetraitById(id){
-  if(!confirm('Supprimer ce retrait ?')) return;
-  const d=await api('/api/retrait/'+id,{method:'DELETE'});
-  if(d?.ok){showToast('✅ Retrait supprimé');loadRetraits();}
-  else showToast('❌ Erreur');
-}
-async function loadSms(){
-  const d=await api(`/api/sms?page=${smsPage}&limit=20${smsOp?'&operator='+encodeURIComponent(smsOp):''}`);
-  const tb=document.getElementById('smsTbody');
-  if(!d){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
-  if(!d.data?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Aucun SMS trouvé</td></tr>';return;}
-  tb.innerHTML=d.data.map(s=>`<tr style='cursor:pointer' onclick="showSmsDetail(${JSON.stringify(s).replace(/"/g,'&quot;')})">
-    <td style="font-weight:700;font-family:'JetBrains Mono',monospace;font-size:12px">${esc(s.from||'—')}</td>
-    <td><span class="badge ${opClass(s.operator)}">${esc(s.operator||'?')}</span></td>
-    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)">${esc(s.message||'')}</td>
-    <td><span class="badge ${statusBadge(s.status)}">${{sent:'Reçu',matched:'Validé',pending:'En attente',ignored:'Ignoré',failed:'Échoué'}[s.status]||s.status||'?'}</span></td>
-    <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(s.receivedAt)}</td>
-    <td><button onclick="deleteSmsById('${s._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
-  </tr>`).join('');
-  document.getElementById('smsPag').textContent=`${(smsPage-1)*20+1}–${Math.min(smsPage*20,d.total||0)} / ${d.total||0}`;
-}
-function showSmsDetail(s) {
-  const existing = document.getElementById('smsModal');
-  if(existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'smsModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px';
-  const inner = document.createElement('div');
-  inner.style.cssText = 'background:var(--surface);border-radius:20px;padding:24px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);position:relative';
-  inner.innerHTML = '<button onclick="document.getElementById(\'smsModal\').remove()" style="position:absolute;top:12px;right:12px;background:rgba(239,68,68,0.1);border:none;border-radius:50%;width:32px;height:32px;color:#EF4444;font-size:18px;cursor:pointer">✕</button>'
-    + '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:16px">Détail SMS</div>'
-    + '<div style="display:flex;flex-direction:column;gap:12px">'
-    + '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:10px"><span style="font-size:11px;color:var(--text3);font-weight:600">EXPÉDITEUR</span><span style="font-weight:800;font-family:monospace">' + esc(s.from||'—') + '</span></div>'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px"><span style="font-size:11px;color:var(--text3);font-weight:600">OPÉRATEUR</span><span class="badge ' + opClass(s.operator) + '">' + esc(s.operator||'?') + '</span></div>'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px"><span style="font-size:11px;color:var(--text3);font-weight:600">STATUT</span><span class="badge ' + statusBadge(s.status) + '">' + (s.status||'?') + '</span></div>'
-    + '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:10px"><span style="font-size:11px;color:var(--text3);font-weight:600">DATE</span><span style="font-size:12px;font-family:monospace">' + fmtDate(s.receivedAt) + '</span></div>'
-    + '<div style="padding:14px;background:var(--bg);border-radius:10px"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">MESSAGE</div><div style="font-size:13px;line-height:1.6;word-break:break-word">' + esc(s.message||'') + '</div></div>'
-    + '<button onclick="deleteSmsById(\'' + s._id + '\');document.getElementById(\'smsModal\').remove()" style="width:100%;padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;color:#EF4444;font-weight:700;cursor:pointer;font-size:13px">🗑 Supprimer ce SMS</button>'
-    + '</div>';
-  modal.appendChild(inner);
-  modal.addEventListener('click', e => { if(e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
-function filterSms(op){smsOp=op;smsPage=1;loadSms();}
-function smsPrev(){if(smsPage>1){smsPage--;loadSms();}}
-function smsNext(){smsPage++;loadSms();}
+
 
 // ══ RETRAIT ══
 function updateUssd(){
@@ -1917,18 +1862,94 @@ async function doRetrait(){
   document.getElementById('ussdBox').style.display='none';
   loadRetraits();
 }
-let _retraits=[];
-async function loadRetraits(){
-  const d=await api('/api/retrait?limit=50');
-  const tb=document.getElementById('rTbody');
-  if(!d){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
-  if(!d.data?.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
-  _retraits = d.data;
-  renderRetraits(_retraits);
+// ══ HELPERS COMMUNS DEPOT/RETRAIT ══
+function opIcon(op){
+  const o=(op||'').toLowerCase();
+  if(o.includes('orange')) return 'orange.png';
+  if(o.includes('airtel')) return 'airtel.png';
+  return 'yas.png';
 }
-
+function receptionBadge(rs){
+  const map={
+    en_attente:  {label:'En attente',  cls:'bg-pend'},
+    verification:{label:'Vérification',cls:'bg-proc'},
+    confirme:    {label:'OK',          cls:'bg-ok'},
+    rejete:      {label:'K.O',         cls:'bg-fail'}
+  };
+  const m=map[rs]||map.en_attente;
+  return `<span class="badge ${m.cls}">${m.label}</span>`;
+}
 function escAttr(v){return String(v||'').replace(/'/g,"\\'");}
 
+// ══ SMS DEPOT (Retrait type=depot) ══
+let _depots=[]; let depotPage=1; let depotOpFilter='';
+async function loadDepots(){
+  const d=await api(`/api/retrait?type=depot&page=${depotPage}&limit=50${depotOpFilter?'&operator='+depotOpFilter:''}`);
+  const tb=document.getElementById('dTbody');
+  if(!d){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
+  _depots = d.data;
+  renderDepots(_depots);
+  document.getElementById('dPag').textContent = `Page ${depotPage} — ${d.total} dépôt(s)`;
+}
+function renderDepots(list){
+  const tb=document.getElementById('dTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
+  tb.innerHTML=list.map(r=>{
+    const cid=r.clientId?String(r.clientId):'';
+    const cidShort=cid?cid.slice(0,8)+'…':'—';
+    return `<tr style="cursor:pointer" onclick="showDepotDetail('${r._id}')">
+      <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${opIcon(r.operator)}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
+      <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#00E5FF">${esc(r.sessionId||'—')}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
+      <td>${receptionBadge(r.receptionStatus)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
+      <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
+      <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+function filterDepots(q){
+  q=(q||'').toLowerCase().trim();
+  if(!q){renderDepots(_depots);return;}
+  renderDepots(_depots.filter(r=>
+    (r.numero||'').toLowerCase().includes(q) ||
+    (r.sessionId||'').toLowerCase().includes(q) ||
+    String(r.clientId||'').toLowerCase().includes(q)
+  ));
+}
+function filterDepotsOp(v){ depotOpFilter=v; depotPage=1; loadDepots(); }
+function depotPrev(){ if(depotPage>1){depotPage--;loadDepots();} }
+function depotNext(){ depotPage++; loadDepots(); }
+function showDepotDetail(id){
+  const r=_depots.find(x=>x._id===id); if(!r)return;
+  const rows=[
+    ['Opérateur', r.operator||'—'],
+    ['Numéro gateway utilisé', r.numero||'—'],
+    ['Montant', fmtAr(r.montant)],
+    ['N° session', r.sessionId||'—'],
+    ['ID client (CR)', r.clientId||'—'],
+    ['Réception', r.receptionStatus||'en_attente'],
+    ['Statut', r.status||'—'],
+    ['Code USSD', r.ussdCode||'—'],
+    ['Date', fmtDate(r.createdAt)]
+  ];
+  showDetailModal('Détail dépôt', rows, '#00E5FF');
+}
+
+// ══ SMS RETRAIT (Retrait type=retrait) ══
+let _retraits=[]; let retraitPage=1; let retraitOpFilter='';
+async function loadRetraits(){
+  const d=await api(`/api/retrait?type=retrait&page=${retraitPage}&limit=50${retraitOpFilter?'&operator='+retraitOpFilter:''}`);
+  const tb=document.getElementById('rTbody');
+  if(!d){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  _retraits = d.data;
+  renderRetraits(_retraits);
+  document.getElementById('rPag').textContent = `Page ${retraitPage} — ${d.total} retrait(s)`;
+}
 function renderRetraits(list){
   const tb=document.getElementById('rTbody');
   if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
@@ -1936,29 +1957,39 @@ function renderRetraits(list){
     const cid=r.clientId?String(r.clientId):'';
     const cidShort=cid?cid.slice(0,8)+'…':'—';
     const deriv=(r.provider||r.providerId)?((r.provider||'')+(r.providerId?(' '+r.providerId):'')):'—';
+    const showRelance = r.status==='failed';
     return `<tr style="cursor:pointer" onclick="showRetraitDetail('${r._id}')">
-    <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${r.operator?.toLowerCase().includes('orange')?'orange.png':r.operator?.toLowerCase().includes('airtel')?'airtel.png':'yas.png'}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
-    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
-    <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
-    <td><span class="badge" style="background:${r.type==='depot'?'rgba(0,200,83,.15)':'rgba(255,109,0,.15)'};color:${r.type==='depot'?'#00C853':'#FF6D00'};border:1px solid ${r.type==='depot'?'rgba(0,200,83,.3)':'rgba(255,109,0,.3)'}">${(r.type||'retrait').toUpperCase()}</span></td>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#B388FF">${esc(r.sessionId||'—')}</td>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
-    <td style="font-size:11px;color:var(--text2)">${esc(deriv)}</td>
-    <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
-    <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
-    <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Valider</button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Refuser</button>`:''}<button onclick="deleteRetraitById('${r._id}')" style="background:rgba(239,68,68,0.1);border:none;border-radius:6px;padding:3px 8px;color:#EF4444;cursor:pointer;font-size:11px;font-weight:700"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" style="width:11px;height:11px;vertical-align:middle"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
-  </tr>`}).join('');
+      <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${opIcon(r.operator)}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
+      <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#B388FF">${esc(r.sessionId||'—')}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
+      <td>${receptionBadge(r.receptionStatus)}</td>
+      <td style="font-size:11px;color:var(--text2)">${esc(deriv)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
+      <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
+      <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}${showRelance?`<button class="btn-neon" style="background:rgba(255,184,0,.15);color:#FFB800;border:1px solid rgba(255,184,0,.4)" onclick="relancerRetrait('${r._id}')" title="Relancer (${r.relanceCount||0}x)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg></button>`:''}</td>
+    </tr>`;
+  }).join('');
 }
-
 function filterRetraits(q){
   q=(q||'').toLowerCase().trim();
   if(!q){renderRetraits(_retraits);return;}
-  const f=_retraits.filter(r=>
+  renderRetraits(_retraits.filter(r=>
     (r.numero||'').toLowerCase().includes(q) ||
     (r.sessionId||'').toLowerCase().includes(q) ||
     String(r.clientId||'').toLowerCase().includes(q)
-  );
-  renderRetraits(f);
+  ));
+}
+function filterRetraitsOp(v){ retraitOpFilter=v; retraitPage=1; loadRetraits(); }
+function retraitPrev(){ if(retraitPage>1){retraitPage--;loadRetraits();} }
+function retraitNext(){ retraitPage++; loadRetraits(); }
+
+async function relancerRetrait(id){
+  if(!confirm('Relancer cette transaction USSD ?')) return;
+  const d=await api('/api/retrait/'+id+'/relancer',{method:'POST'});
+  if(d?.ok){ showToast('🔄 Relance envoyée ('+d.relanceCount+'x)'); loadRetraits(); }
+  else showToast('❌ Erreur relance');
 }
 
 function showRetraitDetail(id){
@@ -1967,19 +1998,26 @@ function showRetraitDetail(id){
     ['Opérateur', r.operator||'—'],
     ['Numéro client (autorisé)', r.numero||'—'],
     ['Montant', fmtAr(r.montant)],
-    ['Type', (r.type||'').toUpperCase()],
     ['N° session', r.sessionId||'—'],
     ['ID client', r.clientId||'—'],
+    ['Réception', r.receptionStatus||'en_attente'],
     ['Fournisseur', r.provider||'—'],
     ['ID fournisseur', r.providerId||'—'],
     ['Code USSD', r.ussdCode||'—'],
+    ['Dernier message USSD', r.lastUssdResponse||'—'],
+    ['Relances', String(r.relanceCount||0)],
     ['Statut', r.status||'—'],
     ['Date', fmtDate(r.createdAt)]
   ];
+  showDetailModal('Détail retrait', rows, '#B388FF');
+}
+
+// ══ MODAL DETAIL COMMUN ══
+function showDetailModal(title, rows, color){
   const html=`<div onclick="this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
     <div onclick="event.stopPropagation()" style="background:var(--card,#0d1b3e);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;background:linear-gradient(135deg,#B388FF,#7C4DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Détail transaction</div>
+        <div style="font-size:15px;font-weight:800;background:linear-gradient(135deg,${color},${color}99);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${title}</div>
         <button onclick="this.closest('div[style*=fixed]').remove()" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;width:30px;height:30px;color:#EF4444;cursor:pointer;font-size:18px">×</button>
       </div>
       ${rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:#9fb3d8;font-size:12px">${k}</span><span style="font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:right;word-break:break-all;color:#fff">${esc(String(v))}</span></div>`).join('')}
@@ -2341,7 +2379,7 @@ function startPolling(){
   setInterval(()=>{
     const pg=document.querySelector('.page.active')?.id?.replace('page-','');
     if(pg==='dashboard') loadDashboard();
-    else if(pg==='sms') loadSms();
+    else if(pg==='sms') loadDepots();
     else if(pg==='retrait') loadRetraits();
     else if(pg==='stats') loadStats();
     updateBadges();
