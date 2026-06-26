@@ -203,17 +203,18 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .op-status{font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px}
 
 /* ── STATS MINI ── */
-.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .stat-mini{
   background:var(--surface);border-radius:var(--r2);
   border:1px solid var(--border);
   padding:14px 12px;
   box-shadow:var(--shadow);
   cursor:pointer;transition:transform .15s;
+  min-width:0;overflow:hidden;
 }
 .stat-mini:hover{transform:translateY(-2px)}
 .stat-mini-val{font-size:26px;font-weight:900;line-height:1;font-family:'JetBrains Mono',monospace}
-.stat-mini-lbl{font-size:10px;font-weight:600;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.stat-mini-lbl{font-size:10px;font-weight:600;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat-mini-trend{font-size:10px;font-weight:700;margin-top:2px}
 
 /* ── FLOW ── */
@@ -495,11 +496,12 @@ tbody tr:hover td{background:var(--blue-light)}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300;background:var(--sidebar)!important}.main{position:relative;z-index:1}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300;background:var(--sidebar)!important;transition:transform .25s ease}.main{position:relative;z-index:1}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
   .tb-menu{display:flex}
+  #tbBack{display:none}
   .solde-grid{grid-template-columns:1fr 1fr}
-  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .stats-row{grid-template-columns:repeat(4,1fr)}
   .dash-grid{grid-template-columns:1fr}
   .charts-grid{grid-template-columns:1fr}
   .stats-big-grid{grid-template-columns:repeat(2,1fr)}
@@ -820,6 +822,9 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
     <div class="topbar">
       <button class="tb-menu" onclick="toggleSidebar()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="tb-menu" id="tbBack" onclick="showPage('dashboard')" title="Retour" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div style="display:flex;align-items:center;gap:10px;flex:1"><span style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)" data-i18n="dashboard">Tableau de bord</span></div>
       <div class="tb-actions">
@@ -1718,6 +1723,7 @@ function showPage(name){
   const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
   const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   document.getElementById('topTitle').textContent=titles[name]||name;
+  const bk=document.getElementById('tbBack'); if(bk) bk.style.display=(name==='dashboard')?'none':'flex';
   closeSidebar();
   const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
   loaders[name]?.();
