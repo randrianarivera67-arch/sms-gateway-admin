@@ -8,6 +8,9 @@
     {"src": "*.js", "use": "@vercel/static"}
   ],
   "routes": [
+    {"src": "/sw.js", "headers": {"cache-control": "no-store, no-cache, must-revalidate"}, "dest": "/sw.js"},
+    {"src": "/(.*\\.html)", "headers": {"cache-control": "no-store, no-cache, must-revalidate"}, "dest": "/$1"},
+    {"src": "/", "headers": {"cache-control": "no-store, no-cache, must-revalidate"}, "dest": "/index.html"},
     {"src": "/(.*)", "dest": "/$1"}
   ]
 }
