@@ -115,7 +115,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .btn-logout:hover{background:rgba(244,67,54,.22);color:#F44336}
 
 /* ── MAIN ── */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;isolation:isolate}
 
 /* ── TOPBAR ── */
 .topbar{position:relative;height:58px;flex-shrink:0;background:url('hero.png') center/cover no-repeat,linear-gradient(135deg,#0D47A1 0%,#1B6CF2 100%);border-bottom:none;display:flex;align-items:center;padding:0 20px;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,.4);overflow:hidden;}
@@ -499,6 +499,7 @@ tbody tr:hover td{background:var(--blue-light)}
 @media(max-width:900px){
   .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:300;background:var(--sidebar)!important;transition:transform .25s ease}.main{position:relative;z-index:1}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
+  .sidebar.open ~ .main .content,body:has(.sidebar.open) .content{pointer-events:none}
   .tb-menu{display:flex}
   #tbBack{display:none}
   .solde-grid{grid-template-columns:1fr 1fr}
@@ -513,6 +514,7 @@ tbody tr:hover td{background:var(--blue-light)}
 @media(max-width:480px){
   .solde-grid{grid-template-columns:1fr 1fr}
   .stats-row{grid-template-columns:repeat(2,1fr)}
+  .stat-mini-val{font-size:21px}
   .content{padding:12px}
   .solde-main-amount{font-size:22px}
   .stats-big-grid{grid-template-columns:1fr 1fr}
@@ -520,7 +522,7 @@ tbody tr:hover td{background:var(--blue-light)}
 }
 .overlay{
   display:block;visibility:hidden;position:fixed;inset:0;
-  background:rgba(0,0,0,.5);z-index:250;
+  background:rgba(0,0,0,.62);z-index:250;
 }
 
 /* ══ NEON EFFECTS ══ */
