@@ -1066,13 +1066,14 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <option value="mvola">MVola / YAS</option>
               <option value="airtel">Airtel Money</option>
             </select>
+            <input id="dDateFilter" type="date" onchange="filterDepotsDate(this.value)" title="Trier par date" style="height:40px;padding:0 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Statut</th><th>Date</th><th style="width:90px"></th>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Statut</th><th>Date</th><th>Template</th><th style="width:90px"></th>
               </tr></thead>
-              <tbody id="dTbody"><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr></tbody>
+              <tbody id="dTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr></tbody>
             </table>
           </div>
           <div class="pag">
@@ -1111,13 +1112,14 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <option value="mvola">MVola / YAS</option>
               <option value="airtel">Airtel Money</option>
             </select>
+            <input id="rDateFilter" type="date" onchange="filterRetraitsDate(this.value)" title="Trier par date" style="height:40px;padding:0 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr>
-                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Deriv</th><th>Statut</th><th>Date</th><th style="width:130px"></th>
+                <th>Opérateur</th><th>Numéro</th><th>Montant</th><th>N° session</th><th>ID client</th><th>Réception</th><th>Deriv</th><th>Statut</th><th>Date</th><th>SMS flash</th><th style="width:130px"></th>
               </tr></thead>
-              <tbody id="rTbody"><tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
+              <tbody id="rTbody"><tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr></tbody>
             </table>
           </div>
           <div class="pag">
@@ -1882,15 +1884,15 @@ let _depots=[]; let depotPage=1; let depotOpFilter='';
 async function loadDepots(){
   const d=await api(`/api/retrait?type=depot&page=${depotPage}&limit=50${depotOpFilter?'&operator='+depotOpFilter:''}`);
   const tb=document.getElementById('dTbody');
-  if(!d){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
-  if(!d.data?.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
+  if(!d){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
   _depots = d.data;
   renderDepots(_depots);
   document.getElementById('dPag').textContent = `Page ${depotPage} — ${d.total} dépôt(s)`;
 }
 function renderDepots(list){
   const tb=document.getElementById('dTbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
+  if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
   tb.innerHTML=list.map(r=>{
     const cid=r.clientId?String(r.clientId):'';
     const cidShort=cid?cid.slice(0,8)+'…':'—';
@@ -1903,6 +1905,7 @@ function renderDepots(list){
       <td>${receptionBadge(r.receptionStatus)}</td>
       <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
       <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.smsTemplate||'')}">${esc((r.smsTemplate||'—').slice(0,45))}</td>
       <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}</td>
     </tr>`;
   }).join('');
@@ -1917,6 +1920,8 @@ function filterDepots(q){
   ));
 }
 function filterDepotsOp(v){ depotOpFilter=v; depotPage=1; loadDepots(); }
+function _isoDay(d){const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+function filterDepotsDate(v){ if(!v){renderDepots(_depots);return;} renderDepots(_depots.filter(r=>_isoDay(r.createdAt)===v)); }
 function depotPrev(){ if(depotPage>1){depotPage--;loadDepots();} }
 function depotNext(){ depotPage++; loadDepots(); }
 function showDepotDetail(id){
@@ -1930,6 +1935,7 @@ function showDepotDetail(id){
     ['Réception', r.receptionStatus||'en_attente'],
     ['Statut', r.status||'—'],
     ['Code USSD', r.ussdCode||'—'],
+    ['Template (SMS opérateur)', r.smsTemplate||'—'],
     ['Date', fmtDate(r.createdAt)]
   ];
   showDetailModal('Détail dépôt', rows, '#00E5FF');
@@ -1940,15 +1946,15 @@ let _retraits=[]; let retraitPage=1; let retraitOpFilter='';
 async function loadRetraits(){
   const d=await api(`/api/retrait?type=retrait&page=${retraitPage}&limit=50${retraitOpFilter?'&operator='+retraitOpFilter:''}`);
   const tb=document.getElementById('rTbody');
-  if(!d){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
-  if(!d.data?.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  if(!d){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
+  if(!d.data?.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   _retraits = d.data;
   renderRetraits(_retraits);
   document.getElementById('rPag').textContent = `Page ${retraitPage} — ${d.total} retrait(s)`;
 }
 function renderRetraits(list){
   const tb=document.getElementById('rTbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
+  if(!list.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   tb.innerHTML=list.map(r=>{
     const cid=r.clientId?String(r.clientId):'';
     const cidShort=cid?cid.slice(0,8)+'…':'—';
@@ -1964,6 +1970,7 @@ function renderRetraits(list){
       <td style="font-size:11px;color:var(--text2)">${esc(deriv)}</td>
       <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
       <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
+      <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${r.lastUssdResponse?(/erreur|echec|insuffisant|invalide|fail/i.test(r.lastUssdResponse)?'#EF4444':'#2bd07a'):'var(--text3)'}" title="${esc(r.lastUssdResponse||'')}">${esc((r.lastUssdResponse||'—').slice(0,40))}</td>
       <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}${showRelance?`<button class="btn-neon" style="background:rgba(255,184,0,.22);color:#FFB800;border:1.5px solid rgba(255,184,0,.55);padding:7px 14px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px" onclick="relancerRetrait('${r._id}')" title="Relancer (${r.relanceCount||0}x)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:15px;height:15px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>Relancer</button>`:''}</td>
     </tr>`;
   }).join('');
@@ -1978,6 +1985,7 @@ function filterRetraits(q){
   ));
 }
 function filterRetraitsOp(v){ retraitOpFilter=v; retraitPage=1; loadRetraits(); }
+function filterRetraitsDate(v){ if(!v){renderRetraits(_retraits);return;} renderRetraits(_retraits.filter(r=>_isoDay(r.createdAt)===v)); }
 function retraitPrev(){ if(retraitPage>1){retraitPage--;loadRetraits();} }
 function retraitNext(){ retraitPage++; loadRetraits(); }
 
