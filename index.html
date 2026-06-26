@@ -245,11 +245,12 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
 /* ── MAIN GRID ── */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.activity-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto}
+.activity-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;overflow-x:hidden}
 .act-item{
   display:flex;align-items:center;gap:10px;
   padding:8px 10px;background:var(--bg);
   border-radius:10px;transition:background .15s;
+  min-width:0;overflow:hidden;
 }
 .act-item:hover{background:var(--blue-light)}
 .act-ic{
@@ -333,7 +334,7 @@ tbody tr:hover td{background:var(--blue-light)}
 .badge{
   display:inline-flex;align-items:center;gap:4px;
   font-size:10px;font-weight:800;padding:3px 8px;
-  border-radius:20px;white-space:nowrap;
+  border-radius:20px;white-space:nowrap;flex-shrink:0;
 }
 .badge::before{content:'●';font-size:7px}
 .badge.ok{background:linear-gradient(135deg,rgba(0,200,83,.15),rgba(0,200,83,.05));color:#00C853;border:1px solid rgba(0,200,83,.3);box-shadow:0 0 8px rgba(0,200,83,.2)}
@@ -826,7 +827,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       <button class="tb-menu" id="tbBack" onclick="showPage('dashboard')" title="Retour" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <div style="display:flex;align-items:center;gap:10px;flex:1"><span style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)" data-i18n="dashboard">Tableau de bord</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex:1"><span id="topTitle" style="font-size:17px;font-weight:800;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)" data-i18n="dashboard">Tableau de bord</span></div>
       <div class="tb-actions">
         <button class="tb-btn neon-btn" onclick="refreshCurrent()" title="Actualiser" style="position:relative">
           <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #00E5FF)"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -1722,7 +1723,7 @@ function showPage(name){
   if(ni) ni.classList.add('active');
   const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
   const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
-  document.getElementById('topTitle').textContent=titles[name]||name;
+  var _tt=document.getElementById('topTitle'); if(_tt) _tt.textContent=titles[name]||name;
   const bk=document.getElementById('tbBack'); if(bk) bk.style.display=(name==='dashboard')?'none':'flex';
   closeSidebar();
   const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
