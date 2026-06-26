@@ -953,7 +953,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <div class="stats-row">
           <div class="stat-mini">
             <div class="stat-mini-val" style="color:var(--blue2)" id="s1">0</div>
-            <div class="stat-mini-lbl">SMS / Jour</div>
+            <div class="stat-mini-lbl">SMS aujourd'hui</div>
             <div class="stat-mini-trend" style="color:var(--green)" id="s1t">+0%</div>
           </div>
           <div class="stat-mini">
@@ -961,12 +961,12 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <div class="stat-mini-lbl">SMS Total</div>
           </div>
           <div class="stat-mini">
-            <div class="stat-mini-val" style="color:var(--orange2)" id="s3">0</div>
-            <div class="stat-mini-lbl">En attente</div>
+            <div class="stat-mini-val" style="color:var(--blue2)" id="s3">0</div>
+            <div class="stat-mini-lbl">Appareils connectés</div>
           </div>
           <div class="stat-mini">
             <div class="stat-mini-val" style="color:var(--green)" id="s4">0</div>
-            <div class="stat-mini-lbl">Réussis</div>
+            <div class="stat-mini-lbl">SMS réussi</div>
           </div>
         </div>
 
@@ -1759,7 +1759,7 @@ async function loadDashboard(){
   const retPend=d.retrait?.pending||0;
   const retOk=d.retrait?.success||0;
   const devCount=(d.devices||[]).filter(x=>x.online).length;
-  setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',retPend);setTxt('s4',retOk);
+  setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',devCount);setTxt('s4',retOk);
   if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
   if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
   const bal=d.balances||{};
