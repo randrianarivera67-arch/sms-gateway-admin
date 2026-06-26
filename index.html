@@ -2875,7 +2875,10 @@ const TRANSLATIONS = {
     reussis: 'Réussis',
     appareils: 'Appareils',
     sms_jour: 'SMS / JOUR',
-    sms_total: 'SMS TOTAL',
+    sms_total: 'SMS Total',
+    sms_aujourdhui: "SMS aujourd'hui",
+    appareils_connectes: 'Appareils connectés',
+    sms_reussi: 'SMS réussi',
     actualiser: 'Actualiser',
     processus: "SOLE D'ENSEMBLE DU PROCESSUS",
     activite: 'ACTIVITÉ TEMPS RÉEL',
@@ -2904,7 +2907,10 @@ const TRANSLATIONS = {
     reussis: 'Vita',
     appareils: 'Fitaovana',
     sms_jour: 'SMS / ANDRO',
-    sms_total: 'SMS REHETRA',
+    sms_total: 'SMS Rehetra',
+    sms_aujourdhui: 'SMS androany',
+    appareils_connectes: 'Fitaovana mifandray',
+    sms_reussi: 'SMS vita',
     actualiser: 'Havaozina',
     processus: 'FANDAHARANA IRAY MANONTOLO',
     activite: "ASAN'NY FOTOANA TENA IZY",
@@ -2949,7 +2955,7 @@ function applyTranslations() {
 
   // Stats labels
   document.querySelectorAll('.stat-mini-lbl').forEach((el, i) => {
-    const keys = ['en_attente','reussis','appareils'];
+    const keys = ['sms_aujourdhui','sms_total','appareils_connectes','sms_reussi'];
     if(keys[i] && t[keys[i]]) el.textContent = t[keys[i]];
   });
 
