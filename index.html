@@ -2422,7 +2422,7 @@ function startPolling(){
     else if(pg==='retrait') loadRetraits();
     else if(pg==='stats') loadStats();
     updateBadges();
-  },15000);
+  },4000);
   // Keep-alive ping Render toutes les 4 minutes
   setInterval(()=>{
     if(BASE) fetch(BASE+'/health').catch(()=>{});
