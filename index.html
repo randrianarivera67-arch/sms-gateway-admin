@@ -784,7 +784,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </button>
 
       <div class="nav-section">// Système</div>
-      <button class="nav-item" onclick="showPage('ussd');setTimeout(loadUssdGateways,100)">
+      <button class="nav-item" onclick="showPage('ussd');setTimeout(loadUssdGateways,100);setTimeout(fillUssdInputs,200)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <span>Codes USSD</span>
       </button>
@@ -3001,6 +3001,25 @@ document.addEventListener("DOMContentLoaded", function(){
   if(btn) btn.textContent = currentLang.toUpperCase();
   applyTranslations();
 });
+
+async function fillUssdInputs(){
+  try{
+    const configs = await api('/api/ussd');
+    if(!configs || !Array.isArray(configs)) return;
+    const set = (id,v)=>{ const e=document.getElementById(id); if(e && v!=null) e.value=v; };
+    ['orange','mvola','airtel'].forEach(op=>{
+      const c = configs.find(x=>x.operator===op);
+      if(!c) return;
+      set(`ussd_${op}_gp_depot`,   c.gp_depot);
+      set(`ussd_${op}_gp_retrait`, c.gp_retrait);
+      set(`ussd_${op}_tpe_depot`,  c.tpe_depot);
+      set(`ussd_${op}_tpe_retrait`,c.tpe_retrait);
+      set(`ussd_${op}_gateway`,    c.gatewayNumero);
+    });
+    if(typeof showToast==='function') showToast('✅ Codes USSD chargés');
+  }catch(e){ if(typeof showToast==='function') showToast('❌ Erreur chargement'); }
+}
+
 </script>
 </body>
 </html>
