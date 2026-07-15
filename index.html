@@ -930,6 +930,14 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <div class="op-amount ai" id="soldeAirtel">— Ar</div>
             <div class="op-status" id="statusAirtel"></div>
           </div>
+          <div class="solde-op" id="cardMvolaKm" style="display:none">
+            <div class="solde-op-head">
+              <div class="op-icon mv" style="border-radius:10px !important;border:2px solid #00BFA5;box-shadow:0 0 8px rgba(0,191,165,.6),0 0 16px rgba(0,191,165,.3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div class="op-name">MVola Comores <span style="font-size:10px;color:#00BFA5;font-weight:700">&#127472;&#127474; Fc</span></div>
+            </div>
+            <div class="op-amount mv" id="soldeMvolaKm" style="color:#00BFA5">— Fc</div>
+            <div class="op-status" id="statusMvolaKm"></div>
+          </div>
         </div>
 
         <!-- Flow processus -->
@@ -1935,18 +1943,26 @@ async function loadDashboard(){
   const hasOrange = onlineSims.includes('orange');
   const hasMvola  = onlineSims.includes('mvola') || onlineSims.includes('yas') || onlineSims.includes('telma');
   const hasAirtel = onlineSims.includes('airtel');
+  const hasKm = onlineSims.includes('mvola_km') || onlineSims.includes('comor') || onlineSims.includes('telma_km');
   const orangeVal = hasOrange ? (bal.orange||0) : null;
   const mvolaVal  = hasMvola  ? (bal.mvola||bal.yas||0) : null;
   const airtelVal = hasAirtel ? (bal.airtel||0) : null;
+  const kmVal     = hasKm     ? (bal.mvola_km||0) : null;
+  // Total = Ariary IHANY (mvola_km en Fc tsy tafiditra)
   const total = (orangeVal||0) + (mvolaVal||0) + (airtelVal||0);
   setTxt('soldeTotalEl', fmtAr(total));
   setTxt('soldeOrange', orangeVal !== null ? fmtAr(orangeVal) : '— Ar');
   setTxt('soldeTelma',  mvolaVal  !== null ? fmtAr(mvolaVal)  : '— Ar');
   setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : '— Ar');
+  // MVola Comores en Fc — carte mitokana, aseho raha misy device Comores online
+  const cardKm = document.getElementById('cardMvolaKm');
+  if (cardKm) cardKm.style.display = hasKm ? '' : 'none';
+  setTxt('soldeMvolaKm', kmVal !== null ? fmtFc(kmVal) : '— Fc');
   const bv = d.balancesVerified||{};
   setOpStatus('statusOrange', orangeVal !== null, hasOrange ? bv.orange : null);
   setOpStatus('statusTelma',  mvolaVal  !== null, hasMvola  ? bv.mvola  : null);
   setOpStatus('statusAirtel', airtelVal !== null, hasAirtel ? bv.airtel : null);
+  if (document.getElementById('statusMvolaKm')) setOpStatus('statusMvolaKm', kmVal !== null, hasKm ? bv.mvola_km : null);
   const online=d.devices?.filter(x=>x.online)||[];
   setTxt('sysStatus',online.length?`${online.length} appareil(s) en ligne`:'Aucun appareil');
   updateDeviceInfoBar(d.devices||[]);
@@ -2854,6 +2870,7 @@ async function resetUssd(opKey){
 // ══ HELPERS ══
 function statusBadge(s){return{success:'ok',sent:'sent',pending:'pend',failed:'fail',processing:'proc',matched:'match',ignored:'ign'}[s]||'pend';}
 function fmtAr(n){return Number(n||0).toLocaleString('fr-FR')+' Ar';}
+function fmtFc(n){return Number(n||0).toLocaleString('fr-FR')+' Fc';}
 function fmtDate(d){if(!d)return '—';return new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function timeAgo(d){if(!d)return '—';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'j';}
 function trunc(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
