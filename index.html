@@ -804,6 +804,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </button>
 
       <div class="nav-section">// Gestion</div>
+      <button class="nav-item" onclick="showPage('alertes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        <span>Alertes</span>
+        <span class="nav-badge" id="alertBadge" style="display:none">0</span>
+      </button>
       <button class="nav-item" onclick="showPage('devices')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
         Appareils
@@ -818,7 +823,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>SMS Templates</span>
       </button>
-      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150);setTimeout(loadRate,150);setTimeout(fillUssdInputs,200)">
+      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150);setTimeout(loadRate,150);setTimeout(loadBetwinner,180);setTimeout(fillUssdInputs,200)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         <span>Paramètres</span>
       </button>
@@ -1170,6 +1175,17 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </div>
 
       <!-- ══ DEVICES ══ -->
+      <div class="page" id="page-alertes">
+        <div class="card">
+          <div class="card-title">&#128276; Alertes &mdash; d&eacute;p&ocirc;t re&ccedil;u sans SMS</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">
+            Solde du gateway augment&eacute; (v&eacute;rification USSD) alors qu'aucun SMS n'est arriv&eacute; pour un ordre en cours.
+            V&eacute;rifiez puis validez (cr&eacute;dit fournisseur) ou refusez.
+          </div>
+          <div id="alertList"><div style="color:var(--text3);font-size:13px;padding:12px 0">Chargement&hellip;</div></div>
+        </div>
+      </div>
+
       <div class="page" id="page-devices">
         <div id="devList">
           <div class="card" style="text-align:center;padding:60px;color:var(--text3)">Chargement des appareils...</div>
@@ -1293,12 +1309,25 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours D&eacute;p&ocirc;t (1 USD = ? Ar)</div><input class="field-input" id="rate_depot" type="number" placeholder="4300" style="font-family:monospace"/></div>
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Ar)</div><input class="field-input" id="rate_retrait" type="number" placeholder="4250" style="font-family:monospace"/></div>
             </div>
+            <div style="font-size:11px;font-weight:800;color:#00897B;margin:2px 0 8px;text-transform:uppercase">&#127474;&#127474; Comores &mdash; Franc comorien (Fc)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours D&eacute;p&ocirc;t (1 USD = ? Fc)</div><input class="field-input" id="rate_depot_km" type="number" placeholder="460" style="font-family:monospace"/></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Fc)</div><input class="field-input" id="rate_retrait_km" type="number" placeholder="450" style="font-family:monospace"/></div>
+            </div>
             <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
             <div class="card-title">&#127974; API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
               <button class="btn btn-primary" onclick="saveDeriv()">Enregistrer API Deriv</button>
+
+              <div class="card-title" style="margin-top:18px">&#127918; API Betwinner (Cashdesk)</div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="betwinner_login" placeholder="Login caisse" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="betwinner_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cashdesk ID (Workplace)</div><input class="field-input" id="betwinner_cashdeskid" placeholder="Cashdeskid" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Hash (cl&eacute; API)</div><input class="field-input" id="betwinner_hash" type="password" placeholder="Hash API" style="font-family:monospace"/></div>
+              <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Langue (lng)</div><input class="field-input" id="betwinner_lng" placeholder="fr" style="font-family:monospace"/></div>
+              <button class="btn btn-primary" onclick="saveBetwinner()">Enregistrer API Betwinner</button>
             </div>
 
             <div class="card" style="margin-bottom:14px">
@@ -1506,6 +1535,34 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             Enregistrer MVola YAS
           </button>
         </div>
+        <!-- ===== TELMA COMORES (Fc) ===== -->
+        <div class="card" style="margin-bottom:14px;position:relative;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+            <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#00695C,#00BFA5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:18px;flex-shrink:0">KM</div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:900;color:var(--text)">Telma Comores &middot; MVola</div>
+              <div style="font-size:11px;color:#00BFA5;font-weight:700;margin-top:2px">Franc comorien (Fc)</div>
+            </div>
+            <span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(0,191,165,.1);color:#00BFA5;border:1px solid rgba(0,191,165,.3)">COMORES</span>
+          </div>
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+            <div style="font-size:11px;font-weight:800;color:#00BFA5;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Grand Public</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t</div><input class="field-input" id="ussd_mvola_km_gp_depot" placeholder="#111*" style="font-family:monospace;font-size:13px;color:#00BFA5;font-weight:700"/></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div><input class="field-input" id="ussd_mvola_km_gp_retrait" placeholder="#144#" style="font-family:monospace;font-size:13px;color:#00BFA5;font-weight:700"/></div>
+            </div>
+          </div>
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)">
+            <div style="font-size:11px;font-weight:800;color:#00BFA5;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">TPE</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t</div><input class="field-input" id="ussd_mvola_km_tpe_depot" style="font-family:monospace;font-size:13px;color:#00BFA5;font-weight:700"/></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div><input class="field-input" id="ussd_mvola_km_tpe_retrait" style="font-family:monospace;font-size:13px;color:#00BFA5;font-weight:700"/></div>
+            </div>
+          </div>
+          <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro gateway Comores</div><input class="field-input" id="ussd_mvola_km_gateway" placeholder="Numero gateway (Comores)" style="font-family:monospace"/></div>
+          <button onclick="saveUssdFull('mvola_km')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#00695C,#00BFA5);color:#fff;font-weight:800;font-size:13px;cursor:pointer">Enregistrer Telma Comores</button>
+        </div>
+
 
         <!-- AIRTEL MONEY -->
         <div class="card" style="margin-bottom:14px;border-left:3px solid #D32F2F;position:relative;overflow:hidden">
@@ -1661,10 +1718,11 @@ async function loadRate(){
   const c=await api('/api/rate'); if(!c) return;
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=(v||v===0)?v:'';};
   set('rate_depot',c.rate_depot); set('rate_retrait',c.rate_retrait);
+  set('rate_depot_km',c.rate_depot_km); set('rate_retrait_km',c.rate_retrait_km);
 }
 async function saveRate(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  const res=await api('/api/rate',{method:'POST',body:JSON.stringify({rate_depot:g('rate_depot'),rate_retrait:g('rate_retrait')})});
+  const res=await api('/api/rate',{method:'POST',body:JSON.stringify({rate_depot:g('rate_depot'),rate_retrait:g('rate_retrait'),rate_depot_km:g('rate_depot_km'),rate_retrait_km:g('rate_retrait_km')})});
   if(res&&res.ok) showToast('Cours enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 async function loadDeriv(){
@@ -1676,6 +1734,81 @@ async function saveDeriv(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
   const res=await api('/api/deriv/config',{method:'POST',body:JSON.stringify({deriv_app_id:g('deriv_app_id'),deriv_token:g('deriv_token'),deriv_cr_agent:g('deriv_cr_agent')})});
   if(res&&res.ok) showToast('API Deriv enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
+}
+async function loadBetwinner(){
+  const c=await api('/api/betwinner/config'); if(!c) return;
+  const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=v||'';};
+  set('betwinner_login',c.betwinner_login); set('betwinner_cashierpass',c.betwinner_cashierpass);
+  set('betwinner_cashdeskid',c.betwinner_cashdeskid); set('betwinner_hash',c.betwinner_hash);
+  set('betwinner_lng',c.betwinner_lng||'fr');
+}
+async function saveBetwinner(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const res=await api('/api/betwinner/config',{method:'POST',body:JSON.stringify({
+    betwinner_login:g('betwinner_login'), betwinner_cashierpass:g('betwinner_cashierpass'),
+    betwinner_cashdeskid:g('betwinner_cashdeskid'), betwinner_hash:g('betwinner_hash'),
+    betwinner_lng:g('betwinner_lng')||'fr'
+  })});
+  if(res&&res.ok) showToast('API Betwinner enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
+}
+// ══ ALERTES (depot recu sans SMS) ══
+async function loadAlertes(){
+  const box=document.getElementById('alertList'); if(!box) return;
+  const list=await api('/api/alert');
+  if(!list || !Array.isArray(list) || !list.length){
+    box.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px 0">Aucune alerte.</div>';
+    refreshAlertBadge(); return;
+  }
+  const fmt=n=>Number(n||0).toLocaleString('fr-FR');
+  box.innerHTML=list.map(a=>{
+    const r=a.retraitId||{};
+    const dv=(a.operator==='mvola_km')?'Fc':'Ar';
+    const pending=(a.status==='pending');
+    const col=pending?'var(--orange2)':(a.status==='valide'?'#2ecc71':'#e74c3c');
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        +'<b style="font-size:13px">'+(a.operator||'').toUpperCase()+'</b>'
+        +'<span style="font-size:10px;font-weight:800;color:'+col+'">'+String(a.status||'').toUpperCase()+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--text2);line-height:1.7">'
+        +'Montant ordre : <b>'+fmt(a.montantAttendu)+' '+dv+'</b><br>'
+        +'Vola voaray (delta solde) : <b>'+fmt(a.montantRecu)+' '+dv+'</b><br>'
+        +'Solde : '+fmt(a.soldeAvant)+' &rarr; '+fmt(a.soldeApres)+' '+dv+'<br>'
+        +(r.numero?('Num&eacute;ro : <b>'+r.numero+'</b><br>'):'')
+        +(r.providerId?('Fournisseur : '+(r.provider||'-')+' / <b>'+r.providerId+'</b><br>'):'')
+        +'<span style="font-size:11px;color:var(--text3)">'+new Date(a.createdAt).toLocaleString('fr-FR')+'</span>'
+      +'</div>'
+      +(pending?('<div style="display:flex;gap:8px;margin-top:10px">'
+        +'<button class="btn btn-outline btn-sm" style="flex:1;justify-content:center" onclick="alertAction(\''+a._id+'\',\'verifier\')">V&eacute;rifier</button>'
+        +'<button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="alertAction(\''+a._id+'\',\'valider\')">Valider</button>'
+        +'<button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;color:#e74c3c;border-color:#e74c3c" onclick="alertAction(\''+a._id+'\',\'refuser\')">Refuser</button>'
+      +'</div>'):'')
+    +'</div>';
+  }).join('');
+  refreshAlertBadge();
+}
+async function alertAction(id, action){
+  if(action!=='verifier' && !confirm('Confirmer : '+action+' ?')) return;
+  const d=await api('/api/alert/'+id+'/'+action,{method:'POST'});
+  if(!d || d.error){ showToast('Erreur: '+((d&&d.error)||'echec')); return; }
+  if(action==='verifier'){
+    showToast(d.verdict||'Verification OK');
+    alert('V\u00e9rification\n\nMontant ordre : '+d.montantAttendu
+      +'\nMontant recu : '+d.montantRecu
+      +'\nTolerance max (+10%) : '+d.toleranceMax
+      +'\n\n'+(d.verdict||''));
+    return;
+  }
+  showToast(action==='valider'?'Depot valide':'Depot refuse');
+  loadAlertes();
+}
+async function refreshAlertBadge(){
+  try{
+    const d=await api('/api/alert/count');
+    const b=document.getElementById('alertBadge'); if(!b) return;
+    const n=(d&&d.count)||0;
+    b.textContent=n; b.style.display=n?'':'none';
+  }catch(e){}
 }
 function doLogout(){localStorage.removeItem('gw_token');location.reload();}
 
@@ -1749,11 +1882,11 @@ function showPage(name){
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-item[onclick*="'${name}'"], .bn-item[onclick*="'${name}'"]`).forEach(n=>n.classList.add('active'));
   const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
-  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
+  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,alertes:'Alertes',devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   /* topTitle fixe = ADMIN (ne change plus par page) */
   const bk=document.getElementById('tbBack'); if(bk) bk.style.display=(name==='dashboard')?'none':'flex';
   closeSidebar();
-  const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
+  const loaders={dashboard:loadDashboard,sms:loadDepots,retrait:loadRetraits,alertes:loadAlertes,devices:loadDevices,stats:loadStats,template:loadTemplates,settings:loadOptions};
   loaders[name]?.();
 }
 function toggleSidebar(){const s=document.getElementById('sidebar');const open=s.classList.toggle('open');document.body.classList.toggle('nav-open',open);document.getElementById('overlay').style.visibility=open?'visible':'hidden';}
@@ -2614,7 +2747,7 @@ async function saveUssdFull(operator){
 async function loadUssdGateways(){
   const configs = await api('/api/ussd');
   if(!configs || !configs.find) return;
-  ['orange','mvola','airtel'].forEach(op=>{
+  ['orange','mvola','airtel','mvola_km'].forEach(op=>{
     const cfg = configs.find(c=>c.operator===op);
     if(!cfg) return;
     const inp = document.getElementById('ussd_'+op+'_gateway');
@@ -3004,7 +3137,7 @@ async function fillUssdInputs(){
     const configs = await api('/api/ussd');
     if(!configs || !Array.isArray(configs)) return;
     const set = (id,v)=>{ const e=document.getElementById(id); if(e && v!=null) e.value=v; };
-    ['orange','mvola','airtel'].forEach(op=>{
+    ['orange','mvola','airtel','mvola_km'].forEach(op=>{
       const c = configs.find(x=>x.operator===op);
       if(!c) return;
       set(`ussd_${op}_gp_depot`,   c.gp_depot);
