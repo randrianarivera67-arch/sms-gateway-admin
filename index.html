@@ -1328,6 +1328,8 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
               <button class="btn btn-primary" onclick="saveDeriv()">Enregistrer API Deriv</button>
+              <button class="btn" onclick="derivDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion Deriv</button>
+              <div id="derivDiagBox" style="display:none;margin-top:10px;padding:12px;border-radius:10px;font-size:12px;font-family:monospace;white-space:pre-wrap;line-height:1.5"></div>
 
               <div class="card-title" style="margin-top:18px">&#127918; API Betwinner (Cashdesk)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="betwinner_login" placeholder="Login caisse" style="font-family:monospace"/></div>
@@ -1742,6 +1744,23 @@ async function saveDeriv(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
   const res=await api('/api/deriv/config',{method:'POST',body:JSON.stringify({deriv_app_id:g('deriv_app_id'),deriv_token:g('deriv_token'),deriv_cr_agent:g('deriv_cr_agent')})});
   if(res&&res.ok) showToast('API Deriv enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
+}
+async function derivDiag(){
+  const box=document.getElementById('derivDiagBox');
+  if(box){box.style.display='block';box.style.background='#f1f5f9';box.style.color='#334155';box.textContent='Test de connexion Deriv en cours...';}
+  let d;
+  try{ d=await api('/api/retrait/deriv-diag'); }
+  catch(e){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Erreur reseau: '+e.message;} return; }
+  if(!d){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Pas de reponse (session expiree ?)';} return; }
+  if(d.ok){
+    var lim=d.limits||{}; var ag=d.agent||{};
+    box.style.background='#dcfce7'; box.style.color='#166534';
+    box.textContent='CONNEXION OK\n\nAgent ID : '+(ag.id||'-')+'\nNom      : '+(ag.name||'-')+'\nDevises  : '+((ag.currencies||[]).join(', ')||'-')+'\nMin USD  : '+(lim.min!=null?lim.min:'-')+'\nMax USD  : '+(lim.max!=null?lim.max:'-')+'\n\nLe retrait Deriv est pret a fonctionner.';
+  } else {
+    var cf=d.config||{};
+    box.style.background='#fee2e2'; box.style.color='#991b1b';
+    box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+(d.code?('\nCode: '+d.code):'')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Agent  : '+(cf.agent_id_manuel||'?');
+  }
 }
 async function loadBetwinner(){
   const c=await api('/api/betwinner/config'); if(!c) return;
