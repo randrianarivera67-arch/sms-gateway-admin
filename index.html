@@ -1752,14 +1752,13 @@ async function derivDiag(){
   try{ d=await api('/api/retrait/deriv-diag'); }
   catch(e){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Erreur reseau: '+e.message;} return; }
   if(!d){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Pas de reponse (session expiree ?)';} return; }
+  var cf=d.config||{};
   if(d.ok){
-    var lim=d.limits||{}; var ag=d.agent||{};
     box.style.background='#dcfce7'; box.style.color='#166534';
-    box.textContent='CONNEXION OK\n\nAgent ID : '+(ag.id||'-')+'\nNom      : '+(ag.name||'-')+'\nDevises  : '+((ag.currencies||[]).join(', ')||'-')+'\nMin USD  : '+(lim.min!=null?lim.min:'-')+'\nMax USD  : '+(lim.max!=null?lim.max:'-')+'\n\nLe retrait Deriv est pret a fonctionner.';
+    box.textContent='CONNEXION OK\n\n'+(d.detail||'Deriv pret.')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Base   : '+(d.base||'?')+'\n\nLe depot / retrait Deriv est pret a fonctionner.';
   } else {
-    var cf=d.config||{};
     box.style.background='#fee2e2'; box.style.color='#991b1b';
-    box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+(d.code?('\nCode: '+d.code):'')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Agent  : '+(cf.agent_id_manuel||'?');
+    box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Base   : '+(d.base||'?');
   }
 }
 async function loadBetwinner(){
