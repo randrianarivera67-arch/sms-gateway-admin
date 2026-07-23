@@ -1783,6 +1783,11 @@ async function betwinnerDiag(){
   let t='Config:\n  Hash        : '+(cf.hash||'?')+'\n  Cashierpass : '+(cf.cashierpass||'?')+'\n  Cashdesk ID : '+(cf.cashdeskid||'?')+'\n  Langue      : '+(cf.lng||'?')+'\n\n';
   if(d.balance){ t+='Solde caisse : '+(d.balance.balance!=null?d.balance.balance:'?')+'  (limite: '+(d.balance.limit!=null?d.balance.limit:'?')+')\n'; }
   if(d.balanceError){ t+='Solde caisse : ECHEC -> '+d.balanceError+'\n'; }
+  if(Array.isArray(d.balanceVariants)&&d.balanceVariants.length){
+    t+='\nSolde caisse (variantes de signature):\n';
+    d.balanceVariants.forEach(function(v){ t+='  '+v.variante+' : '+v.resultat+'\n'; });
+    if(d.balanceVarianteValide) t+='  => Variante solde acceptee : '+d.balanceVarianteValide+'\n';
+  }
   if(Array.isArray(d.variants)&&d.variants.length){
     t+='\nRecherche joueur (variantes de signature):\n';
     d.variants.forEach(function(v){ t+='  '+v.variante+' : '+v.resultat+'\n'; });
