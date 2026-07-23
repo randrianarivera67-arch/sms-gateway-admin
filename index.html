@@ -1342,6 +1342,9 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Hash (cl&eacute; API)</div><input class="field-input" id="betwinner_hash" type="password" placeholder="Hash API" style="font-family:monospace"/></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Langue (lng)</div><input class="field-input" id="betwinner_lng" placeholder="fr" style="font-family:monospace"/></div>
               <button class="btn btn-primary" onclick="saveBetwinner()">Enregistrer API Betwinner</button>
+              <button class="btn" onclick="betwinnerDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion Betwinner</button>
+              <div style="margin-top:8px"><input class="field-input" id="bwDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
+              <pre id="bwDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
             </div>
 
             <div class="card" style="margin-bottom:14px">
@@ -1487,7 +1490,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
 
           <div class="fg" style="margin-top:4px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro D&eacute;p&ocirc;t (gateway)</div><input class="field-input" id="ussd_orange_gateway" placeholder="03X XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_orange_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. Mettre <b>{pin}</b> a la fin du code retrait. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_orange_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
           <button onclick="saveUssdFull('orange')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(255,109,0,.3);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer Orange Money
@@ -1545,7 +1548,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
 
           <div class="fg" style="margin-top:4px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro D&eacute;p&ocirc;t (gateway)</div><input class="field-input" id="ussd_mvola_gateway" placeholder="03X XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. Mettre <b>{pin}</b> a la fin du code retrait. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
           <button onclick="saveUssdFull('mvola')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(41,121,255,.3);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer MVola YAS
@@ -1576,7 +1579,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             </div>
           </div>
           <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro gateway Comores</div><input class="field-input" id="ussd_mvola_km_gateway" placeholder="Numero gateway (Comores)" style="font-family:monospace"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_km_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. Mettre <b>{pin}</b> a la fin du code retrait. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_km_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
           <button onclick="saveUssdFull('mvola_km')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#00695C,#00BFA5);color:#fff;font-weight:800;font-size:13px;cursor:pointer">Enregistrer Telma Comores</button>
         </div>
 
@@ -1766,6 +1769,31 @@ async function derivDiag(){
   } else {
     box.style.background='#fee2e2'; box.style.color='#991b1b';
     box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Base   : '+(d.base||'?');
+  }
+}
+async function betwinnerDiag(){
+  const box=document.getElementById('bwDiagBox');
+  const uid=(document.getElementById('bwDiagUser')?.value||'').trim();
+  if(box){box.style.display='block';box.style.background='#f1f5f9';box.style.color='#334155';box.textContent='Test Betwinner en cours...';}
+  let d;
+  try{ d=await api('/api/betwinner/diag'+(uid?('?userId='+encodeURIComponent(uid)):'')); }
+  catch(e){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Erreur reseau: '+e.message;} return; }
+  if(!d){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Pas de reponse (session expiree ?)';} return; }
+  const cf=d.config||{};
+  let t='Config:\n  Hash        : '+(cf.hash||'?')+'\n  Cashierpass : '+(cf.cashierpass||'?')+'\n  Cashdesk ID : '+(cf.cashdeskid||'?')+'\n  Langue      : '+(cf.lng||'?')+'\n\n';
+  if(d.balance){ t+='Solde caisse : '+(d.balance.balance!=null?d.balance.balance:'?')+'  (limite: '+(d.balance.limit!=null?d.balance.limit:'?')+')\n'; }
+  if(d.balanceError){ t+='Solde caisse : ECHEC -> '+d.balanceError+'\n'; }
+  if(Array.isArray(d.variants)&&d.variants.length){
+    t+='\nRecherche joueur (variantes de signature):\n';
+    d.variants.forEach(function(v){ t+='  '+v.variante+' : '+v.resultat+'\n'; });
+    if(d.varianteValide) t+='\n=> Variante acceptee : '+d.varianteValide+'\n';
+  }
+  if(d.ok||d.varianteValide){
+    box.style.background='#dcfce7'; box.style.color='#166534';
+    box.textContent='BETWINNER OK\n\n'+(d.detail||'')+'\n\n'+t;
+  }else{
+    box.style.background='#fee2e2'; box.style.color='#991b1b';
+    box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+'\n\n'+t;
   }
 }
 async function loadBetwinner(){
