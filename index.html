@@ -1490,7 +1490,8 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
 
           <div class="fg" style="margin-top:4px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro D&eacute;p&ocirc;t (gateway)</div><input class="field-input" id="ussd_orange_gateway" placeholder="03X XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_orange_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_orange_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div>
+          <div id="pinState_orange" style="font-size:11px;font-weight:700;margin-top:6px;padding:6px 9px;border-radius:8px;background:#fee2e2;color:#991b1b">PIN : verification…</div></div>
           <button onclick="saveUssdFull('orange')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(255,109,0,.3);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer Orange Money
@@ -1548,7 +1549,8 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
 
           <div class="fg" style="margin-top:4px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro D&eacute;p&ocirc;t (gateway)</div><input class="field-input" id="ussd_mvola_gateway" placeholder="03X XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div>
+          <div id="pinState_mvola" style="font-size:11px;font-weight:700;margin-top:6px;padding:6px 9px;border-radius:8px;background:#fee2e2;color:#991b1b">PIN : verification…</div></div>
           <button onclick="saveUssdFull('mvola')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(41,121,255,.3);display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer MVola YAS
@@ -1579,7 +1581,8 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             </div>
           </div>
           <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro gateway Comores</div><input class="field-input" id="ussd_mvola_km_gateway" placeholder="Numero gateway (Comores)" style="font-family:monospace"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_km_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div></div>
+          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_mvola_km_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Requis pour valider l'envoi USSD. <b>Deux modes :</b> (1) <b>PIN separe</b> (Orange) &mdash; NE PAS mettre {pin} dans le code : le gateway tape le PIN quand l'operateur affiche l'invite. (2) <b>PIN integre</b> &mdash; mettre <b>{pin}</b> dans le code. Laisser vide = inchange ; saisir <b>-</b> pour effacer.</div>
+          <div id="pinState_mvola_km" style="font-size:11px;font-weight:700;margin-top:6px;padding:6px 9px;border-radius:8px;background:#fee2e2;color:#991b1b">PIN : verification…</div></div>
           <button onclick="saveUssdFull('mvola_km')" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#00695C,#00BFA5);color:#fff;font-weight:800;font-size:13px;cursor:pointer">Enregistrer Telma Comores</button>
         </div>
 
@@ -2352,16 +2355,6 @@ function updateDeviceInfoBar(devices){
   }).join('<div style="width:1px;height:20px;background:rgba(0,229,255,.2)"></div>');
 }
 
-function signalBars(level){
-  const bars=4;
-  let html='';
-  for(let i=1;i<=bars;i++){
-    const active=i<=level;
-    const h=6+i*4;
-    html+=`<div style="width:4px;height:${h}px;border-radius:2px;background:${active?'#00E5FF':'rgba(255,255,255,0.15)'};${active?'box-shadow:0 0 4px #00E5FF':''}"></div>`;
-  }
-  return html;
-}
 
 
 function signalBars(level){
@@ -2841,23 +2834,9 @@ async function saveUssdFull(operator){
     const p = await api('/api/ussd/pins', { method:'POST', body: JSON.stringify({ [operator]: pin }) });
     if (!(p && p.ok)) pinErr = (p && p.error) || 'PIN non enregistre';
   }
-  if (d?.ok && !pinErr) showToast('✅ Codes USSD' + (pin ? ' + PIN' : '') + ' enregistrés');
+  if (d?.ok && !pinErr) showToast('✅ Codes USSD' + (pin ? ' + PIN' : ' (PIN inchange)') + ' enregistrés');
   else showToast('❌ Erreur: ' + (pinErr || d?.error || 'inconnue'));
-}
-async function saveUssdFull(operator){
-  const get = id => document.getElementById(id)?.value?.trim();
-  const gp_depot   = get(`ussd_${operator}_gp_depot`);
-  const gp_retrait = get(`ussd_${operator}_gp_retrait`);
-  const tpe_depot   = get(`ussd_${operator}_tpe_depot`);
-  const tpe_retrait = get(`ussd_${operator}_tpe_retrait`);
-  const gatewayNumero = get(`ussd_${operator}_gateway`);
-  const body = { operator, gp_depot, gp_retrait };
-  if (tpe_depot)   body.tpe_depot = tpe_depot;
-  if (tpe_retrait) body.tpe_retrait = tpe_retrait;
-  if (gatewayNumero) body.gatewayNumero = gatewayNumero;
-  const d = await api('/api/ussd', { method:'POST', body: JSON.stringify(body) });
-  if (d?.ok) showToast('✅ Codes USSD enregistrés');
-  else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
+  refreshPinState();   // le voyant reflete l'etat REEL en base
 }
 async function loadUssdGateways(){
   const configs = await api('/api/ussd');
@@ -3248,6 +3227,26 @@ document.addEventListener("DOMContentLoaded", function(){
   applyTranslations();
 });
 
+// Affiche sans ambiguite si un PIN est REELLEMENT enregistre en base.
+// Sans ce voyant, un champ pre-rempli visuellement peut laisser croire que le
+// PIN est sauvegarde alors qu'il ne l'est pas (retrait bloque a l'invite USSD).
+async function refreshPinState(){
+  let pins = null;
+  try { pins = await api('/api/ussd/pins?reveal=1'); } catch(e){}
+  ['orange','mvola','airtel','mvola_km'].forEach(function(op){
+    const el = document.getElementById('pinState_'+op);
+    if(!el) return;
+    const v = pins ? (pins[op]||'') : '';
+    if(v){
+      el.style.background='#dcfce7'; el.style.color='#166534';
+      el.textContent='PIN enregistre ('+String(v).length+' chiffres)';
+    } else {
+      el.style.background='#fee2e2'; el.style.color='#991b1b';
+      el.textContent='AUCUN PIN enregistre — le retrait restera bloque a l\'invite USSD';
+    }
+  });
+}
+
 async function fillUssdInputs(){
   // PIN mobile money (source separee, ne bloque pas le reste)
   try{
@@ -3257,6 +3256,7 @@ async function fillUssdInputs(){
       if (e && pins[op]) e.value = pins[op];
     });
   }catch(e){}
+  refreshPinState();
   try{
     const configs = await api('/api/ussd');
     if(!configs || !Array.isArray(configs)) return;
