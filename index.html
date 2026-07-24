@@ -2277,7 +2277,7 @@ async function diagUssd(id){
   if(Array.isArray(d.appareils)&&d.appareils.length){
     t+='\nAppareils:\n';
     d.appareils.forEach(function(a){
-      t+='  '+a.deviceId+' ['+(a.online?'EN LIGNE':'hors ligne')+'] sims='+a.sims+' file='+a.commandesEnAttente+'\n';
+      t+='  '+a.deviceId+' ['+(a.actif?'ACTIF':'MUET')+'] contact='+(a.dernierContact||'?')+' sims='+a.sims+' file='+a.commandesEnAttente+'\n';
     });
   }
   t+='\n>>> '+(d.bloque||'');
