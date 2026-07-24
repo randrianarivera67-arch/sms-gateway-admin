@@ -2252,11 +2252,45 @@ function showRetraitDetail(id){
     ['Statut', r.status||'—'],
     ['Date', fmtDate(r.createdAt)]
   ];
-  showDetailModal('Détail retrait', rows, '#B388FF');
+  showDetailModal('Détail retrait', rows, '#B388FF', id);
+}
+
+// Diagnostic complet de la chaine USSD d'un retrait : dit exactement ou ca bloque.
+async function diagUssd(id){
+  const box=document.getElementById('ussdDiagBox');
+  if(box){box.style.display='block';box.style.background='#1e293b';box.style.color='#cbd5e1';box.textContent='Analyse en cours...';}
+  let d;
+  try{ d=await api('/api/retrait/'+encodeURIComponent(id)+'/diag-ussd'); }
+  catch(e){ if(box){box.style.background='#7f1d1d';box.style.color='#fecaca';box.textContent='Erreur: '+e.message;} return; }
+  if(!d){ if(box){box.style.background='#7f1d1d';box.style.color='#fecaca';box.textContent='Pas de reponse (session expiree ?)';} return; }
+  let t='';
+  if(d.retrait){
+    t+='Retrait '+d.retrait.status+' / reception '+d.retrait.receptionStatus+'\n';
+    t+='  Code USSD : '+d.retrait.ussdCode+'\n';
+    t+='  PIN       : '+d.retrait.ussdPin+'\n';
+    t+='  Reponse   : '+d.retrait.response+'\n\n';
+  }
+  (d.etapes||[]).forEach(function(e){
+    var ic = e.statut==='OK' ? '[OK]    ' : (e.statut==='BLOQUE' ? '[BLOQUE]' : '[info]  ');
+    t += ic+' '+e.etape+'\n         '+(e.detail||'')+'\n';
+  });
+  if(Array.isArray(d.appareils)&&d.appareils.length){
+    t+='\nAppareils:\n';
+    d.appareils.forEach(function(a){
+      t+='  '+a.deviceId+' ['+(a.online?'EN LIGNE':'hors ligne')+'] sims='+a.sims+' file='+a.commandesEnAttente+'\n';
+    });
+  }
+  t+='\n>>> '+(d.bloque||'');
+  const bloque=(d.etapes||[]).some(function(e){return e.statut==='BLOQUE';});
+  if(box){
+    box.style.background = bloque ? '#7f1d1d' : '#14532d';
+    box.style.color      = bloque ? '#fecaca' : '#bbf7d0';
+    box.textContent = t;
+  }
 }
 
 // ══ MODAL DETAIL COMMUN ══
-function showDetailModal(title, rows, color){
+function showDetailModal(title, rows, color, retraitId){
   const html=`<div onclick="this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
     <div onclick="event.stopPropagation()" style="background:var(--card,#0d1b3e);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -2264,6 +2298,8 @@ function showDetailModal(title, rows, color){
         <button onclick="this.closest('div[style*=fixed]').remove()" style="background:rgba(239,68,68,.12);border:none;border-radius:8px;width:30px;height:30px;color:#EF4444;cursor:pointer;font-size:18px">×</button>
       </div>
       ${rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:#9fb3d8;font-size:12px">${k}</span><span style="font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:right;word-break:break-all;color:#fff">${esc(String(v))}</span></div>`).join('')}
+      ${retraitId ? `<button onclick="diagUssd('${retraitId}')" style="width:100%;margin-top:12px;padding:10px;border:none;border-radius:10px;background:#0d9488;color:#fff;font-size:12px;font-weight:700">&#129658; Diagnostic envoi Mobile Money</button>
+      <pre id="ussdDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:11px;padding:10px;border-radius:10px;margin-top:8px;line-height:1.45"></pre>` : ''}
     </div></div>`;
   const div=document.createElement('div'); div.innerHTML=html; document.body.appendChild(div.firstElementChild);
 }
