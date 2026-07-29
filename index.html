@@ -1050,11 +1050,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div class="opts-grid" style="margin-bottom:14px" id="dashOpts">
             <div class="opt-row">
               <div class="opt-info"><h4>TPE Dépôt</h4><p>Grand Public par défaut (OFF = GP)</p></div>
-              <button class="toggle on" id="dopt-tpe-depot" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')" data-default="off"></button>
+              <button class="toggle" id="dopt-tpe-depot" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')" data-default="off"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
-              <button class="toggle on" id="dopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')" data-default="off"></button>
+              <button class="toggle" id="dopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')" data-default="off"></button>
             </div>
             <div class="opt-row">
               <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
@@ -1376,11 +1376,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE Dépôt</h4><p>Grand Public par défaut (OFF = GP)</p></div>
-                  <button class="toggle on" id="sopt-tpe" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')"></button>
+                  <button class="toggle" id="sopt-tpe" data-optkey="tpe_depot" onclick="toggleOpt(this,'tpe_depot')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
-                  <button class="toggle on" id="sopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
+                  <button class="toggle" id="sopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
                 </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
@@ -1480,11 +1480,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <div>
                 <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
-                <input class="field-input" id="ussd_orange_tpe_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+                <input class="field-input" id="ussd_orange_tpe_depot" value="" placeholder="ex: #144*2*{numero}*{montant}#" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
               </div>
               <div>
                 <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
-                <input class="field-input" id="ussd_orange_tpe_retrait" value="#145*" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
+                <input class="field-input" id="ussd_orange_tpe_retrait" value="" placeholder="ex: #144*2*{numero}*{montant}#" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/>
               </div>
             </div>
           </div>
@@ -1539,11 +1539,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <div>
                 <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Dépôt</div>
-                <input class="field-input" id="ussd_mvola_tpe_depot" value="#144#" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+                <input class="field-input" id="ussd_mvola_tpe_depot" value="" placeholder="ex: #144*2*{numero}*{montant}#" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
               </div>
               <div>
                 <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait</div>
-                <input class="field-input" id="ussd_mvola_tpe_retrait" value="#144*" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
+                <input class="field-input" id="ussd_mvola_tpe_retrait" value="" placeholder="ex: #144*2*{numero}*{montant}#" style="font-family:monospace;font-size:13px;color:#2979FF;font-weight:700"/>
               </div>
             </div>
           </div>
@@ -2588,16 +2588,36 @@ function saveSettings(){
 }
 
 // ══ OPTIONS TERMINAL ══
-const optState={tpe:true,tpe_depot:true,tpe_ret:true,cash:false,ret_aut:true,ussd:true};
+// FIX: tpe_depot/tpe_ret etaient a true ici alors que le serveur les met a
+// false par defaut. Avant la reponse du serveur, l'ecran annoncait donc TPE
+// pour un systeme reellement en Grand Public.
+const optState={tpe_depot:false,tpe_ret:false,cash:false,ret_aut:true,ussd:true};
 async function loadOptions(){
   loadUssdConfig();
   const d=await api('/api/settings/options');
   if(!d) return;
   Object.assign(optState,d);
-  const keys=['tpe','tpe_ret','cash','ret_aut','ussd'];
+  // FIX: 'tpe_depot' etait ABSENT de cette liste, remplace par une cle 'tpe'
+  // qui n'existe nulle part. Resultat : le bouton Depot TPE gardait l'etat
+  // ecrit en dur dans le HTML (class="toggle on") et n'affichait donc JAMAIS
+  // la valeur reelle du serveur. On voyait "TPE" alors que le serveur etait
+  // en Grand Public — et le clic suivant faisait l'inverse de ce qu'on croyait.
+  const keys=['tpe_depot','tpe_ret','cash','ret_aut','ussd'];
   keys.forEach(k=>{
-    const btns=document.querySelectorAll(`[onclick*="'${k}'"]`);
+    // data-optkey est un marqueur explicite : plus fiable que de fouiller
+    // le contenu de l'attribut onclick.
+    const btns=document.querySelectorAll(`[data-optkey="${k}"]`);
     btns.forEach(b=>b.className='toggle'+(optState[k]?' on':''));
+    // Met a jour le libelle "Actuel: TPE / Grand Public" au chargement
+    if(k==='tpe_depot'||k==='tpe_ret'){
+      btns.forEach(b=>{
+        const row=b.closest('.opt-row');
+        if(!row) return;
+        const p=row.querySelector('p');
+        if(p) p.textContent='OFF = Grand Public · ON = TPE · Actuel: '
+          +(optState[k]?'TPE':'Grand Public');
+      });
+    }
   });
 }
 function toggleOpt(btn,key){
