@@ -1325,7 +1325,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
             <div class="card-title">&#127974; API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
-              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Laisser vide pour ne pas changer" style="font-family:monospace"/><div id="deriv_token_etat" style="font-size:11px;margin-top:6px;line-height:1.5"></div></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
               <div class="field"><label>APP ID OAUTH (retrait client)</label>
                 <div class="inp"><input id="deriv_oauth_app_id" placeholder="ex: 33Rb4EzyIkGpJUf5ePal5 ou 52542"></div>
@@ -1751,12 +1751,42 @@ async function saveRate(){
 async function loadDeriv(){
   const c=await api('/api/deriv/config'); if(!c) return;
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=v||'';};
-  set('deriv_app_id',c.deriv_app_id); set('deriv_token',c.deriv_token); set('deriv_cr_agent',c.deriv_cr_agent); set('deriv_oauth_app_id',c.deriv_oauth_app_id);
+  set('deriv_app_id',c.deriv_app_id); set('deriv_cr_agent',c.deriv_cr_agent); set('deriv_oauth_app_id',c.deriv_oauth_app_id);
+
+  // ----------------------------------------------------------------
+  // Le serveur ne renvoie JAMAIS le token en clair : il donne seulement
+  // une empreinte et un booleen. Le champ reste donc vide, et c'est
+  // voulu — vide signifie "ne pas changer" au moment d'enregistrer.
+  // Sans le message ci-dessous, on croit le token perdu a chaque
+  // rafraichissement alors qu'il est bien en base.
+  // ----------------------------------------------------------------
+  set('deriv_token','');
+  const etat=document.getElementById('deriv_token_etat');
+  if(etat){
+    if(c.deriv_token_present){
+      etat.innerHTML='<span style="color:#16a34a;font-weight:700">&#10004; Token enregistre</span>'
+        +' <span style="font-family:monospace;color:var(--text3)">'+esc(c.deriv_token_empreinte||'')+'</span>'
+        +'<br><span style="color:var(--text3)">Champ vide = le token actuel est conserve.'
+        +' Ne remplissez que pour le remplacer.</span>';
+    } else {
+      etat.innerHTML='<span style="color:#dc2626;font-weight:700">&#10007; Aucun token enregistre</span>'
+        +'<br><span style="color:var(--text3)">Les retraits Deriv ne fonctionneront pas.</span>';
+    }
+  }
 }
 async function saveDeriv(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  const res=await api('/api/deriv/config',{method:'POST',body:JSON.stringify({deriv_app_id:g('deriv_app_id'),deriv_token:g('deriv_token'),deriv_cr_agent:g('deriv_cr_agent'),deriv_oauth_app_id:g('deriv_oauth_app_id')})});
-  if(res&&res.ok) showToast('API Deriv enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
+  const tok=g('deriv_token');
+  const corps={deriv_app_id:g('deriv_app_id'),deriv_cr_agent:g('deriv_cr_agent'),deriv_oauth_app_id:g('deriv_oauth_app_id')};
+  // N'envoyer le token QUE s'il a ete saisi : un champ vide ne doit pas
+  // ecraser le secret existant.
+  if(tok) corps.deriv_token=tok;
+  const res=await api('/api/deriv/config',{method:'POST',body:JSON.stringify(corps)});
+  if(res&&res.ok){
+    showToast(tok?'Token Deriv remplace':'API Deriv enregistre (token inchange)');
+    const e=document.getElementById('deriv_token'); if(e) e.value='';
+    loadDeriv();   // reaffiche l'empreinte a jour
+  } else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 async function derivDiag(){
   const box=document.getElementById('derivDiagBox');
