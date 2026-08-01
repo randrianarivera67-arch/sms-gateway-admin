@@ -3117,6 +3117,7 @@ const TRANSLATIONS = {
     dashboard: 'Tableau de bord',
     sms_recus: 'SMS Dépôt',
     retraits: 'SMS Retrait',
+    alertes: 'Alertes',
     devices: 'Appareils connectés',
     stats: 'Statistiques',
     ussd: 'Codes USSD',
@@ -3149,6 +3150,7 @@ const TRANSLATIONS = {
     dashboard: 'Filan-tsonia',
     sms_recus: 'SMS Depot',
     retraits: 'SMS Retrait',
+    alertes: 'Fampandrenesana',
     devices: 'Fitaovana mifandray',
     stats: 'Antontan-isa',
     ussd: 'Kaody USSD',
@@ -3187,14 +3189,38 @@ function applyTranslations() {
   // Top title
 
   // Sidebar
-  const sideItems = document.querySelectorAll('.sidebar-nav .nav-item');
-  const sideKeys = ['dashboard','sms_recus','retraits','devices','stats','template','settings'];
-  sideItems.forEach((el, i) => {
-    if(!sideKeys[i] || !t[sideKeys[i]]) return;
-    const span = el.querySelector('span');
-    if(span) { span.textContent = t[sideKeys[i]]; return; }
+  // ------------------------------------------------------------------
+  // FIX — libelles du menu decales d'un cran.
+  // ------------------------------------------------------------------
+  // Les noms etaient appliques par POSITION, via une liste de 7 cles alors
+  // que le menu compte 8 boutons : 'alertes' manquait. Resultat, a partir du
+  // 4e bouton chacun recevait le nom du SUIVANT — l'icone cloche affichait
+  // "Appareils connectes", et "Parametres" apparaissait deux fois.
+  //
+  // On associe desormais chaque bouton a sa cle par sa PAGE (lue dans son
+  // onclick), plus par son rang. Ajouter, retirer ou deplacer une entree du
+  // menu ne peut donc plus decaler les libelles.
+  // ------------------------------------------------------------------
+  const NAV_KEYS = {
+    dashboard: 'dashboard',
+    sms:       'sms_recus',
+    retrait:   'retraits',
+    alertes:   'alertes',
+    devices:   'devices',
+    stats:     'stats',
+    template:  'template',
+    settings:  'settings'
+  };
+  document.querySelectorAll('.sidebar-nav .nav-item, .bn-item').forEach(el => {
+    const m = (el.getAttribute('onclick') || '').match(/showPage\('([a-z]+)'\)/);
+    if(!m) return;
+    const key = NAV_KEYS[m[1]];
+    if(!key || !t[key]) return;
+    // Le badge est un <span> lui aussi : ne prendre que celui du libelle.
+    const span = [...el.querySelectorAll('span')].find(sp => !sp.classList.contains('nav-badge'));
+    if(span) { span.textContent = t[key]; return; }
     const nodes = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
-    if(nodes.length) nodes[0].textContent = ' ' + t[sideKeys[i]];
+    if(nodes.length) nodes[0].textContent = ' ' + t[key];
   });
 
   // Solde section
