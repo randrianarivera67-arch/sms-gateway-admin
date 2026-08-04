@@ -1345,6 +1345,14 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <button class="btn" onclick="betwinnerDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion Betwinner</button>
               <div style="margin-top:8px"><input class="field-input" id="bwDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="bwDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
+
+              <!-- Outils accessibles sans console de navigateur -->
+              <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
+                <div style="font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Outils serveur</div>
+                <button class="btn" onclick="voirIpSortante()" style="background:#4f46e5;color:#fff;width:100%;margin-bottom:8px">&#127760; Adresse IP du serveur (a donner a Betwinner)</button>
+                <button class="btn" onclick="fusionnerSoldes()" style="background:#0891b2;color:#fff;width:100%">&#128260; Reparer les soldes (fusionner les doublons)</button>
+                <pre id="outilsBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:10px"></pre>
+              </div>
             </div>
 
             <div class="card" style="margin-bottom:14px">
@@ -1787,6 +1795,69 @@ async function saveDeriv(){
     loadDeriv();   // recharge le champ et l'empreinte
   } else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
+/* ============================================================
+ * Outils serveur — accessibles depuis le telephone.
+ * Ces deux actions ne demandent aucune console de navigateur.
+ * ============================================================ */
+function outilsAfficher(txt, couleur){
+  const b=document.getElementById('outilsBox');
+  if(!b) return;
+  b.style.display='block';
+  b.style.background = couleur==='ok' ? '#ecfdf5' : (couleur==='ko' ? '#fef2f2' : '#f1f5f9');
+  b.style.color      = couleur==='ok' ? '#065f46' : (couleur==='ko' ? '#991b1b' : '#334155');
+  b.textContent=txt;
+}
+
+/** Adresse IP par laquelle le serveur sort : c'est elle que voit Betwinner. */
+async function voirIpSortante(){
+  outilsAfficher('Recherche de l\'adresse IP du serveur...');
+  let d; try{ d=await api('/api/diag/ip'); }catch(e){ d=null; }
+  if(!d){ outilsAfficher('Impossible de joindre le serveur.','ko'); return; }
+  if(d.error){ outilsAfficher('Erreur : '+d.error,'ko'); return; }
+  if(!d.ip){
+    outilsAfficher('Adresse IP introuvable.\n\n'+JSON.stringify(d,null,2),'ko');
+    return;
+  }
+  outilsAfficher(
+    'ADRESSE IP DU SERVEUR\n\n    '+d.ip+'\n\n'
+    +'C\'est cette adresse que voient Betwinner et Deriv.\n\n'
+    +'Message a envoyer au support Betwinner :\n\n'
+    +'  Notre serveur sort par l\'IP '+d.ip+'.\n'
+    +'  Toutes nos requetes vers le cashdesk '+((document.getElementById('betwinner_cashdeskid')||{}).value||'...')+'\n'
+    +'  recoivent HTTP 403, quelle que soit la signature.\n'
+    +'  Merci de verifier : (1) cette IP est-elle autorisee,\n'
+    +'  (2) le cashdesk est-il active pour l\'API CashdeskBotAPI,\n'
+    +'  (3) le hash correspond-il bien a ce cashdesk.\n\n'
+    +'Note : l\'hebergeur peut changer d\'IP. Demandez si une plage\n'
+    +'d\'adresses peut etre autorisee plutot qu\'une seule.', 'ok');
+}
+
+/** Fusionne les documents Solde en double (Telma / YAS / MVola). */
+async function fusionnerSoldes(){
+  outilsAfficher('Reparation des soldes en cours...');
+  let d; try{ d=await api('/api/solde/fusionner',{method:'POST'}); }catch(e){ d=null; }
+  if(!d){ outilsAfficher('Impossible de joindre le serveur.','ko'); return; }
+  if(d.error){ outilsAfficher('Erreur : '+d.error,'ko'); return; }
+  const r=d.rapport||[];
+  if(!r.length){
+    outilsAfficher('Aucun doublon a fusionner : les soldes sont deja propres.','ok');
+    loadStats&&loadStats();
+    return;
+  }
+  let txt='SOLDES REPARES\n\n';
+  for(const x of r){
+    txt+='  '+x.operateur+'\n'
+       +'    documents fusionnes : '+(x.fusionnes||[]).join(', ')+'\n'
+       +'    dernier solde constate : '+x.baseAmount+'\n'
+       +'    mouvements depuis      : '+x.delta+'\n'
+       +'    solde affiche          : '+x.montant+'\n\n';
+  }
+  txt+='Lancez une consultation de solde depuis la passerelle\n'
+     +'pour recaler sur la valeur reelle de la SIM.';
+  outilsAfficher(txt,'ok');
+  loadStats&&loadStats();
+}
+
 async function derivDiag(){
   const box=document.getElementById('derivDiagBox');
   if(box){box.style.display='block';box.style.background='#f1f5f9';box.style.color='#334155';box.textContent='Test de connexion Deriv en cours...';}
