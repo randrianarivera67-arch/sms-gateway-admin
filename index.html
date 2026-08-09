@@ -1515,10 +1515,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:12px;background:var(--bg)">
             <div style="font-size:12px;font-weight:700;color:var(--text)">Portefeuille actif</div>
-            <div style="display:flex;gap:6px">
-              <button type="button" id="owBtnTsotra" onclick="setOrangeWallet('tsotra')" style="padding:7px 14px;border-radius:9px;border:none;font-weight:800;font-size:12px;cursor:pointer;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff">Tsotra</button>
-              <button type="button" id="owBtnMarchand" onclick="setOrangeWallet('marchand')" style="padding:7px 14px;border-radius:9px;border:1.5px solid var(--border);font-weight:800;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text)">Marchand</button>
-            </div>
+            <div style="font-size:11px;font-weight:700;color:var(--text3);font-style:italic">Piloté depuis l'APK</div>
           </div>
           <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Config Marchand (laisser vide = identique a Tsotra)</div>
           <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">Code USSD retrait (marchand)</div><input class="field-input" id="ow_gp_retrait" placeholder="#144#... (vide = comme tsotra)" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/></div>
@@ -3009,7 +3006,7 @@ async function loadOrangeWallet(){
 }
 async function saveOrangeWallet(){
   const get=id=>document.getElementById(id)?.value?.trim();
-  const body={ active:_owActive, gp_retrait:get('ow_gp_retrait')||'', gp_depot:get('ow_gp_depot')||'', gateway:get('ow_gateway')||'' };
+  const body={ gp_retrait:get('ow_gp_retrait')||'', gp_depot:get('ow_gp_depot')||'', gateway:get('ow_gateway')||'' };
   const pin=get('ow_pin'); if(pin) body.pin=pin;
   const d=await api('/api/ussd/orange-wallet',{method:'POST',body:JSON.stringify(body)});
   if(d&&d.ok){ showToast('\u2705 Portefeuille Orange ('+_owActive+') enregistre'); const e=document.getElementById('ow_pin'); if(e) e.value=''; loadOrangeWallet(); }
