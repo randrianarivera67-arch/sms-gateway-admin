@@ -906,6 +906,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
               </div>
               <div class="op-name">Orange Money</div>
+            <span id="orangeWalletBadge" style="display:none;margin-left:6px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;background:#FFE0B2;color:#E65100;text-transform:uppercase;letter-spacing:.3px">marchand</span>
             </div>
             <div class="op-amount or" id="soldeOrange">— Ar</div>
             <div class="op-status" id="statusOrange"></div>
@@ -1504,6 +1505,27 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Enregistrer Orange Money
           </button>
+        </div>
+
+        <!-- ORANGE DOUBLE PORTEFEUILLE (tsotra / marchand) -->
+        <div class="card" style="margin-bottom:14px;border-left:3px solid #FF6D00;position:relative;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="font-size:15px;font-weight:900;color:var(--text)">Orange &mdash; Portefeuille</div>
+            <span id="owActiveBadge" style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:9px;background:#e5e7eb;color:#374151">tsotra</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:12px;background:var(--bg)">
+            <div style="font-size:12px;font-weight:700;color:var(--text)">Portefeuille actif</div>
+            <div style="display:flex;gap:6px">
+              <button type="button" id="owBtnTsotra" onclick="setOrangeWallet('tsotra')" style="padding:7px 14px;border-radius:9px;border:none;font-weight:800;font-size:12px;cursor:pointer;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff">Tsotra</button>
+              <button type="button" id="owBtnMarchand" onclick="setOrangeWallet('marchand')" style="padding:7px 14px;border-radius:9px;border:1.5px solid var(--border);font-weight:800;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text)">Marchand</button>
+            </div>
+          </div>
+          <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Config Marchand (laisser vide = identique a Tsotra)</div>
+          <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">Code USSD retrait (marchand)</div><input class="field-input" id="ow_gp_retrait" placeholder="#144#... (vide = comme tsotra)" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/></div>
+          <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">Code USSD depot (marchand)</div><input class="field-input" id="ow_gp_depot" placeholder="#144#... (vide = comme tsotra)" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/></div>
+          <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">Numero gateway (marchand)</div><input class="field-input" id="ow_gateway" placeholder="03X XX XXX XX (vide = comme tsotra)" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
+          <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">PIN Mobile Money (marchand)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ow_pin" placeholder="PIN (vide = inchange, - = effacer)" style="font-family:monospace;font-size:13px;font-weight:700"/><div id="ow_pin_state" style="font-size:10px;color:var(--text3);margin-top:4px"></div></div>
+          <button onclick="saveOrangeWallet()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(255,109,0,.3)">Enregistrer Portefeuille Orange</button>
         </div>
 
         <!-- MVOLA YAS -->
@@ -2958,6 +2980,41 @@ async function saveUssdFull(operator){
   else showToast('❌ Erreur: ' + (pinErr || d?.error || 'inconnue'));
   refreshPinState();   // le voyant reflete l'etat REEL en base
 }
+// ===== Orange double portefeuille (tsotra / marchand) =====
+let _owActive = 'tsotra';
+function _owApplyUI(active){
+  _owActive = (String(active).toLowerCase()==='marchand') ? 'marchand' : 'tsotra';
+  const bt=document.getElementById('owBtnTsotra'), bm=document.getElementById('owBtnMarchand');
+  const on='linear-gradient(135deg,#E65100,#FF6D00)';
+  if(bt&&bm){
+    if(_owActive==='marchand'){ bm.style.background=on;bm.style.color='#fff';bm.style.border='none'; bt.style.background='var(--bg)';bt.style.color='var(--text)';bt.style.border='1.5px solid var(--border)'; }
+    else { bt.style.background=on;bt.style.color='#fff';bt.style.border='none'; bm.style.background='var(--bg)';bm.style.color='var(--text)';bm.style.border='1.5px solid var(--border)'; }
+  }
+  const ab=document.getElementById('owActiveBadge');
+  if(ab){ ab.textContent=_owActive; ab.style.background=(_owActive==='marchand')?'#FFE0B2':'#e5e7eb'; ab.style.color=(_owActive==='marchand')?'#E65100':'#374151'; }
+  const badge=document.getElementById('orangeWalletBadge');
+  if(badge){ badge.style.display=(_owActive==='marchand')?'inline-block':'none'; }
+}
+function setOrangeWallet(active){ _owApplyUI(active); }
+async function loadOrangeWallet(){
+  try{
+    const d=await api('/api/ussd/orange-wallet');
+    if(!d||!d.ok) return;
+    _owApplyUI(d.active||'tsotra');
+    const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.value=v||''; };
+    set('ow_gp_retrait',d.gp_retrait); set('ow_gp_depot',d.gp_depot); set('ow_gateway',d.gateway);
+    const ps=document.getElementById('ow_pin_state');
+    if(ps) ps.textContent=d.pin_set?'PIN marchand : enregistre':'PIN marchand : non defini';
+  }catch(e){}
+}
+async function saveOrangeWallet(){
+  const get=id=>document.getElementById(id)?.value?.trim();
+  const body={ active:_owActive, gp_retrait:get('ow_gp_retrait')||'', gp_depot:get('ow_gp_depot')||'', gateway:get('ow_gateway')||'' };
+  const pin=get('ow_pin'); if(pin) body.pin=pin;
+  const d=await api('/api/ussd/orange-wallet',{method:'POST',body:JSON.stringify(body)});
+  if(d&&d.ok){ showToast('\u2705 Portefeuille Orange ('+_owActive+') enregistre'); const e=document.getElementById('ow_pin'); if(e) e.value=''; loadOrangeWallet(); }
+  else showToast('\u274c Erreur: '+((d&&d.error)||'inconnue'));
+}
 async function loadUssdGateways(){
   const configs = await api('/api/ussd');
   if(!configs || !configs.find) return;
@@ -3403,6 +3460,7 @@ async function fillUssdInputs(){
     });
   }catch(e){}
   refreshPinState();
+  loadOrangeWallet();
   try{
     const configs = await api('/api/ussd');
     if(!configs || !Array.isArray(configs)) return;
