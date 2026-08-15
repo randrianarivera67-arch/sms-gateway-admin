@@ -1515,7 +1515,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:12px;background:var(--bg)">
             <div style="font-size:12px;font-weight:700;color:var(--text)">Portefeuille actif</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text3);font-style:italic">Piloté depuis l'APK</div>
+            <div style="display:flex;gap:6px">
+              <button type="button" id="owBtnTsotra" onclick="setOrangeWallet('tsotra')" style="padding:7px 14px;border-radius:9px;border:none;font-weight:800;font-size:12px;cursor:pointer;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff">Tsotra</button>
+              <button type="button" id="owBtnMarchand" onclick="setOrangeWallet('marchand')" style="padding:7px 14px;border-radius:9px;border:1.5px solid var(--border);font-weight:800;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text)">Marchand</button>
+            </div>
           </div>
           <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:8px;text-transform:uppercase">Config Marchand (laisser vide = identique a Tsotra)</div>
           <div class="fg" style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px">Code USSD retrait (marchand)</div><input class="field-input" id="ow_gp_retrait" placeholder="#144#... (vide = comme tsotra)" style="font-family:monospace;font-size:13px;color:#FF6D00;font-weight:700"/></div>
@@ -1624,8 +1627,6 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div id="airtel-steps-container"></div>
           <button onclick="airtelAddStep()" style="width:100%;padding:10px;border-radius:10px;border:1.5px dashed rgba(211,47,47,.4);background:transparent;color:#D32F2F;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:12px">+ Ajouter une &eacute;tape</button>
           <div class="fg" style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro Airtel Gateway</div><input class="field-input" id="ussd_airtel_gateway" placeholder="033 XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
-          <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_airtel_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Airtel est un <b>flow multi-&eacute;tape</b> : gardez l'&eacute;tape <b>{pin}</b> dans la liste ci-dessus <b>ET</b> renseignez le PIN ici. Le gateway le tape lui-m&ecirc;me sur l'&eacute;cran &laquo;&nbsp;code secret&nbsp;&raquo; ; il n'est jamais &eacute;crit en clair dans le mod&egrave;le. Laisser vide = inchang&eacute; ; saisir <b>-</b> pour effacer.</div>
-          <div id="pinState_airtel" style="font-size:11px;font-weight:700;margin-top:6px;padding:6px 9px;border-radius:8px;background:#fee2e2;color:#991b1b">PIN : verification&hellip;</div></div>
           <button onclick="saveAirtelSteps()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3)">Enregistrer Airtel Money</button>
         </div>
         </div>
@@ -2945,18 +2946,8 @@ async function saveAirtelSteps() {
     gp_retrait: airtelSteps.map(s=>s.value).join('|'),
     gatewayNumero: gw,
   })});
-  // PIN mobile money : stocke a part (Settings), jamais dans le modele.
-  // Vide = inchange, "-" = effacer. Sans PIN enregistre, le backend refuse le
-  // retrait Airtel avec un motif explicite plutot que de le laisser en attente.
-  const pin = document.getElementById('ussd_airtel_pin')?.value?.trim() || '';
-  let pinErr = '';
-  if (pin) {
-    const p = await api('/api/ussd/pins', { method:'POST', body: JSON.stringify({ airtel: pin }) });
-    if (!(p && p.ok)) pinErr = (p && p.error) || 'PIN non enregistre';
-  }
-  if (d?.ok && !pinErr) showToast('✅ Étapes Airtel' + (pin ? ' + PIN' : ' (PIN inchangé)') + ' enregistrées');
-  else showToast('❌ Erreur: ' + (pinErr || d?.error || 'inconnue'));
-  if (typeof refreshPinState === 'function') refreshPinState();
+  if (d?.ok) showToast('✅ Étapes Airtel enregistrées');
+  else showToast('❌ Erreur: ' + (d?.error||'inconnue'));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3018,7 +3009,7 @@ async function loadOrangeWallet(){
 }
 async function saveOrangeWallet(){
   const get=id=>document.getElementById(id)?.value?.trim();
-  const body={ gp_retrait:get('ow_gp_retrait')||'', gp_depot:get('ow_gp_depot')||'', gateway:get('ow_gateway')||'' };
+  const body={ active:_owActive, gp_retrait:get('ow_gp_retrait')||'', gp_depot:get('ow_gp_depot')||'', gateway:get('ow_gateway')||'' };
   const pin=get('ow_pin'); if(pin) body.pin=pin;
   const d=await api('/api/ussd/orange-wallet',{method:'POST',body:JSON.stringify(body)});
   if(d&&d.ok){ showToast('\u2705 Portefeuille Orange ('+_owActive+') enregistre'); const e=document.getElementById('ow_pin'); if(e) e.value=''; loadOrangeWallet(); }
