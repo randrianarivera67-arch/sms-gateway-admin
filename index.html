@@ -1340,9 +1340,21 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="font-size:11px;color:var(--text3);margin:0 0 10px;line-height:1.5">
                 Sert au <b>d&eacute;p&ocirc;t Orange par API</b>. Le secret et la merchant key ne ressortent <b>jamais</b> en clair : laisser vide = inchang&eacute;, saisir <b>-</b> pour effacer.
               </div>
-              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Client ID</div><input class="field-input" id="om_client_id" placeholder="Client ID Orange Developer" style="font-family:monospace"/></div>
-              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Client Secret</div><input class="field-input" id="om_client_secret" type="password" autocomplete="new-password" placeholder="Client Secret" style="font-family:monospace"/><div id="om_secret_etat" style="font-size:11px;font-weight:700;margin-top:6px"></div></div>
-              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Merchant Key</div><input class="field-input" id="om_merchant_key" type="password" autocomplete="new-password" placeholder="Merchant Key" style="font-family:monospace"/><div id="om_merchant_etat" style="font-size:11px;font-weight:700;margin-top:6px"></div></div>
+              <!-- Champs masques par CSS et NON de type password : le gestionnaire de
+                   mots de passe du navigateur remplissait les champs password avec
+                   des valeurs sans rapport, ce qui faisait croire qu'une cle etait
+                   enregistree alors que non. Le voyant sous le champ reste la seule
+                   indication fiable. -->
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cl&eacute; API (en-t&ecirc;te Authorization)</div><input class="field-input" id="om_auth_header" autocomplete="off" spellcheck="false" placeholder="Basic xxxxxxxx (cl&eacute; fournie par Orange)" style="font-family:monospace;-webkit-text-security:disc"/><div id="om_auth_etat" style="font-size:11px;font-weight:700;margin-top:6px"></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">C'est la valeur donn&eacute;e par Orange Developer pour obtenir le jeton. Le pr&eacute;fixe <span style="font-family:monospace">Basic</span> est ajout&eacute; tout seul s'il manque.</div>
+              </div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Merchant Key</div><input class="field-input" id="om_merchant_key" autocomplete="off" spellcheck="false" placeholder="Merchant Key" style="font-family:monospace;-webkit-text-security:disc"/><div id="om_merchant_etat" style="font-size:11px;font-weight:700;margin-top:6px"></div></div>
+              <details style="margin-bottom:10px">
+                <summary style="font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;text-transform:uppercase">Client ID / Client Secret (optionnel)</summary>
+                <div style="font-size:11px;color:var(--text3);margin:8px 0;line-height:1.5">&Agrave; remplir <b>uniquement</b> si Orange vous a fourni ce couple au lieu d'une cl&eacute; toute faite. Si la cl&eacute; ci-dessus est renseign&eacute;e, c'est elle qui est utilis&eacute;e.</div>
+                <div style="margin-bottom:8px"><input class="field-input" id="om_client_id" autocomplete="off" placeholder="Client ID (optionnel)" style="font-family:monospace"/></div>
+                <div><input class="field-input" id="om_client_secret" autocomplete="off" spellcheck="false" placeholder="Client Secret (optionnel)" style="font-family:monospace;-webkit-text-security:disc"/><div id="om_secret_etat" style="font-size:11px;font-weight:700;margin-top:6px"></div></div>
+              </details>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Environnement</div>
                 <select class="field-input" id="om_env" style="font-family:monospace">
                   <option value="sandbox">sandbox (test &mdash; devise OUV)</option>
@@ -1977,6 +1989,7 @@ async function loadOrangePay(){
     e.textContent = present ? (nom+' enregistre') : ('AUCUN '+nom+' enregistre');
     e.style.color = present ? '#047857' : '#991b1b';
   };
+  marque('om_auth_etat',     c.om_auth_present,     'cle API');
   marque('om_secret_etat',   c.om_secret_present,   'secret');
   marque('om_merchant_etat', c.om_merchant_present, 'merchant key');
   if(c.breaker_ouvert){
@@ -1992,12 +2005,13 @@ async function saveOrangePay(){
   };
   /* Champ vide = inchange : ne PAS envoyer, sinon un secret deja enregistre
      serait ecrase par du vide a chaque enregistrement. */
+  const cle=g('om_auth_header');   if(cle) corps.om_auth_header=cle;
   const sec=g('om_client_secret'); if(sec) corps.om_client_secret=sec;
   const mk =g('om_merchant_key');  if(mk)  corps.om_merchant_key=mk;
   const res=await api('/api/orange-pay/config',{method:'POST',body:JSON.stringify(corps)});
   if(res&&res.ok){
     showToast('API Orange Money enregistre');
-    ['om_client_secret','om_merchant_key'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+    ['om_auth_header','om_client_secret','om_merchant_key'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
     loadOrangePay();
   } else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
@@ -2011,6 +2025,8 @@ async function orangePayDiag(){
   catch(e){ box.textContent='Erreur: '+e.message; return; }
   if(!d){ box.textContent='Aucune reponse du serveur.'; return; }
   let t='';
+  t+='Mode auth      : '+(d.config?d.config.mode_auth:'?')+'\n';
+  t+='Cle API        : '+(d.config?d.config.om_auth_header:'?')+'\n';
   t+='Client ID      : '+(d.config?d.config.om_client_id:'?')+'\n';
   t+='Client Secret  : '+(d.config?d.config.om_client_secret:'?')+'\n';
   t+='Merchant Key   : '+(d.config?d.config.om_merchant_key:'?')+'\n';
