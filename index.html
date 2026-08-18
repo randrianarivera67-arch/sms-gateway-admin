@@ -2247,8 +2247,16 @@ async function loadDashboard(){
   const retOk=d.retrait?.success||0;
   const devCount=(d.devices||[]).filter(x=>x.online).length;
   setTxt('s1',smsToday);setTxt('s2',smsTotal);setTxt('s3',devCount);setTxt('s4',retOk);
-  if(smsToday>0){const b=document.getElementById('smsBadge');if(b){b.textContent=smsToday;b.style.display='';}}
-  if(retPend>0){const b=document.getElementById('retraitBadge');if(b){b.textContent=retPend;b.style.display='';} document.getElementById('notifDot').style.display='block';}
+  // Chaque menu affiche CE QUI LE CONCERNE. Auparavant "SMS Retrait" portait le
+  // total des ordres en attente — donc aussi les DEPOTS — pendant que
+  // "SMS Depot" affichait le nombre de SMS du jour, sans rapport avec les
+  // depots en attente. Le backend separe desormais les deux compteurs ;
+  // repli sur les anciennes valeurs si le serveur n'est pas encore a jour.
+  const depPend = (d.retrait?.pendingDepot   != null) ? d.retrait.pendingDepot   : smsToday;
+  const retSeul = (d.retrait?.pendingRetrait != null) ? d.retrait.pendingRetrait : retPend;
+  majBadge('smsBadge', depPend);
+  majBadge('retraitBadge', retSeul);
+  if(retSeul>0 || depPend>0){const nd=document.getElementById('notifDot'); if(nd) nd.style.display='block';}
   const bal=d.balances||{};
   // Operators connectés avy amin'ny devices online
   const onlineSims = (d.devices||[]).filter(x=>x.online).map(x=>(x.sims||'').toLowerCase()).join(',');
@@ -2871,6 +2879,15 @@ async function loadOptions(){
     }
   });
 }
+/* Affiche le compteur, ou MASQUE le badge quand il retombe a zero.
+   L'ancien code ne faisait que l'afficher : un badge affiche une fois restait
+   a l'ecran avec sa vieille valeur meme quand la file etait videe. */
+function majBadge(id, n){
+  const b=document.getElementById(id); if(!b) return;
+  if(n>0){ b.textContent=n; b.style.display=''; }
+  else { b.style.display='none'; }
+}
+
 function toggleOpt(btn,key){
   // Mahaleo tena tsirairay — tsy mifandray tpe_depot sy tpe_ret
   optState[key]=!optState[key];
@@ -2940,15 +2957,12 @@ async function updateBadges(){
   const smsTotal=d.sms?.total||0;
   const retPend=d.retrait?.pending||0;
 
-  // Badge SMS
-  if(smsToday>0){
-    const b=document.getElementById('smsBadge');
-    if(b){b.textContent=smsToday;b.style.display='';}
-  }
-  // Badge retrait
-  if(retPend>0){
-    const b=document.getElementById('retraitBadge');
-    if(b){b.textContent=retPend;b.style.display='';}
+  // Memes compteurs separes que sur le tableau de bord.
+  const depPend = (d.retrait?.pendingDepot   != null) ? d.retrait.pendingDepot   : smsToday;
+  const retSeul = (d.retrait?.pendingRetrait != null) ? d.retrait.pendingRetrait : retPend;
+  majBadge('smsBadge', depPend);
+  majBadge('retraitBadge', retSeul);
+  if(retSeul>0 || depPend>0){
     const nd=document.getElementById('notifDot');
     if(nd) nd.style.display='block';
   }
