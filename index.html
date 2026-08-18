@@ -1069,6 +1069,13 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div class="opt-info"><h4>USSD autorisé</h4><p>Commandes USSD auto</p></div>
               <button class="toggle on" id="dopt-ussd" data-optkey="ussd" onclick="toggleOpt(this,'ussd')"></button>
             </div>
+            <!-- Meme cle que le toggle de la carte Orange (Codes USSD) :
+                 toggleOpt() met a jour TOUS les boutons portant data-optkey,
+                 les deux emplacements restent donc synchronises. -->
+            <div class="opt-row">
+              <div class="opt-info"><h4>Dépôt API Orange</h4><p>ON = API Orange Money · OFF = code USSD</p></div>
+              <button class="toggle" id="dopt-depot-api-orange" data-optkey="depot_api_orange" onclick="toggleOpt(this,'depot_api_orange')" data-default="off"></button>
+            </div>
           </div>
           <div class="action-btns" style="margin-top:12px;padding-bottom:80px">
             <button class="btn btn-primary" onclick="mettreAJour()">
@@ -1434,6 +1441,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
                 <div class="opt-row">
                   <div class="opt-info"><h4>USSD autorisé</h4><p>Commandes USSD auto</p></div>
                   <button class="toggle on" id="sopt-ussd" data-optkey="ussd" onclick="toggleOpt(this,'ussd')"></button>
+                </div>
+                <div class="opt-row">
+                  <div class="opt-info"><h4>Dépôt API Orange</h4><p>ON = API Orange Money · OFF = code USSD</p></div>
+                  <button class="toggle" id="sopt2-depot-api-orange" data-optkey="depot_api_orange" onclick="toggleOpt(this,'depot_api_orange')" data-default="off"></button>
                 </div>
               </div>
               <div class="action-btns" style="margin-top:12px;padding-bottom:80px">
