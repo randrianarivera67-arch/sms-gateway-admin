@@ -1683,6 +1683,15 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div id="airtel-steps-container"></div>
           <button onclick="airtelAddStep()" style="width:100%;padding:10px;border-radius:10px;border:1.5px dashed rgba(211,47,47,.4);background:transparent;color:#D32F2F;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:12px">+ Ajouter une &eacute;tape</button>
           <div class="fg" style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Num&eacute;ro Airtel Gateway</div><input class="field-input" id="ussd_airtel_gateway" placeholder="033 XX XXX XX" style="font-family:monospace;font-size:13px;font-weight:700"/></div>
+          <div class="fg" style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Instructions d&eacute;p&ocirc;t (texte montr&eacute; au client)</div>
+            <textarea class="field-input" id="ussd_airtel_gp_depot" rows="4" style="font-family:monospace;font-size:13px;line-height:1.5" placeholder="*436# puis 2 ensuite 1 puis 1 apr&egrave;s {numeroGateway}, resaisir le num&eacute;ro {numeroGateway} puis le montant de {montant} apr&egrave;s 2 et code secret"></textarea>
+            <div style="font-size:10px;color:var(--text3);margin-top:5px;line-height:1.6">
+              Airtel est un flow <b>multi-&eacute;tape</b> : le client ne peut pas composer une seule fois. On lui affiche donc un <b>texte d'instructions</b>, pas un code &agrave; appeler.<br>
+              Variables remplac&eacute;es automatiquement : <b>{numeroGateway}</b> (num&eacute;ro qui re&ccedil;oit) et <b>{montant}</b>.<br>
+              <b style="color:#b91c1c">N'&eacute;crivez JAMAIS {pin} ici</b> : ce texte part chez le client, il y verrait votre code secret.
+            </div>
+          </div>
           <div class="fg" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Code PIN Mobile Money (retrait)</div><input class="field-input" type="password" inputmode="numeric" autocomplete="new-password" id="ussd_airtel_pin" placeholder="PIN a 4 chiffres" style="font-family:monospace;font-size:13px;font-weight:700"/><div style="font-size:10px;color:var(--text3);margin-top:4px">Airtel est un <b>flow multi-&eacute;tape</b> : gardez l'&eacute;tape <b>{pin}</b> dans la liste ci-dessus <b>ET</b> renseignez le PIN ici. Le gateway le tape lui-m&ecirc;me sur l'&eacute;cran &laquo;&nbsp;code secret&nbsp;&raquo; ; il n'est jamais &eacute;crit en clair dans le mod&egrave;le. Laisser vide = inchang&eacute; ; saisir <b>-</b> pour effacer.</div>
           <div id="pinState_airtel" style="font-size:11px;font-weight:700;margin-top:6px;padding:6px 9px;border-radius:8px;background:#fee2e2;color:#991b1b">PIN : verification&hellip;</div></div>
           <button onclick="saveAirtelSteps()" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#B71C1C,#D32F2F);color:#fff;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 15px rgba(211,47,47,.3)">Enregistrer Airtel Money</button>
@@ -3085,7 +3094,11 @@ async function saveAirtelSteps() {
   const d = await api('/api/ussd', { method:'POST', body: JSON.stringify({
     operator: 'airtel',
     steps: airtelSteps,
-    gp_depot: airtelSteps.map(s=>s.value).join('|'),
+    // gp_retrait : sequence executee par le GATEWAY (etapes separees par |).
+    // gp_depot   : texte d'INSTRUCTIONS lu par le CLIENT. Recopier la sequence
+    //   ici n'avait aucun sens : le client ne peut pas composer un enchainement
+    //   multi-etape en une fois, il lui faut des explications.
+    gp_depot: (document.getElementById('ussd_airtel_gp_depot')?.value || '').trim(),
     gp_retrait: airtelSteps.map(s=>s.value).join('|'),
     gatewayNumero: gw,
   })});
