@@ -1269,6 +1269,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <button onclick="setTplOp('orange')" id="tplTabOr" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#FF6D00,#FF9100);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(255,109,0,.4)"><img src="orange.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Orange</button>
           <button onclick="setTplOp('mvola')" id="tplTabMv" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#1565C0,#2979FF);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(41,121,255,.4)"><img src="yas.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> MVola·YAS</button>
           <button onclick="setTplOp('airtel')" id="tplTabAi" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#B71C1C,#F44336);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(244,67,54,.4)"><img src="airtel.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Airtel</button>
+          <button onclick="setTplOp('mvola_km')" id="tplTabKm" class="btn" style="flex-shrink:0;background:linear-gradient(135deg,#00695C,#00BFA5);color:#fff;border:none;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(0,191,165,.4)">Telma Comores</button>
         </div>
         <div style="background:#FFFFFF;border:1.5px solid rgba(0,229,255,.3);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 16px rgba(0,229,255,.1)">
           <div style="font-size:12px;font-weight:800;color:#00E5FF;margin-bottom:12px">+ AJOUTER TEMPLATE</div>
@@ -2793,8 +2794,8 @@ let currentTplOp='orange';
 function setTplOp(op){
   currentTplOp=op;
   document.getElementById('tplOpSelect').value=op;
-  ['orange','mvola','airtel'].forEach(o=>{
-    const id=o==='orange'?'tplTabOr':o==='mvola'?'tplTabMv':'tplTabAi';
+  ['orange','mvola','airtel','mvola_km'].forEach(o=>{
+    const id=o==='orange'?'tplTabOr':o==='mvola'?'tplTabMv':o==='airtel'?'tplTabAi':'tplTabKm';
     const b=document.getElementById(id);
     if(b){b.style.opacity='1';b.style.transform=o===op?'scale(1.05)':'scale(1)';b.style.boxShadow=o===op?'0 4px 16px rgba(0,0,0,.3)':'0 2px 10px rgba(0,0,0,.2)';}
   });
@@ -2805,9 +2806,9 @@ async function loadTemplates(){
   if(!el)return;
   const data=await api('/api/template?operator='+currentTplOp);
   if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);border:1px dashed rgba(0,229,255,.2);border-radius:12px">Tsy misy template</div>';return;}
-  const c=currentTplOp==='orange'?'#FF6D00':currentTplOp==='mvola'?'#2979FF':'#F44336';
-  const img=currentTplOp==='orange'?'orange.png':currentTplOp==='mvola'?'yas.png':'airtel.png';
-  const opName=currentTplOp==='orange'?'Orange Money':currentTplOp==='mvola'?'MVola · YAS':'Airtel Money';
+  const c=currentTplOp==='orange'?'#FF6D00':currentTplOp==='mvola'?'#2979FF':currentTplOp==='airtel'?'#F44336':'#00BFA5';
+  const img=currentTplOp==='orange'?'orange.png':currentTplOp==='mvola'?'yas.png':currentTplOp==='airtel'?'airtel.png':'yas.png';
+  const opName=currentTplOp==='orange'?'Orange Money':currentTplOp==='mvola'?'MVola · YAS':currentTplOp==='airtel'?'Airtel Money':'Telma Comores';
   el.innerHTML=data.map(t=>`<div class="card" style="margin-bottom:12px;border-left:4px solid ${c}">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;border:1.5px solid ${c}44;overflow:hidden;flex-shrink:0">
