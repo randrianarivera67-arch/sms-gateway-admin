@@ -1387,6 +1387,18 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="bwDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="bwDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
+              <div class="card-title" style="margin-top:18px">&#127918; API 1XBET (Cashdesk)</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">M&ecirc;me r&eacute;seau que Betwinner, mais <b>caisse diff&eacute;rente</b> : les identifiants ci-dessous sont propres &agrave; 1XBET.</div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="onexbet_login" placeholder="Login caisse" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="onexbet_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cashdesk ID (Workplace)</div><input class="field-input" id="onexbet_cashdeskid" placeholder="Cashdeskid" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Hash (cl&eacute; API)</div><input class="field-input" id="onexbet_hash" type="password" placeholder="Hash API" style="font-family:monospace"/></div>
+              <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Langue (lng)</div><input class="field-input" id="onexbet_lng" placeholder="fr" style="font-family:monospace"/></div>
+              <button class="btn btn-primary" onclick="save1xbet()">Enregistrer API 1XBET</button>
+              <button class="btn" onclick="onexbetDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion 1XBET</button>
+              <div style="margin-top:8px"><input class="field-input" id="oxDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
+              <pre id="oxDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
+
               <!-- Outils accessibles sans console de navigateur -->
               <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
                 <div style="font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Outils serveur</div>
@@ -1964,12 +1976,17 @@ async function derivDiag(){
     box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+'\n\nConfig:\n  App ID : '+(cf.app_id||'?')+'\n  Token  : '+(cf.token||'?')+'\n  Base   : '+(d.base||'?');
   }
 }
-async function betwinnerDiag(){
-  const box=document.getElementById('bwDiagBox');
-  const uid=(document.getElementById('bwDiagUser')?.value||'').trim();
-  if(box){box.style.display='block';box.style.background='#f1f5f9';box.style.color='#334155';box.textContent='Test Betwinner en cours...';}
+// Diagnostic Cashdesk, partage par Betwinner et 1XBET : meme API, memes
+// formules, seuls les identifiants et donc la caisse changent.
+async function betwinnerDiag(){ return cashdeskDiag('betwinner','Betwinner','bwDiagBox','bwDiagUser'); }
+async function onexbetDiag(){   return cashdeskDiag('onexbet','1XBET','oxDiagBox','oxDiagUser'); }
+
+async function cashdeskDiag(marque, nom, idBox, idUser){
+  const box=document.getElementById(idBox);
+  const uid=(document.getElementById(idUser)?.value||'').trim();
+  if(box){box.style.display='block';box.style.background='#f1f5f9';box.style.color='#334155';box.textContent='Test '+nom+' en cours...';}
   let d;
-  try{ d=await api('/api/betwinner/diag'+(uid?('?userId='+encodeURIComponent(uid)):'')); }
+  try{ d=await api('/api/betwinner/diag?marque='+encodeURIComponent(marque)+(uid?('&userId='+encodeURIComponent(uid)):'')); }
   catch(e){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Erreur reseau: '+e.message;} return; }
   if(!d){ if(box){box.style.background='#fee2e2';box.style.color='#991b1b';box.textContent='Pas de reponse (session expiree ?)';} return; }
   const cf=d.config||{};
@@ -1988,7 +2005,7 @@ async function betwinnerDiag(){
   }
   if(d.ok||d.varianteValide){
     box.style.background='#dcfce7'; box.style.color='#166534';
-    box.textContent='BETWINNER OK\n\n'+(d.detail||'')+'\n\n'+t;
+    box.textContent=nom.toUpperCase()+' OK\n\n'+(d.detail||'')+'\n\n'+t;
   }else{
     box.style.background='#fee2e2'; box.style.color='#991b1b';
     box.textContent='PROBLEME DETECTE\n\n'+(d.error||'Erreur inconnue')+'\n\n'+t;
@@ -2071,6 +2088,20 @@ async function loadBetwinner(){
   set('betwinner_login',c.betwinner_login); set('betwinner_cashierpass',c.betwinner_cashierpass);
   set('betwinner_cashdeskid',c.betwinner_cashdeskid); set('betwinner_hash',c.betwinner_hash);
   set('betwinner_lng',c.betwinner_lng||'fr');
+  // 1XBET : meme appel /config renvoie les deux marques.
+  set('onexbet_login',c.onexbet_login); set('onexbet_cashierpass',c.onexbet_cashierpass);
+  set('onexbet_cashdeskid',c.onexbet_cashdeskid); set('onexbet_hash',c.onexbet_hash);
+  set('onexbet_lng',c.onexbet_lng||'fr');
+}
+
+async function save1xbet(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const res=await api('/api/betwinner/config',{method:'POST',body:JSON.stringify({
+    onexbet_login:g('onexbet_login'), onexbet_cashierpass:g('onexbet_cashierpass'),
+    onexbet_cashdeskid:g('onexbet_cashdeskid'), onexbet_hash:g('onexbet_hash'),
+    onexbet_lng:g('onexbet_lng')||'fr'
+  })});
+  if(res&&res.ok) showToast('API 1XBET enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 async function saveBetwinner(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
