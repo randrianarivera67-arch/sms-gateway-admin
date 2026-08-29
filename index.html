@@ -1399,6 +1399,18 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="oxDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="oxDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
+              <div class="card-title" style="margin-top:18px">&#127918; API 1XBET Comores (Fc)</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">Caisse <b>s&eacute;par&eacute;e</b> de la caisse 1XBET malgache, en franc comorien. Utilis&eacute;e uniquement pour l'op&eacute;rateur MVola Comores.</div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="onexbet_km_login" placeholder="Login caisse" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="onexbet_km_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cashdesk ID (Workplace)</div><input class="field-input" id="onexbet_km_cashdeskid" placeholder="Cashdeskid" style="font-family:monospace"/></div>
+              <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Hash (cl&eacute; API)</div><input class="field-input" id="onexbet_km_hash" type="password" placeholder="Hash API" style="font-family:monospace"/></div>
+              <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Langue (lng)</div><input class="field-input" id="onexbet_km_lng" placeholder="fr" style="font-family:monospace"/></div>
+              <button class="btn btn-primary" onclick="save1xbetKm()">Enregistrer API 1XBET Comores</button>
+              <button class="btn" onclick="onexbetKmDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion 1XBET Comores</button>
+              <div style="margin-top:8px"><input class="field-input" id="oxkmDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
+              <pre id="oxkmDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
+
               <!-- Outils accessibles sans console de navigateur -->
               <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
                 <div style="font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Outils serveur</div>
@@ -1980,6 +1992,7 @@ async function derivDiag(){
 // formules, seuls les identifiants et donc la caisse changent.
 async function betwinnerDiag(){ return cashdeskDiag('betwinner','Betwinner','bwDiagBox','bwDiagUser'); }
 async function onexbetDiag(){   return cashdeskDiag('onexbet','1XBET','oxDiagBox','oxDiagUser'); }
+async function onexbetKmDiag(){ return cashdeskDiag('onexbet_km','1XBET KM','oxkmDiagBox','oxkmDiagUser'); }
 
 async function cashdeskDiag(marque, nom, idBox, idUser){
   const box=document.getElementById(idBox);
@@ -2092,6 +2105,19 @@ async function loadBetwinner(){
   set('onexbet_login',c.onexbet_login); set('onexbet_cashierpass',c.onexbet_cashierpass);
   set('onexbet_cashdeskid',c.onexbet_cashdeskid); set('onexbet_hash',c.onexbet_hash);
   set('onexbet_lng',c.onexbet_lng||'fr');
+  set('onexbet_km_login',c.onexbet_km_login); set('onexbet_km_cashierpass',c.onexbet_km_cashierpass);
+  set('onexbet_km_cashdeskid',c.onexbet_km_cashdeskid); set('onexbet_km_hash',c.onexbet_km_hash);
+  set('onexbet_km_lng',c.onexbet_km_lng||'fr');
+}
+
+async function save1xbetKm(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const res=await api('/api/betwinner/config',{method:'POST',body:JSON.stringify({
+    onexbet_km_login:g('onexbet_km_login'), onexbet_km_cashierpass:g('onexbet_km_cashierpass'),
+    onexbet_km_cashdeskid:g('onexbet_km_cashdeskid'), onexbet_km_hash:g('onexbet_km_hash'),
+    onexbet_km_lng:g('onexbet_km_lng')||'fr'
+  })});
+  if(res&&res.ok) showToast('API 1XBET Comores enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 
 async function save1xbet(){
