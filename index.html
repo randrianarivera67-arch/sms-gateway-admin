@@ -809,6 +809,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <span>Alertes</span>
         <span class="nav-badge" id="alertBadge" style="display:none">0</span>
       </button>
+      <button class="nav-item" onclick="showPage('clients');setTimeout(loadClients,80)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Comptes clients
+      </button>
       <button class="nav-item" onclick="showPage('devices')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
         Appareils
@@ -1199,6 +1203,24 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             V&eacute;rifiez puis validez (cr&eacute;dit fournisseur) ou refusez.
           </div>
           <div id="alertList"><div style="color:var(--text3);font-size:13px;padding:12px 0">Chargement&hellip;</div></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-clients">
+        <div class="card">
+          <div class="card-title">&#128100; Comptes clients</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Comptes cr&eacute;&eacute;s depuis le site. La cl&eacute; d'acc&egrave;s est demand&eacute;e une seule fois et rest&eacute;e sur cet appareil.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <input class="field-input" id="cliSearch" placeholder="Nom, email, telephone..." style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter')loadClients()"/>
+            <select id="cliActif" class="field-input" style="max-width:150px" onchange="loadClients()">
+              <option value="">Tous</option>
+              <option value="true">Actifs</option>
+              <option value="false">D&eacute;sactiv&eacute;s</option>
+            </select>
+            <button class="btn btn-primary" onclick="loadClients()">Rechercher</button>
+          </div>
+          <div id="cliInfo" style="font-size:12px;color:var(--text3);margin-bottom:8px"></div>
+          <div id="cliList"></div>
         </div>
       </div>
 
@@ -2262,6 +2284,85 @@ async function api(path,opts={}){
 }
 
 // ══ NAVIGATION ══
+/* ===== Comptes clients =====================================================
+   Les comptes vivent dans client-api, pas dans le backend : ces fonctions
+   l'appellent directement. L'acces est protege par une cle dediee, saisie une
+   fois puis conservee sur cet appareil (localStorage) -- elle n'est jamais
+   envoyee ailleurs qu'a client-api. */
+const CLIENT_API = 'https://169-58-192-191.sslip.io/client';
+
+function cleClient(force){
+  let c = localStorage.getItem('mm_admin_key') || '';
+  if(!c || force){
+    c = prompt("Cle d'acces aux comptes clients :") || '';
+    if(c) localStorage.setItem('mm_admin_key', c.trim());
+  }
+  return (c||'').trim();
+}
+
+async function apiClient(chemin, opts){
+  const cle = cleClient(false);
+  if(!cle) return null;
+  const o = Object.assign({headers:{}}, opts||{});
+  o.headers['x-admin-key'] = cle;
+  if(o.body) o.headers['Content-Type'] = 'application/json';
+  const r = await fetch(CLIENT_API + chemin, o);
+  if(r.status === 401){
+    showToast('Cle refusee');
+    localStorage.removeItem('mm_admin_key');
+    return null;
+  }
+  return await r.json().catch(()=>null);
+}
+
+async function loadClients(){
+  const box = document.getElementById('cliList');
+  const inf = document.getElementById('cliInfo');
+  if(!box) return;
+  box.innerHTML = '<div style="padding:14px;color:var(--text3)">Chargement...</div>';
+  const q = (document.getElementById('cliSearch')?.value||'').trim();
+  const a = document.getElementById('cliActif')?.value||'';
+  const d = await apiClient('/api/admin/users?limit=100'
+      + (q?('&q='+encodeURIComponent(q)):'')
+      + (a?('&active='+a):''));
+  if(!d || !d.ok){ box.innerHTML = '<div style="padding:14px;color:#dc2626">Impossible de charger les comptes.</div>'; return; }
+  if(inf) inf.textContent = d.total + ' compte(s)';
+  if(!d.users.length){ box.innerHTML = '<div style="padding:14px;color:var(--text3)">Aucun compte.</div>'; return; }
+  box.innerHTML = d.users.map(function(u){
+    const ident = u.email || u.phone || '—';
+    const four  = (u.providers||[]).map(function(p){return p.name+' '+p.accountId;}).join(' · ') || 'aucun fournisseur';
+    const etat  = u.active
+      ? '<span style="color:#16a34a;font-weight:700">Actif</span>'
+      : '<span style="color:#dc2626;font-weight:700">D&eacute;sactiv&eacute;</span>';
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
+      + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      +   '<div style="min-width:0"><div style="font-weight:800;font-size:14px">'+(u.name||'(sans nom)')+'</div>'
+      +   '<div style="font-size:12px;color:var(--text3);word-break:break-all">'+ident+'</div>'
+      +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+(u.country||'')+(u.kmAccount?' · Comores (Fc)':'')+'</div>'
+      +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+four+'</div></div>'
+      +   '<div style="text-align:right"><div style="font-size:12px;margin-bottom:6px">'+etat+'</div>'
+      +   '<button class="btn" style="padding:5px 10px;font-size:11px" onclick="toggleClient(\''+u.id+'\','+(!u.active)+')">'+(u.active?'D&eacute;sactiver':'Activer')+'</button> '
+      +   '<button class="btn" style="padding:5px 10px;font-size:11px" onclick="mdpClient(\''+u.id+'\')">Mot de passe</button></div>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function toggleClient(id, actif){
+  if(!confirm(actif ? 'Reactiver ce compte ?' : 'Desactiver ce compte ? Le client ne pourra plus se connecter.')) return;
+  const d = await apiClient('/api/admin/users/'+id, {method:'PATCH', body: JSON.stringify({active: actif})});
+  if(d && d.ok){ showToast(actif?'Compte reactive':'Compte desactive'); loadClients(); }
+  else showToast('Erreur: '+((d&&d.error)||'echec'));
+}
+
+async function mdpClient(id){
+  const mdp = prompt('Nouveau mot de passe (6 caracteres minimum) :');
+  if(!mdp) return;
+  if(mdp.length < 6){ showToast('Mot de passe trop court'); return; }
+  const d = await apiClient('/api/admin/users/'+id+'/password', {method:'POST', body: JSON.stringify({password: mdp})});
+  if(d && d.ok) showToast('Mot de passe remplace');
+  else showToast('Erreur: '+((d&&d.error)||'echec'));
+}
+
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.scrollTop=0;});
   document.querySelectorAll('.nav-item, .bn-item').forEach(n=>n.classList.remove('active'));
@@ -2269,7 +2370,7 @@ function showPage(name){
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-item[onclick*="'${name}'"], .bn-item[onclick*="'${name}'"]`).forEach(n=>n.classList.add('active'));
   const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
-  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,alertes:'Alertes',devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
+  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,alertes:'Alertes',clients:'Comptes clients',devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   /* topTitle fixe = ADMIN (ne change plus par page) */
   const bk=document.getElementById('tbBack'); if(bk) bk.style.display=(name==='dashboard')?'none':'flex';
   closeSidebar();
