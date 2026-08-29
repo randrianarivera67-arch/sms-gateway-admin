@@ -809,6 +809,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <span>Alertes</span>
         <span class="nav-badge" id="alertBadge" style="display:none">0</span>
       </button>
+      <button class="nav-item" onclick="showPage('annonces');setTimeout(loadAnnonces,80)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        Annonces
+      </button>
       <button class="nav-item" onclick="showPage('clients');setTimeout(loadClients,80)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Comptes clients
@@ -1203,6 +1207,21 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             V&eacute;rifiez puis validez (cr&eacute;dit fournisseur) ou refusez.
           </div>
           <div id="alertList"><div style="color:var(--text3);font-size:13px;padding:12px 0">Chargement&hellip;</div></div>
+        </div>
+      </div>
+
+      <div class="page" id="page-annonces">
+        <div class="card">
+          <div class="card-title">&#128227; Nouvelle annonce</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Visible par tous les clients dans la cloche du site, tant qu'elle reste active.</div>
+          <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Titre (optionnel)</div><input class="field-input" id="annTitre" placeholder="Maintenance prevue"/></div>
+          <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Message</div><textarea class="field-input" id="annBody" rows="3" placeholder="Votre message aux clients..."></textarea></div>
+          <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Type</div><select class="field-input" id="annLevel"><option value="info">Information</option><option value="success">Bonne nouvelle</option><option value="warning">Avertissement</option></select></div>
+          <button class="btn btn-primary" onclick="creerAnnonce()">Publier l'annonce</button>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Annonces publi&eacute;es</div>
+          <div id="annList"></div>
         </div>
       </div>
 
@@ -2284,6 +2303,63 @@ async function api(path,opts={}){
 }
 
 // ══ NAVIGATION ══
+/* ===== Annonces clients ==================================================
+   Les annonces vivent dans le backend, protegees par le jeton admin habituel :
+   aucune cle supplementaire n'est necessaire ici. */
+async function loadAnnonces(){
+  const box=document.getElementById('annList');
+  if(!box) return;
+  box.innerHTML='<div style="padding:14px;color:var(--text3)">Chargement...</div>';
+  const d=await api('/api/announcements/all');
+  if(!d||!d.ok){ box.innerHTML='<div style="padding:14px;color:#dc2626">Impossible de charger.</div>'; return; }
+  if(!d.announcements.length){ box.innerHTML='<div style="padding:14px;color:var(--text3)">Aucune annonce.</div>'; return; }
+  const couleurs={info:'#0ea5e9',success:'#16a34a',warning:'#f59e0b'};
+  box.innerHTML=d.announcements.map(function(a){
+    const c=couleurs[a.level]||couleurs.info;
+    const etat=a.active?'<span style="color:#16a34a;font-weight:700">Active</span>':'<span style="color:var(--text3)">Masqu&eacute;e</span>';
+    const dt=a.createdAt?new Date(a.createdAt).toLocaleString('fr-FR'):'';
+    return '<div style="border:1px solid var(--border);border-left:4px solid '+c+';border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      +'<div style="min-width:0;flex:1">'
+      +(a.title?('<div style="font-weight:800;font-size:14px;margin-bottom:3px">'+a.title+'</div>'):'')
+      +'<div style="font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">'+a.body+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:5px">'+dt+' &middot; '+etat+'</div></div>'
+      +'<div style="text-align:right;flex:none">'
+      +'<button class="btn" style="padding:5px 10px;font-size:11px" onclick="toggleAnnonce(\''+a._id+'\','+(!a.active)+')">'+(a.active?'Masquer':'Afficher')+'</button> '
+      +'<button class="btn" style="padding:5px 10px;font-size:11px;color:#dc2626" onclick="supprAnnonce(\''+a._id+'\')">Supprimer</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+async function creerAnnonce(){
+  const body=(document.getElementById('annBody')?.value||'').trim();
+  if(!body){ showToast('Message requis'); return; }
+  const d=await api('/api/announcements',{method:'POST',body:JSON.stringify({
+    title:(document.getElementById('annTitre')?.value||'').trim(),
+    body:body,
+    level:(document.getElementById('annLevel')?.value||'info')
+  })});
+  if(d&&d.ok){
+    showToast('Annonce publiee');
+    document.getElementById('annTitre').value='';
+    document.getElementById('annBody').value='';
+    loadAnnonces();
+  } else showToast('Erreur: '+((d&&d.error)||'echec'));
+}
+
+async function toggleAnnonce(id,actif){
+  const d=await api('/api/announcements/'+id,{method:'PATCH',body:JSON.stringify({active:actif})});
+  if(d&&d.ok){ showToast(actif?'Annonce affichee':'Annonce masquee'); loadAnnonces(); }
+  else showToast('Erreur: '+((d&&d.error)||'echec'));
+}
+
+async function supprAnnonce(id){
+  if(!confirm('Supprimer definitivement cette annonce ?')) return;
+  const d=await api('/api/announcements/'+id,{method:'DELETE'});
+  if(d&&d.ok){ showToast('Annonce supprimee'); loadAnnonces(); }
+  else showToast('Erreur: '+((d&&d.error)||'echec'));
+}
+
 /* ===== Comptes clients =====================================================
    Les comptes vivent dans client-api, pas dans le backend : ces fonctions
    l'appellent directement. L'acces est protege par une cle dediee, saisie une
@@ -2370,7 +2446,7 @@ function showPage(name){
   if(pg) pg.classList.add('active');
   document.querySelectorAll(`.nav-item[onclick*="'${name}'"], .bn-item[onclick*="'${name}'"]`).forEach(n=>n.classList.add('active'));
   const t=TRANSLATIONS[currentLang]||TRANSLATIONS.fr;
-  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,alertes:'Alertes',clients:'Comptes clients',devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
+  const titles={dashboard:t.dashboard,sms:t.sms_recus,retrait:t.retraits,alertes:'Alertes',annonces:'Annonces',clients:'Comptes clients',devices:t.devices,stats:t.stats,ussd:t.ussd,template:'SMS Templates',settings:t.settings};
   /* topTitle fixe = ADMIN (ne change plus par page) */
   const bk=document.getElementById('tbBack'); if(bk) bk.style.display=(name==='dashboard')?'none':'flex';
   closeSidebar();
