@@ -1452,6 +1452,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="oxkmDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="oxkmDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
+              <div class="card-title" style="margin-top:18px">&#127918; API 1WIN</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">R&eacute;seau diff&eacute;rent des autres : une seule cl&eacute;, une seule caisse, <b>en dollars</b>. Les montants Ariary et Franc comorien sont convertis au cours du jour, comme pour Deriv.</div>
+              <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cl&eacute; API (X-API-KEY)</div><input class="field-input" id="onewin_apikey" type="password" placeholder="Cle recue par Telegram" style="font-family:monospace"/></div>
+              <button class="btn btn-primary" onclick="save1win()">Enregistrer API 1WIN</button>
+
               <!-- Outils accessibles sans console de navigateur -->
               <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
                 <div style="font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Outils serveur</div>
@@ -2149,6 +2154,15 @@ async function loadBetwinner(){
   set('onexbet_km_login',c.onexbet_km_login); set('onexbet_km_cashierpass',c.onexbet_km_cashierpass);
   set('onexbet_km_cashdeskid',c.onexbet_km_cashdeskid); set('onexbet_km_hash',c.onexbet_km_hash);
   set('onexbet_km_lng',c.onexbet_km_lng||'fr');
+  set('onewin_apikey',c.onewin_apikey);
+}
+
+async function save1win(){
+  const e=document.getElementById('onewin_apikey');
+  const res=await api('/api/betwinner/config',{method:'POST',body:JSON.stringify({
+    onewin_apikey:(e?e.value.trim():'')
+  })});
+  if(res&&res.ok) showToast('API 1WIN enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 
 async function save1xbetKm(){
