@@ -746,7 +746,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </div>
       <div>
         <div class="login-title">SMS Gateway</div>
-        <div class="login-sub">Admin Panel · by Diamcash</div>
+        <div class="login-sub">Admin Panel · by MATUL MADA</div>
       </div>
     </div>
     <div class="login-err" id="loginErr"></div>
@@ -2379,7 +2379,7 @@ async function supprAnnonce(id){
    l'appellent directement. L'acces est protege par une cle dediee, saisie une
    fois puis conservee sur cet appareil (localStorage) -- elle n'est jamais
    envoyee ailleurs qu'a client-api. */
-const CLIENT_API = 'https://169-58-192-191.sslip.io/client';
+const CLIENT_API = 'https://api.matulmada.net/client';
 
 function cleClient(force){
   let c = localStorage.getItem('mm_admin_key') || '';
@@ -2522,10 +2522,11 @@ async function loadDashboard(){
   const hasMvola  = onlineSims.includes('mvola') || onlineSims.includes('yas') || onlineSims.includes('telma');
   const hasAirtel = onlineSims.includes('airtel');
   const hasKm = onlineSims.includes('mvola_km') || onlineSims.includes('comor') || onlineSims.includes('telma_km');
-  const orangeVal = hasOrange ? (bal.orange||0) : null;
-  const mvolaVal  = hasMvola  ? (bal.mvola||bal.yas||0) : null;
-  const airtelVal = hasAirtel ? (bal.airtel||0) : null;
-  const kmVal     = hasKm     ? (bal.mvola_km||0) : null;
+  const bv = d.balancesVerified||{};
+  const orangeVal = (hasOrange && bv.orange)   ? (bal.orange||0) : null;
+  const mvolaVal  = (hasMvola  && bv.mvola)    ? (bal.mvola||bal.yas||0) : null;
+  const airtelVal = (hasAirtel && bv.airtel)   ? (bal.airtel||0) : null;
+  const kmVal     = (hasKm     && bv.mvola_km) ? (bal.mvola_km||0) : null;
   // Total = Ariary IHANY (mvola_km en Fc tsy tafiditra)
   const total = (orangeVal||0) + (mvolaVal||0) + (airtelVal||0);
   setTxt('soldeTotalEl', fmtAr(total));
@@ -2534,7 +2535,6 @@ async function loadDashboard(){
   setTxt('soldeAirtel', airtelVal !== null ? fmtAr(airtelVal) : '— Ar');
   // MVola Comores en Fc — carte TOUJOURS visible (comme Orange/MVola/Airtel)
   setTxt('soldeMvolaKm', kmVal !== null ? fmtFc(kmVal) : '— Fc');
-  const bv = d.balancesVerified||{};
   setOpStatus('statusOrange', orangeVal !== null, hasOrange ? bv.orange : null);
   setOpStatus('statusTelma',  mvolaVal  !== null, hasMvola  ? bv.mvola  : null);
   setOpStatus('statusAirtel', airtelVal !== null, hasAirtel ? bv.airtel : null);
