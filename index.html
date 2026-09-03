@@ -2517,11 +2517,15 @@ async function loadDashboard(){
   if(retSeul>0 || depPend>0){const nd=document.getElementById('notifDot'); if(nd) nd.style.display='block';}
   const bal=d.balances||{};
   // Operators connectés avy amin'ny devices online
-  const onlineSims = (d.devices||[]).filter(x=>x.online).map(x=>(x.sims||'').toLowerCase()).join(',');
-  const hasOrange = onlineSims.includes('orange');
-  const hasMvola  = onlineSims.includes('mvola') || onlineSims.includes('yas') || onlineSims.includes('telma');
-  const hasAirtel = onlineSims.includes('airtel');
-  const hasKm = onlineSims.includes('mvola_km') || onlineSims.includes('comor') || onlineSims.includes('telma_km');
+  // Chaque SIM est examinee SEPAREMENT. "Telma Comores" contient "telma" :
+  // teste sur la chaine entiere, il faisait passer MVola Madagascar pour actif
+  // alors que seule la SIM comorienne etait en ligne (et inversement).
+  const simsList = (d.devices||[]).filter(x=>x.online).map(x=>(x.sims||'').toLowerCase());
+  const estKm = (s) => s.includes('comor') || s.includes('_km');
+  const hasOrange = simsList.some(s => s.includes('orange'));
+  const hasMvola  = simsList.some(s => !estKm(s) && (s.includes('mvola') || s.includes('yas') || s.includes('telma')));
+  const hasAirtel = simsList.some(s => s.includes('airtel'));
+  const hasKm     = simsList.some(estKm);
   const bv = d.balancesVerified||{};
   const orangeVal = (hasOrange && bv.orange)   ? (bal.orange||0) : null;
   const mvolaVal  = (hasMvola  && bv.mvola)    ? (bal.mvola||bal.yas||0) : null;
