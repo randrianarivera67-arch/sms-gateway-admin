@@ -369,6 +369,18 @@ tbody tr:hover td{background:var(--blue-light)}
   color:rgba(255,255,255,.55);transition:background .15s,color .15s}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 .sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
+.cli-menu{position:relative;display:inline-block}
+.cli-dots{background:none;border:0;cursor:pointer;padding:4px;border-radius:8px;color:var(--text3)}
+.cli-dots:hover{background:rgba(127,127,127,.14);color:var(--text)}
+.cli-dots svg{width:18px;height:18px}
+.cli-pop{display:none;position:absolute;right:0;top:28px;z-index:1300;min-width:210px;
+  background:var(--card,#fff);border:1px solid var(--border);border-radius:10px;
+  box-shadow:0 8px 26px rgba(0,0,0,.22);overflow:hidden}
+.cli-pop.open{display:block}
+.cli-pop button{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  padding:10px 13px;font:inherit;font-size:12.5px;color:var(--text)}
+.cli-pop button:hover{background:rgba(127,127,127,.12)}
+.cli-pop button.danger{color:#dc2626;font-weight:700;border-top:1px solid var(--border)}
 .cli-nav{display:none;position:fixed;left:0;right:0;bottom:0;width:100%;z-index:1200;
   background:linear-gradient(180deg,#0D47A1,#0A1628);
   border-top:2px solid rgba(0,229,255,.45);box-shadow:0 -6px 24px rgba(0,0,0,.5)}
@@ -2468,8 +2480,13 @@ async function loadClients(){
       +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+(u.country||'')+(u.kmAccount?' · Comores (Fc)':'')+'</div>'
       +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+four+'</div></div>'
       +   '<div style="text-align:right"><div style="font-size:12px;margin-bottom:6px">'+etat+'</div>'
-      +   '<button class="btn" style="padding:5px 10px;font-size:11px" onclick="toggleClient(\''+u.id+'\','+(!u.active)+')">'+(u.active?'D&eacute;sactiver':'Activer')+'</button> '
-      +   '<button class="btn" style="padding:5px 10px;font-size:11px" onclick="mdpClient(\''+u.id+'\')">Mot de passe</button></div>'
+      +   '<div class="cli-menu"><button class="cli-dots" onclick="basculerMenuClient(event,\''+u.id+'\')" title="Actions">'
+      +     '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>'
+      +     '<div class="cli-pop" id="pop-'+u.id+'">'
+      +       '<button onclick="toggleClient(\''+u.id+'\','+(!u.active)+')">'+(u.active?'D&eacute;sactiver':'Activer')+'</button>'
+      +       '<button onclick="mdpClient(\''+u.id+'\')">R&eacute;initialiser le mot de passe</button>'
+      +       '<button class="danger" onclick="supprimerClient(\''+u.id+'\',\''+String(u.name||'').replace(/'/g,"")+'\')">Supprimer</button>'
+      +     '</div></div></div>'
       + '</div></div>';
   }).join('');
 }
@@ -3999,6 +4016,25 @@ function majBarreClient(pg){
   var _sp2 = window.showPage;
   window.showPage = function(id){ majBarreClient(id); return _sp2.apply(this, arguments); };
 })();
+
+
+/* Menu d'actions par compte client. */
+function basculerMenuClient(ev, id){
+  ev.stopPropagation();
+  var ouvert = document.getElementById('pop-'+id);
+  document.querySelectorAll('.cli-pop.open').forEach(function(e){ if(e!==ouvert) e.classList.remove('open'); });
+  if(ouvert) ouvert.classList.toggle('open');
+}
+document.addEventListener('click', function(){
+  document.querySelectorAll('.cli-pop.open').forEach(function(e){ e.classList.remove('open'); });
+});
+async function supprimerClient(id, nom){
+  if(!confirm('Supprimer definitivement le compte '+(nom||'')+' ?\n\nIl disparaitra des listes. Ses ordres passes restent consultables.')) return;
+  if(!confirm('Cette action ne peut pas etre annulee depuis le panneau. Confirmer ?')) return;
+  var d = await apiClient('/api/admin/users/'+id, {method:'DELETE'});
+  if(d && d.ok){ showToast('Compte supprime'); loadClients(); }
+  else showToast('Suppression impossible');
+}
 
 </script>
 </body>
