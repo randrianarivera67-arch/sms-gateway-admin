@@ -3964,6 +3964,10 @@ function basculerSousMenu(){
   };
   window.addEventListener('load', function(){
     var id; try{ id = localStorage.getItem('gw_page'); }catch(e){}
+    // Rien tant que la session n'est pas ouverte : sinon la restauration
+    // relancait l'ecran de connexion en boucle.
+    var tok; try{ tok = localStorage.getItem('gw_token'); }catch(e){}
+    if(!tok) return;
     if(!id || id==='dashboard') return;
     setTimeout(function(){
       if(!document.getElementById('page-'+id)) return;
