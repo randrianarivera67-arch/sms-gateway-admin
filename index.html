@@ -369,7 +369,7 @@ tbody tr:hover td{background:var(--blue-light)}
   color:rgba(255,255,255,.55);transition:background .15s,color .15s}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 .sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
-.cst-p.on{background:#1B6CF2;color:#fff}
+.cst-p.on,.dem-f.on{background:#1B6CF2;color:#fff}
 .cli-menu{position:relative;display:inline-block}
 .cli-dots{background:none;border:0;cursor:pointer;padding:4px;border-radius:8px;color:var(--text3)}
 .cli-dots:hover{background:rgba(127,127,127,.14);color:var(--text)}
@@ -1317,7 +1317,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       <div class="page" id="page-demandes">
         <div class="card">
           <div class="card-title">Demandes de changement de num&eacute;ro</div>
-          <div id="demandesList" style="color:var(--text3);font-size:13px">Aucune demande.</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn dem-f on" data-s="en_attente" onclick="chargerDemandes('en_attente')">En attente</button>
+            <button class="btn dem-f"    data-s="toutes"     onclick="chargerDemandes('toutes')">Toutes</button>
+          </div>
+          <div id="demandesList" style="font-size:13px">Chargement...</div>
         </div>
       </div>
 
@@ -4023,6 +4027,7 @@ function ouvrirClient(pg){
   showPage(pg);
   if(pg==='clients')  setTimeout(loadClients,80);
   if(pg==='annonces') setTimeout(loadAnnonces,80);
+  if(pg==='demandes') setTimeout(function(){chargerDemandes('en_attente');},80);
   if(pg==='cstats')   setTimeout(function(){chargerStatsClient('jour');},80);
   majBarreClient(pg);
 }
@@ -4093,6 +4098,50 @@ function chargerStatsClient(p){
       '<b style="color:#16a34a">'+act+'</b> actifs &nbsp;·&nbsp; <b style="color:#dc2626">'+ina+'</b> d&eacute;sactiv&eacute;s'
       +'<br>'+tot+' inscription(s) sur la p&eacute;riode';
   });
+}
+
+
+/* Demandes de changement de wallet : le numero qui recoit l'argent ne change
+   qu'apres validation ici. */
+function chargerDemandes(statut){
+  statut = statut || 'en_attente';
+  document.querySelectorAll('.dem-f').forEach(function(b){ b.classList.toggle('on', b.dataset.s===statut); });
+  var box=document.getElementById('demandesList');
+  box.innerHTML='Chargement...';
+  apiClient('/api/admin/demandes?statut='+statut).then(function(d){
+    if(!d||!d.ok){ box.innerHTML='<span style="color:#dc2626">Chargement impossible.</span>'; return; }
+    if(!d.demandes.length){ box.innerHTML='<span style="color:var(--text3)">Aucune demande.</span>'; return; }
+    box.innerHTML=d.demandes.map(function(x){
+      var c=x.client||{}, sup=(x.type==='suppression');
+      var badge = x.statut==='en_attente' ? '<span style="color:#b45309;font-weight:700">En attente</span>'
+                : x.statut==='approuve'   ? '<span style="color:#16a34a;font-weight:700">Approuv&eacute;e</span>'
+                                          : '<span style="color:#dc2626;font-weight:700">Refus&eacute;e</span>';
+      var corps = sup
+        ? '<div style="font-size:12.5px">Suppression du wallet <b>'+(x.ancien&&x.ancien.operator||'')+'</b> &middot; '+(x.ancien&&x.ancien.numero||'')+'</div>'
+        : '<div style="font-size:12.5px">'+(x.ancien&&x.ancien.operator||'')+' : <span style="text-decoration:line-through;color:var(--text3)">'
+          +(x.ancien&&x.ancien.numero||'')+'</span> &rarr; <b>'+(x.nouveau&&x.nouveau.numero||'')+'</b></div>';
+      var actions = x.statut==='en_attente'
+        ? '<div style="display:flex;gap:8px;margin-top:10px">'
+          +'<button class="btn" style="background:#16a34a;color:#fff;padding:6px 12px;font-size:12px" onclick="deciderDemande(\''+x._id+'\',\'approuve\')">Approuver</button>'
+          +'<button class="btn" style="background:#dc2626;color:#fff;padding:6px 12px;font-size:12px" onclick="deciderDemande(\''+x._id+'\',\'refuse\')">Refuser</button></div>'
+        : '';
+      return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
+        +'<div style="display:flex;justify-content:space-between;gap:10px"><div style="font-weight:800;font-size:13.5px">'
+        +(c.name||'(sans nom)')+'</div>'+badge+'</div>'
+        +'<div style="font-size:11.5px;color:var(--text3);margin:2px 0 6px">'+(c.email||c.phone||'')+'</div>'
+        +corps+actions+'</div>';
+    }).join('');
+  });
+}
+async function deciderDemande(id, decision){
+  var msg = decision==='approuve'
+    ? 'Approuver ? Le numero du client sera modifie immediatement.'
+    : 'Refuser cette demande ?';
+  if(!confirm(msg)) return;
+  var d = await apiClient('/api/admin/demandes/'+id+'/decision',
+            {method:'POST', body: JSON.stringify({decision: decision})});
+  if(d && d.ok){ showToast(decision==='approuve'?'Demande approuvee':'Demande refusee'); chargerDemandes('en_attente'); }
+  else showToast((d && d.error) || 'Action impossible');
 }
 
 </script>
