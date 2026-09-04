@@ -821,10 +821,6 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         Annonces
       </button>
-      <button class="nav-item" onclick="showPage('clients');setTimeout(loadClients,80)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Comptes clients
-      </button>
       <button class="nav-item" onclick="showPage('devices')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
         Appareils
@@ -898,9 +894,8 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <button class="tb-btn" onclick="toggleTheme()" title="Thème" id="themeBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button class="tb-btn" onclick="showPage('sms')" title="Notifications" style="position:relative">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#FFD600" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #FFD600)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <div id="notifDot" style="display:none;position:absolute;top:3px;right:3px;min-width:16px;height:16px;border-radius:8px;background:#FFD600;color:#000;font-size:9px;font-weight:900;align-items:center;justify-content:center;box-shadow:0 0 8px #FFD600"></div>
+        <button class="tb-btn" onclick="showPage('clients');setTimeout(loadClients,80)" title="Comptes clients" style="position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #00E5FF)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </button>
       </div>
     </div>
@@ -3936,6 +3931,26 @@ function allerSection(id){
 function basculerSousMenu(){
   var m=document.getElementById('subSettings'); if(m) m.classList.toggle('open');
 }
+
+
+/* Le pull-to-refresh recharge la page entiere : sans memoriser l'onglet, on
+   retombait toujours sur le tableau de bord. */
+(function(){
+  var _sp = window.showPage;
+  window.showPage = function(id){
+    try{ localStorage.setItem('gw_page', id); }catch(e){}
+    return _sp.apply(this, arguments);
+  };
+  window.addEventListener('load', function(){
+    var id; try{ id = localStorage.getItem('gw_page'); }catch(e){}
+    if(!id || id==='dashboard') return;
+    setTimeout(function(){
+      if(!document.getElementById('page-'+id)) return;
+      showPage(id);
+      try{ refreshData(); }catch(e){}
+    }, 600);
+  });
+})();
 
 </script>
 </body>
