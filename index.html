@@ -368,7 +368,19 @@ tbody tr:hover td{background:var(--blue-light)}
   padding:7px 10px;border-radius:7px;font:inherit;font-size:12.5px;text-align:left;
   color:rgba(255,255,255,.55);transition:background .15s,color .15s}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
-.sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
+.sub-item .cli-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:900;
+  background:rgba(10,22,40,.96);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(0,229,255,.22);box-shadow:0 -4px 20px rgba(0,0,0,.35);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.cli-nav.show{display:flex}
+.cli-nav button{flex:1;background:none;border:0;cursor:pointer;font:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
+  color:rgba(255,255,255,.5);font-size:10.5px;font-weight:700;transition:color .15s}
+.cli-nav button svg{width:20px;height:20px;stroke-width:2}
+.cli-nav button.on{color:#00E5FF}
+.cli-nav button.on svg{filter:drop-shadow(0 0 6px #00E5FF)}
+body:has(.cli-nav.show) .content{padding-bottom:74px}
+.ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
 .ico-n{width:15px;height:15px;vertical-align:-2px;filter:drop-shadow(0 0 4px currentColor)}
 /* Options Terminal */
 .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -817,10 +829,6 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <span>Alertes</span>
         <span class="nav-badge" id="alertBadge" style="display:none">0</span>
       </button>
-      <button class="nav-item" onclick="showPage('annonces');setTimeout(loadAnnonces,80)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        Annonces
-      </button>
       <button class="nav-item" onclick="showPage('devices')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
         Appareils
@@ -900,6 +908,12 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </div>
     </div>
 
+    <nav class="cli-nav" id="cliNav">
+        <button id="cn-clients" onclick="ouvrirClient('clients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Comptes</button>
+        <button id="cn-stats" onclick="ouvrirClient('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Statistiques</button>
+        <button id="cn-demandes" onclick="ouvrirClient('demandes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Demandes</button>
+        <button id="cn-annonces" onclick="ouvrirClient('annonces')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 11v3a1 1 0 0 0 1 1h3l4 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>Annonces</button>
+    </nav>
     <div class="content" id="content">
 
       <!-- ══ DASHBOARD ══ -->
@@ -1266,6 +1280,13 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </div>
 
       <!-- ══ STATS ══ -->
+      <div class="page" id="page-demandes">
+        <div class="card">
+          <div class="card-title">Demandes de changement de num&eacute;ro</div>
+          <div id="demandesList" style="color:var(--text3);font-size:13px">Aucune demande.</div>
+        </div>
+      </div>
+
       <div class="page" id="page-stats">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <button class="btn" onclick="loadStats()" style="background:rgba(41,121,255,0.12);color:var(--blue2);border:none;padding:8px 16px;font-size:12px;font-weight:700;border-radius:10px">🔄 Actualiser</button>
@@ -3950,6 +3971,29 @@ function basculerSousMenu(){
       try{ refreshData(); }catch(e){}
     }, 600);
   });
+})();
+
+
+/* Espace client : barre du bas propre a ces quatre pages. */
+var PAGES_CLIENT = ['clients','stats','demandes','annonces'];
+function ouvrirClient(pg){
+  showPage(pg);
+  if(pg==='clients')  setTimeout(loadClients,80);
+  if(pg==='annonces') setTimeout(loadAnnonces,80);
+  if(pg==='stats')    setTimeout(loadStats,80);
+  majBarreClient(pg);
+}
+function majBarreClient(pg){
+  var bar=document.getElementById('cliNav'); if(!bar) return;
+  var dedans = PAGES_CLIENT.indexOf(pg)>=0;
+  bar.classList.toggle('show', dedans);
+  PAGES_CLIENT.forEach(function(p){
+    var b=document.getElementById('cn-'+p); if(b) b.classList.toggle('on', p===pg);
+  });
+}
+(function(){
+  var _sp2 = window.showPage;
+  window.showPage = function(id){ majBarreClient(id); return _sp2.apply(this, arguments); };
 })();
 
 </script>
