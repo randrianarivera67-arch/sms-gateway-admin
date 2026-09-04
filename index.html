@@ -362,6 +362,14 @@ tbody tr:hover td{background:var(--blue-light)}
 }
 .field-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,108,242,.12)}
 
+.sub-nav{display:none;flex-direction:column;gap:1px;margin:2px 0 6px 0;padding-left:8px;border-left:1px solid rgba(41,121,255,.25)}
+.sub-nav.open{display:flex}
+.sub-item{display:flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;
+  padding:7px 10px;border-radius:7px;font:inherit;font-size:12.5px;text-align:left;
+  color:rgba(255,255,255,.55);transition:background .15s,color .15s}
+.sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+.sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
+.ico-n{width:15px;height:15px;vertical-align:-2px;filter:drop-shadow(0 0 4px currentColor)}
 /* Options Terminal */
 .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .opt-row{
@@ -831,10 +839,23 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>SMS Templates</span>
       </button>
-      <button class="nav-item" onclick="showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150);setTimeout(loadRate,150);setTimeout(loadBetwinner,180);setTimeout(loadOrangePay,190);setTimeout(fillUssdInputs,200)">
+      <button class="nav-item" onclick="basculerSousMenu();showPage('settings');setTimeout(loadPasskeys,100);setTimeout(loadDeriv,150);setTimeout(loadRate,150);setTimeout(loadBetwinner,180);setTimeout(loadOrangePay,190);setTimeout(fillUssdInputs,200)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         <span>Paramètres</span>
       </button>
+      <div class="sub-nav" id="subSettings">
+      <button class="sub-item" onclick="allerSection('s-serveur')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Configuration serveur</button>
+      <button class="sub-item" onclick="allerSection('s-cours')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a3 3 0 0 0-3-1.5c-1.7 0-3 1-3 2.3s1.3 2 3 2.3 3 1 3 2.3-1.3 2.3-3 2.3a3 3 0 0 1-3-1.5"/></svg>Cours d'&eacute;change</button>
+      <button class="sub-item" onclick="allerSection('s-deriv')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>API Deriv</button>
+      <button class="sub-item" onclick="allerSection('s-orange')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M16 12h4"/></svg>API Orange Money</button>
+      <button class="sub-item" onclick="allerSection('s-betwinner')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API Betwinner</button>
+      <button class="sub-item" onclick="allerSection('s-1xbet')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API 1XBET</button>
+      <button class="sub-item" onclick="allerSection('s-1xbetkm')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API 1XBET Comores</button>
+      <button class="sub-item" onclick="allerSection('s-1win')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API 1WIN</button>
+      <button class="sub-item" onclick="allerSection('s-passkeys')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/></svg>Passkeys</button>
+      <button class="sub-item" onclick="allerSection('s-infos')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>Informations syst&egrave;me</button>
+      <button class="sub-item" onclick="allerSection('s-terminal')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Options Terminal</button>
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -1343,7 +1364,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <div class="settings-grid">
           <div>
             <div class="card" style="margin-bottom:14px">
-              <div class="card-title">
+              <div class="card-title" id="s-serveur">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
                 Configuration serveur
               </div>
@@ -1362,7 +1383,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             </div>
 
             <div class="card" style="margin-bottom:14px">
-              <div class="card-title">&#128176; Cours d'&eacute;change (Deriv USD &rarr; Ar)</div>
+              <div class="card-title" id="s-cours"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a3 3 0 0 0-3-1.5c-1.7 0-3 1-3 2.3s1.3 2 3 2.3 3 1 3 2.3-1.3 2.3-3 2.3a3 3 0 0 1-3-1.5"/></svg> Cours d'&eacute;change (Deriv USD &rarr; Ar)</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours D&eacute;p&ocirc;t (1 USD = ? Ar)</div><input class="field-input" id="rate_depot" type="number" placeholder="4300" style="font-family:monospace"/></div>
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Ar)</div><input class="field-input" id="rate_retrait" type="number" placeholder="4250" style="font-family:monospace"/></div>
@@ -1373,7 +1394,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Fc)</div><input class="field-input" id="rate_retrait_km" type="number" placeholder="450" style="font-family:monospace"/></div>
             </div>
             <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
-            <div class="card-title">&#127974; API Deriv (Payment Agent)</div>
+            <div class="card-title" id="s-deriv"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg> API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/><div id="deriv_token_etat" style="font-size:11px;margin-top:6px;line-height:1.5"></div></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
@@ -1385,7 +1406,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <button class="btn" onclick="derivDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion Deriv</button>
               <div id="derivDiagBox" style="display:none;margin-top:10px;padding:12px;border-radius:10px;font-size:12px;font-family:monospace;white-space:pre-wrap;line-height:1.5"></div>
 
-              <div class="card-title" style="margin-top:18px">&#128992; API Orange Money (Web Payment)</div>
+              <div class="card-title" id="s-orange" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M16 12h4"/></svg> API Orange Money (Web Payment)</div>
               <div style="font-size:11px;color:var(--text3);margin:0 0 10px;line-height:1.5">
                 Sert au <b>d&eacute;p&ocirc;t Orange par API</b>. Le secret et la merchant key ne ressortent <b>jamais</b> en clair : laisser vide = inchang&eacute;, saisir <b>-</b> pour effacer.
               </div>
@@ -1417,7 +1438,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <button class="btn" onclick="orangePayDiag()" style="margin-top:8px;background:#0d9488;color:#fff">&#129658; Diagnostic connexion Orange Money</button>
               <pre id="omDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
-              <div class="card-title" style="margin-top:18px">&#127918; API Betwinner (Cashdesk)</div>
+              <div class="card-title" id="s-betwinner" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg> API Betwinner (Cashdesk)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="betwinner_login" placeholder="Login caisse" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="betwinner_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cashdesk ID (Workplace)</div><input class="field-input" id="betwinner_cashdeskid" placeholder="Cashdeskid" style="font-family:monospace"/></div>
@@ -1428,7 +1449,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="bwDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="bwDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
-              <div class="card-title" style="margin-top:18px">&#127918; API 1XBET (Cashdesk)</div>
+              <div class="card-title" id="s-1xbet" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg> API 1XBET (Cashdesk)</div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">M&ecirc;me r&eacute;seau que Betwinner, mais <b>caisse diff&eacute;rente</b> : les identifiants ci-dessous sont propres &agrave; 1XBET.</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="onexbet_login" placeholder="Login caisse" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="onexbet_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
@@ -1440,7 +1461,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="oxDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="oxDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
-              <div class="card-title" style="margin-top:18px">&#127918; API 1XBET Comores (Fc)</div>
+              <div class="card-title" id="s-1xbetkm" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg> API 1XBET Comores (Fc)</div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">Caisse <b>s&eacute;par&eacute;e</b> de la caisse 1XBET malgache, en franc comorien. Utilis&eacute;e uniquement pour l'op&eacute;rateur MVola Comores.</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Login (caisse)</div><input class="field-input" id="onexbet_km_login" placeholder="Login caisse" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Mot de passe caisse</div><input class="field-input" id="onexbet_km_cashierpass" type="password" placeholder="Cashierpass" style="font-family:monospace"/></div>
@@ -1452,7 +1473,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-top:8px"><input class="field-input" id="oxkmDiagUser" placeholder="ID joueur a tester (optionnel)" style="font-family:monospace"/></div>
               <pre id="oxkmDiagBox" style="display:none;white-space:pre-wrap;word-break:break-word;font-size:12px;padding:10px;border-radius:10px;margin-top:8px"></pre>
 
-              <div class="card-title" style="margin-top:18px">&#127918; API 1WIN</div>
+              <div class="card-title" id="s-1win" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg> API 1WIN</div>
               <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">R&eacute;seau diff&eacute;rent des autres : une seule cl&eacute;, une seule caisse, <b>en dollars</b>. Les montants Ariary et Franc comorien sont convertis au cours du jour, comme pour Deriv.</div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cl&eacute; API (X-API-KEY)</div><input class="field-input" id="onewin_apikey" type="password" placeholder="Cle recue par Telegram" style="font-family:monospace"/></div>
               <button class="btn btn-primary" onclick="save1win()">Enregistrer API 1WIN</button>
@@ -1467,13 +1488,13 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             </div>
 
             <div class="card" style="margin-bottom:14px">
-              <div class="card-title">&#128273; Passkeys (WebAuthn)</div>
+              <div class="card-title" id="s-passkeys"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M15 12v2"/></svg> Passkeys (WebAuthn)</div>
               <div id="passkeyList" style="font-size:13px;color:var(--text2);margin-bottom:10px">&mdash;</div>
               <button class="btn btn-primary" onclick="registerPasskey()">+ Enregistrer un passkey</button>
             </div>
 
             <div class="card">
-              <div class="card-title">
+              <div class="card-title" id="s-infos">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"/></svg>
                 Informations système
               </div>
@@ -1488,7 +1509,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 
           <div>
             <div class="card">
-              <div class="card-title">
+              <div class="card-title" id="s-terminal">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
                 Options Terminal
               </div>
@@ -3896,6 +3917,24 @@ async function fillUssdInputs(){
     });
     if(typeof showToast==='function') showToast('✅ Codes USSD chargés');
   }catch(e){ if(typeof showToast==='function') showToast('❌ Erreur chargement'); }
+}
+
+
+/* Sous-menu Parametres : ouvre la page puis fait defiler jusqu'a la section. */
+function allerSection(id){
+  showPage('settings');
+  setTimeout(function(){ loadPasskeys(); loadDeriv(); loadRate(); loadBetwinner(); loadOrangePay(); fillUssdInputs(); }, 60);
+  setTimeout(function(){
+    var el=document.getElementById(id); if(!el) return;
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    var c=el.closest('.card')||el; var bg=c.style.boxShadow;
+    c.style.transition='box-shadow .4s'; c.style.boxShadow='0 0 0 2px rgba(41,121,255,.55)';
+    setTimeout(function(){ c.style.boxShadow=bg||''; },1400);
+    var sb=document.getElementById('sidebar'); if(sb) sb.classList.remove('open');
+  }, 220);
+}
+function basculerSousMenu(){
+  var m=document.getElementById('subSettings'); if(m) m.classList.toggle('open');
 }
 
 </script>
