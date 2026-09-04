@@ -369,6 +369,7 @@ tbody tr:hover td{background:var(--blue-light)}
   color:rgba(255,255,255,.55);transition:background .15s,color .15s}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 .sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
+.cst-p.on{background:#1B6CF2;color:#fff}
 .cli-menu{position:relative;display:inline-block}
 .cli-dots{background:none;border:0;cursor:pointer;padding:4px;border-radius:8px;color:var(--text3)}
 .cli-dots:hover{background:rgba(127,127,127,.14);color:var(--text)}
@@ -922,7 +923,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 
     <nav class="cli-nav" id="cliNav">
         <button id="cn-clients" onclick="ouvrirClient('clients')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>Comptes</button>
-        <button id="cn-stats" onclick="ouvrirClient('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Statistiques</button>
+        <button id="cn-cstats" onclick="ouvrirClient('cstats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Statistiques</button>
         <button id="cn-demandes" onclick="ouvrirClient('demandes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Demandes</button>
         <button id="cn-annonces" onclick="ouvrirClient('annonces')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 11v3a1 1 0 0 0 1 1h3l4 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>Annonces</button>
     </nav>
@@ -1292,6 +1293,27 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       </div>
 
       <!-- ══ STATS ══ -->
+      <div class="page" id="page-cstats">
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title">Activit&eacute; des clients</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button class="btn cst-p on" data-p="jour"    onclick="chargerStatsClient('jour')">Jour</button>
+            <button class="btn cst-p"    data-p="semaine" onclick="chargerStatsClient('semaine')">Semaine</button>
+            <button class="btn cst-p"    data-p="mois"    onclick="chargerStatsClient('mois')">Mois</button>
+          </div>
+          <div id="cstBar" style="min-height:210px"></div>
+          <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:12px">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#1B6CF2"></span> D&eacute;p&ocirc;ts</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#FF9800"></span> Retraits</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Inscriptions</div>
+          <div id="cstDonut" style="display:flex;justify-content:center;padding:8px 0"></div>
+          <div id="cstLeg" style="text-align:center;font-size:12.5px;color:var(--text3)"></div>
+        </div>
+      </div>
+
       <div class="page" id="page-demandes">
         <div class="card">
           <div class="card-title">Demandes de changement de num&eacute;ro</div>
@@ -2473,13 +2495,13 @@ async function loadClients(){
     const etat  = u.active
       ? '<span style="color:#16a34a;font-weight:700">Actif</span>'
       : '<span style="color:#dc2626;font-weight:700">D&eacute;sactiv&eacute;</span>';
-    return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
+    return '<div style="position:relative;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
       + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
       +   '<div style="min-width:0"><div style="font-weight:800;font-size:14px">'+(u.name||'(sans nom)')+'</div>'
       +   '<div style="font-size:12px;color:var(--text3);word-break:break-all">'+ident+'</div>'
       +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+(u.country||'')+(u.kmAccount?' · Comores (Fc)':'')+'</div>'
       +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+four+'</div></div>'
-      +   '<div style="text-align:right"><div style="font-size:12px;margin-bottom:6px">'+etat+'</div>'
+      +   '<div style="position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:8px"><div style="font-size:12px">'+etat+'</div>'
       +   '<div class="cli-menu"><button class="cli-dots" onclick="basculerMenuClient(event,\''+u.id+'\')" title="Actions">'
       +     '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>'
       +     '<div class="cli-pop" id="pop-'+u.id+'">'
@@ -3996,12 +4018,12 @@ function basculerSousMenu(){
 
 
 /* Espace client : barre du bas propre a ces quatre pages. */
-var PAGES_CLIENT = ['clients','stats','demandes','annonces'];
+var PAGES_CLIENT = ['clients','cstats','demandes','annonces'];
 function ouvrirClient(pg){
   showPage(pg);
   if(pg==='clients')  setTimeout(loadClients,80);
   if(pg==='annonces') setTimeout(loadAnnonces,80);
-  if(pg==='stats')    setTimeout(loadStats,80);
+  if(pg==='cstats')   setTimeout(function(){chargerStatsClient('jour');},80);
   majBarreClient(pg);
 }
 function majBarreClient(pg){
@@ -4034,6 +4056,43 @@ async function supprimerClient(id, nom){
   var d = await apiClient('/api/admin/users/'+id, {method:'DELETE'});
   if(d && d.ok){ showToast('Compte supprime'); loadClients(); }
   else showToast('Suppression impossible');
+}
+
+
+/* Statistiques des comptes clients : histogramme depots/retraits + anneau. */
+function chargerStatsClient(p){
+  document.querySelectorAll('.cst-p').forEach(function(b){ b.classList.toggle('on', b.dataset.p===p); });
+  apiClient('/api/admin/stats?periode='+p).then(function(d){
+    if(!d || !d.ok) return;
+    var bar=document.getElementById('cstBar');
+    var max=Math.max(1, Math.max.apply(null, d.depot.concat(d.retrait)));
+    var h='<div style="display:flex;align-items:flex-end;gap:10px;height:190px">';
+    d.labels.forEach(function(lb,i){
+      var hd=Math.round(d.depot[i]/max*150), hr=Math.round(d.retrait[i]/max*150);
+      h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">'
+       +   '<div style="display:flex;align-items:flex-end;gap:3px;height:155px">'
+       +     '<div title="Depots: '+d.depot[i]+'" style="width:12px;height:'+hd+'px;border-radius:3px 3px 0 0;background:#1B6CF2"></div>'
+       +     '<div title="Retraits: '+d.retrait[i]+'" style="width:12px;height:'+hr+'px;border-radius:3px 3px 0 0;background:#FF9800"></div>'
+       +   '</div>'
+       +   '<div style="font-size:9.5px;color:var(--text3)">'+lb.slice(5)+'</div>'
+       + '</div>';
+    });
+    bar.innerHTML=h+'</div>';
+
+    var tot=d.inscriptions.reduce(function(a,b){return a+b;},0);
+    var act=d.actifs||0, ina=d.inactifs||0, tc=d.totalClients||1;
+    var pa=Math.round(act/tc*100);
+    var don=document.getElementById('cstDonut');
+    don.innerHTML='<svg width="168" height="168" viewBox="0 0 42 42">'
+      +'<circle cx="21" cy="21" r="15.9" fill="none" stroke="rgba(127,127,127,.18)" stroke-width="5"/>'
+      +'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#16a34a" stroke-width="5" stroke-linecap="round"'
+      +' stroke-dasharray="'+pa+' '+(100-pa)+'" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>'
+      +'<text x="21" y="20.5" text-anchor="middle" font-size="6.5" font-weight="800" fill="currentColor">'+tc+'</text>'
+      +'<text x="21" y="26" text-anchor="middle" font-size="3.2" fill="#94a3b8">comptes</text></svg>';
+    document.getElementById('cstLeg').innerHTML=
+      '<b style="color:#16a34a">'+act+'</b> actifs &nbsp;·&nbsp; <b style="color:#dc2626">'+ina+'</b> d&eacute;sactiv&eacute;s'
+      +'<br>'+tot+' inscription(s) sur la p&eacute;riode';
+  });
 }
 
 </script>
