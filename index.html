@@ -833,7 +833,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       <button class="nav-item" onclick="showPage('retrait')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
         <span>SMS Retrait</span>
-        <span class="nav-badge yellow" id="retraitBadge" style="display:none">0</span>
+        <span class="nav-badge yellow" id="retraitBadge" style="display:none">0</span><span class="nav-badge" id="rembBadge" title="Encaissements a rembourser" style="display:none;background:rgba(22,163,74,.9);color:#fff">0</span>
       </button>
 
       <div class="nav-section">// Gestion</div>
@@ -2594,6 +2594,8 @@ async function loadDashboard(){
   const retSeul = (d.retrait?.pendingRetrait != null) ? d.retrait.pendingRetrait : retPend;
   majBadge('smsBadge', depPend);
   majBadge('retraitBadge', retSeul);
+  // Encaissement sans envoi : l'argent attend d'etre remis en caisse.
+  majBadge('rembBadge', (d.retrait && d.retrait.aRembourser) || 0);
   if(retSeul>0 || depPend>0){const nd=document.getElementById('notifDot'); if(nd) nd.style.display='block';}
   const bal=d.balances||{};
   // Operators connectés avy amin'ny devices online
@@ -3309,6 +3311,8 @@ async function updateBadges(){
   const retSeul = (d.retrait?.pendingRetrait != null) ? d.retrait.pendingRetrait : retPend;
   majBadge('smsBadge', depPend);
   majBadge('retraitBadge', retSeul);
+  // Encaissement sans envoi : l'argent attend d'etre remis en caisse.
+  majBadge('rembBadge', (d.retrait && d.retrait.aRembourser) || 0);
   if(retSeul>0 || depPend>0){
     const nd=document.getElementById('notifDot');
     if(nd) nd.style.display='block';
