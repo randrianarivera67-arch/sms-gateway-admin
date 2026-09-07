@@ -2803,6 +2803,11 @@ function renderRetraits(list){
     const cidShort=cid?cid.slice(0,8)+'…':'—';
     const deriv=(r.provider||r.providerId)?((r.provider||'')+(r.providerId?(' '+r.providerId):'')):'—';
     const showRelance = r.status==='failed';
+    // Remboursement : l'argent est sorti de la caisse du bookmaker mais le
+    // Mobile Money n'est jamais parti. On le remet sur le compte de jeu.
+    const showRemb = r.status==='failed' && !r.rembourseLe
+      && ['Betwinner','1XBET','1WIN'].indexOf(r.provider)>=0
+      && r.providerId && r.montant>0;
     return `<tr style="cursor:pointer" onclick="showRetraitDetail('${r._id}')">
       <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${opIcon(r.operator)}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
@@ -2814,7 +2819,7 @@ function renderRetraits(list){
       <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
       <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
       <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${r.lastUssdResponse?(/erreur|echec|insuffisant|invalide|fail/i.test(r.lastUssdResponse)?'#EF4444':'#2bd07a'):'var(--text3)'}" title="${esc(r.lastUssdResponse||'')}">${esc((r.lastUssdResponse||'—').slice(0,40))}</td>
-      <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}${showRelance?`<button class="btn-neon" style="background:rgba(255,184,0,.22);color:#FFB800;border:1.5px solid rgba(255,184,0,.55);padding:7px 14px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px" onclick="relancerRetrait('${r._id}')" title="Relancer (${r.relanceCount||0}x)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:15px;height:15px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>Relancer</button>`:''}</td>
+      <td onclick="event.stopPropagation()">${r.status==='processing'?`<button class="btn-neon ok" onclick="valideRetrait('${r._id}')" title="Valider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button><button class="btn-neon no" onclick="refuseRetrait('${r._id}')" title="Refuser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}${showRelance?`<button class="btn-neon" style="background:rgba(255,184,0,.22);color:#FFB800;border:1.5px solid rgba(255,184,0,.55);padding:7px 14px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px" onclick="relancerRetrait('${r._id}')" title="Relancer (${r.relanceCount||0}x)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:15px;height:15px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>Relancer</button>`:''}${showRemb?`<button class="btn-neon" style="background:rgba(22,163,74,.2);color:#16a34a;border:1.5px solid rgba(22,163,74,.55);padding:7px 14px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px;margin-left:6px" onclick="rembourserRetrait('${r._id}','${r.provider}','${r.montant}','${r.devise||'Ar'}')" title="Remettre l'argent sur le compte de jeu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:15px;height:15px"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>Rembourser</button>`:''}</td>
     </tr>`;
   }).join('');
 }
@@ -4142,6 +4147,18 @@ async function deciderDemande(id, decision){
             {method:'POST', body: JSON.stringify({decision: decision})});
   if(d && d.ok){ showToast(decision==='approuve'?'Demande approuvee':'Demande refusee'); chargerDemandes('en_attente'); }
   else showToast((d && d.error) || 'Action impossible');
+}
+
+
+/* Remboursement caisse : l'encaissement a eu lieu, le Mobile Money non.
+   Double confirmation, parce que l'operation deplace de l'argent reel. */
+async function rembourserRetrait(id, provider, montant, devise){
+  if(!confirm('Rembourser ce retrait ?\n\n' + Number(montant).toLocaleString('fr-FR') + ' ' + devise
+    + ' seront remis sur le compte ' + provider + ' du client.')) return;
+  if(!confirm('Verifiez d\'abord que l\'argent n\'a pas deja ete envoye a la main.\n\nConfirmer le remboursement ?')) return;
+  const d = await api('/api/retrait/'+id+'/rembourser', {method:'POST'});
+  if(d?.ok){ showToast('Rembourse — ' + (d.detail||'')); loadRetraits(); }
+  else showToast((d && d.error) || 'Remboursement impossible');
 }
 
 </script>
