@@ -2297,14 +2297,21 @@ async function loadAlertes(){
       +'</div>'
       +(pending?('<div style="display:flex;gap:8px;margin-top:10px">'
         +'<button class="btn btn-outline btn-sm" style="flex:1;justify-content:center" onclick="alertAction(\''+a._id+'\',\'verifier\')">V&eacute;rifier</button>'
-        +'<button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="alertAction(\''+a._id+'\',\'valider\')">Valider</button>'
+        +'<button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="alertAction(\''+a._id+'\',\'valider\','+Number(a.montantRecu||0)+')">Valider</button>'
         +'<button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;color:#e74c3c;border-color:#e74c3c" onclick="alertAction(\''+a._id+'\',\'refuser\')">Refuser</button>'
       +'</div>'):'')
     +'</div>';
   }).join('');
   refreshAlertBadge();
 }
-async function alertAction(id, action){
+async function alertAction(id, action, montantRecu){
+  // Un delta de solde nul signifie qu'aucun mouvement n'a ete constate sur la
+  // SIM : valider creditera le client sans qu'on ait rien recu. On le dit
+  // clairement plutot que de laisser le clic passer comme les autres.
+  if(action === 'valider' && Number(montantRecu||0) === 0){
+    if(!confirm("Aucun mouvement de solde n'a ete constate pour cet ordre.\n\n"
+      + "Valider creditera quand meme le client. Verifiez le releve de l'operateur avant de continuer.\n\nContinuer ?")) return;
+  }
   if(action!=='verifier' && !confirm('Confirmer : '+action+' ?')) return;
   const d=await api('/api/alert/'+id+'/'+action,{method:'POST'});
   if(!d || d.error){ showToast('Erreur: '+((d&&d.error)||'echec')); return; }
