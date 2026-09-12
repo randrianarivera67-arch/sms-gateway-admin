@@ -864,6 +864,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       <button class="sub-item" onclick="allerSection('s-serveur')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Configuration serveur</button>
       <button class="sub-item" onclick="allerSection('s-cours')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a3 3 0 0 0-3-1.5c-1.7 0-3 1-3 2.3s1.3 2 3 2.3 3 1 3 2.3-1.3 2.3-3 2.3a3 3 0 0 1-3-1.5"/></svg>Cours d'&eacute;change</button>
       <button class="sub-item" onclick="allerSection('s-deriv')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>API Deriv</button>
+      <button class="sub-item" id="sub-binance" onclick="allerSection('s-binance')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 7 7l2 2 3-3 3 3 2-2zM5 12l2-2 2 2-2 2zM17 12l2-2 2 2-2 2zM12 22l-5-5 2-2 3 3 3-3 2 2z"/></svg>API Binance</button>
       <button class="sub-item" onclick="allerSection('s-orange')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M16 12h4"/></svg>API Orange Money</button>
       <button class="sub-item" onclick="allerSection('s-betwinner')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API Betwinner</button>
       <button class="sub-item" onclick="allerSection('s-1xbet')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API 1XBET</button>
@@ -1448,7 +1449,31 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Fc)</div><input class="field-input" id="rate_retrait_km" type="number" placeholder="450" style="font-family:monospace"/></div>
             </div>
             <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
-            <div class="card-title" id="s-deriv"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg> API Deriv (Payment Agent)</div>
+            <div class="card-title" id="s-binance" style="margin-top:18px">
+                <svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 7 7l2 2 3-3 3 3 2-2zM5 12l2-2 2 2-2 2zM17 12l2-2 2 2-2 2zM12 22l-5-5 2-2 3 3 3-3 2 2z"/></svg> API Binance (USDT)
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">Cl&eacute; en <b>lecture seule</b>, avec restriction d'IP sur le serveur. Elle sert &agrave; constater les d&eacute;p&ocirc;ts USDT re&ccedil;us, jamais &agrave; envoyer.</div>
+              <div class="form-grid">
+                <div class="field"><label>API KEY</label><input id="bn_key" placeholder="cl&eacute; publique"></div>
+                <div class="field"><label>API SECRET</label><input id="bn_secret" type="password" placeholder="laisser vide pour ne pas changer"></div>
+              </div>
+              <div id="bn_empreinte" style="font-size:11px;color:var(--text3);margin:4px 0 10px"></div>
+              <div class="form-grid">
+                <div class="field"><label>ADRESSE USDT &mdash; BEP20</label><input id="bn_bep20" placeholder="0x..."></div>
+                <div class="field"><label>ADRESSE USDT &mdash; TRC20</label><input id="bn_trc20" placeholder="T..."></div>
+              </div>
+              <div class="card-title" style="margin-top:14px;font-size:12px">Cours USDT</div>
+              <div class="form-grid">
+                <div class="field"><label>D&Eacute;P&Ocirc;T (1 USDT = ? Ar)</label><input id="bn_rd" type="number" step="0.01"></div>
+                <div class="field"><label>RETRAIT (1 USDT = ? Ar)</label><input id="bn_rr" type="number" step="0.01"></div>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label>D&Eacute;P&Ocirc;T COMORES (1 USDT = ? Fc)</label><input id="bn_rdkm" type="number" step="0.01"></div>
+                <div class="field"><label>RETRAIT COMORES (1 USDT = ? Fc)</label><input id="bn_rrkm" type="number" step="0.01"></div>
+              </div>
+              <button class="btn btn-primary" onclick="saveBinance()">Enregistrer API Binance</button>
+
+              <div class="card-title" id="s-deriv"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg> API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/><div id="deriv_token_etat" style="font-size:11px;margin-top:6px;line-height:1.5"></div></div>
               <div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">CR Agent</div><input class="field-input" id="deriv_cr_agent" placeholder="CRxxxxxxx" style="font-family:monospace"/></div>
@@ -3998,7 +4023,7 @@ async function fillUssdInputs(){
 /* Sous-menu Parametres : ouvre la page puis fait defiler jusqu'a la section. */
 function allerSection(id){
   showPage('settings');
-  setTimeout(function(){ loadPasskeys(); loadDeriv(); loadRate(); loadBetwinner(); loadOrangePay(); fillUssdInputs(); }, 60);
+  setTimeout(function(){ loadPasskeys(); loadDeriv(); loadRate(); loadBetwinner(); loadOrangePay(); fillUssdInputs(); loadBinance(); }, 60);
   setTimeout(function(){
     var el=document.getElementById(id); if(!el) return;
     el.scrollIntoView({behavior:'smooth',block:'start'});
@@ -4170,6 +4195,58 @@ async function rembourserRetrait(id, provider, montant, devise){
   const d = await api('/api/retrait/'+id+'/rembourser', {method:'POST'});
   if(d?.ok){ showToast('Rembourse — ' + (d.detail||'')); loadRetraits(); }
   else showToast((d && d.error) || 'Remboursement impossible');
+}
+
+
+/* API Binance : depots USDT. Reserve a DiamCash — la cle et les adresses
+   n'ont pas de sens sur une autre installation, la section y est masquee. */
+function binanceActif(){ return /diamcash/i.test(typeof CLIENT_API !== 'undefined' ? CLIENT_API : ''); }
+
+async function loadBinance(){
+  const masquer = !binanceActif();
+  const sec = document.getElementById('s-binance');
+  const men = document.getElementById('sub-binance');
+  if(masquer){
+    if(men) men.style.display='none';
+    if(sec) sec.style.display='none';
+    ['bn_key','bn_secret','bn_bep20','bn_trc20','bn_rd','bn_rr','bn_rdkm','bn_rrkm'].forEach(function(id){
+      const e=document.getElementById(id);
+      if(e && e.closest('.field')) e.closest('.field').style.display='none';
+    });
+    const emp=document.getElementById('bn_empreinte'); if(emp) emp.style.display='none';
+    const b=document.querySelector('button[onclick="saveBinance()"]'); if(b) b.style.display='none';
+    return;
+  }
+  const d=await api('/api/binance/config');
+  if(!d) return;
+  const set=function(id,v){const e=document.getElementById(id); if(e) e.value=(v===0?'':v)||'';};
+  set('bn_key', d.binance_api_key);
+  set('bn_bep20', d.binance_adresse_bep20);
+  set('bn_trc20', d.binance_adresse_trc20);
+  set('bn_rd', d.rate_usdt_depot);
+  set('bn_rr', d.rate_usdt_retrait);
+  set('bn_rdkm', d.rate_usdt_depot_km);
+  set('bn_rrkm', d.rate_usdt_retrait_km);
+  const emp=document.getElementById('bn_empreinte');
+  if(emp) emp.innerHTML = d.binance_secret_present
+    ? ('\u2714 Secret enregistr\u00e9 <span style="opacity:.6">'+d.binance_secret_empreinte+'</span>')
+    : '<span style="color:#dc2626">Aucun secret enregistr\u00e9</span>';
+}
+
+async function saveBinance(){
+  const g=function(id){const e=document.getElementById(id);return e?e.value.trim():'';};
+  const corps={
+    binance_adresse_bep20:g('bn_bep20'), binance_adresse_trc20:g('bn_trc20'),
+    rate_usdt_depot:g('bn_rd'), rate_usdt_retrait:g('bn_rr'),
+    rate_usdt_depot_km:g('bn_rdkm'), rate_usdt_retrait_km:g('bn_rrkm')
+  };
+  // Champs vides ignores cote serveur : enregistrer les adresses ne doit pas
+  // effacer la cle deja en place.
+  if(g('bn_key')) corps.binance_api_key=g('bn_key');
+  if(g('bn_secret')) corps.binance_api_secret=g('bn_secret');
+  const r=await api('/api/binance/config',{method:'POST',body:JSON.stringify(corps)});
+  if(r&&r.ok){ showToast('API Binance enregistre'); document.getElementById('bn_secret').value=''; loadBinance(); }
+  else showToast('Erreur: '+((r&&r.error)||'echec'));
 }
 
 </script>
