@@ -369,7 +369,7 @@ tbody tr:hover td{background:var(--blue-light)}
   color:rgba(255,255,255,.55);transition:background .15s,color .15s}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 .sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
-.cst-p.on,.dem-f.on{background:#1B6CF2;color:#fff}
+.cst-p.on,.dem-f.on,.uw-f.on{background:#1B6CF2;color:#fff}
 .cli-menu{position:relative;display:inline-block}
 .cli-dots{background:none;border:0;cursor:pointer;padding:4px;border-radius:8px;color:var(--text3)}
 .cli-dots:hover{background:rgba(127,127,127,.14);color:var(--text)}
@@ -1324,6 +1324,15 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <button class="btn dem-f"    data-s="toutes"     onclick="chargerDemandes('toutes')">Toutes</button>
           </div>
           <div id="demandesList" style="font-size:13px">Chargement...</div>
+        </div>
+        <div class="card" id="carteUsdtWallets" style="margin-top:14px;display:none">
+          <div class="card-title">Portefeuilles USDT &agrave; valider</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">La capture prouve que l'adresse appartient bien au portefeuille annonc&eacute;. TRC20 est r&eacute;serv&eacute; aux comptes Binance.</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn uw-f on" data-s="en_attente" onclick="chargerUsdtWallets('en_attente')">En attente</button>
+            <button class="btn uw-f"    data-s="toutes"     onclick="chargerUsdtWallets('toutes')">Tous</button>
+          </div>
+          <div id="usdtWalletsList" style="font-size:13px">Chargement...</div>
         </div>
       </div>
 
@@ -4075,7 +4084,7 @@ function ouvrirClient(pg){
   showPage(pg);
   if(pg==='clients')  setTimeout(loadClients,80);
   if(pg==='annonces') setTimeout(loadAnnonces,80);
-  if(pg==='demandes') setTimeout(function(){chargerDemandes('en_attente');},80);
+  if(pg==='demandes') setTimeout(function(){chargerDemandes('en_attente');chargerUsdtWallets('en_attente');},80);
   if(pg==='cstats')   setTimeout(function(){chargerStatsClient('jour');},80);
   majBarreClient(pg);
 }
@@ -4292,6 +4301,59 @@ async function saveMaintenanceMsg(){
   const r = await api('/api/stats/maintenance', {method:'POST', body: JSON.stringify({
     depot_message: g('mtDepotMsg'), retrait_message: g('mtRetraitMsg') })});
   showToast(r && r.ok ? 'Messages enregistres' : 'Erreur');
+}
+
+
+/* Portefeuilles USDT : reserve a DiamCash, masque ailleurs. */
+function usdtActif(){ return /diamcash/i.test(typeof CLIENT_API !== 'undefined' ? CLIENT_API : ''); }
+
+async function chargerUsdtWallets(statut){
+  const carte = document.getElementById('carteUsdtWallets');
+  if(!usdtActif()){ if(carte) carte.style.display='none'; return; }
+  if(carte) carte.style.display='';
+  statut = statut || 'en_attente';
+  document.querySelectorAll('.uw-f').forEach(function(b){ b.classList.toggle('on', b.dataset.s===statut); });
+  const box = document.getElementById('usdtWalletsList');
+  box.innerHTML = 'Chargement...';
+  const d = await api('/api/admin/usdt-wallets?statut=' + statut);
+  if(!d || !d.ok){ box.innerHTML = '<span style="color:#dc2626">Chargement impossible.</span>'; return; }
+  if(!d.wallets.length){ box.innerHTML = '<span style="color:var(--text3)">Aucun portefeuille.</span>'; return; }
+  box.innerHTML = d.wallets.map(function(w){
+    const c = w.client || {};
+    const badge = w.statut==='en_attente' ? '<span style="color:#b45309;font-weight:700">En attente</span>'
+                : w.statut==='valide'     ? '<span style="color:#16a34a;font-weight:700">Valid&eacute;</span>'
+                                          : '<span style="color:#dc2626;font-weight:700">Refus&eacute;</span>';
+    const actions = w.statut==='en_attente'
+      ? '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+        + '<button class="btn" style="background:#16a34a;color:#fff;padding:6px 12px;font-size:12px" onclick="deciderUsdtWallet(\''+w._id+'\',\'valide\')">Valider</button>'
+        + '<button class="btn" style="background:#dc2626;color:#fff;padding:6px 12px;font-size:12px" onclick="deciderUsdtWallet(\''+w._id+'\',\'refuse\')">Refuser</button></div>'
+      : (w.motif ? '<div style="font-size:11.5px;color:var(--text3);margin-top:8px">Motif : '+w.motif+'</div>' : '');
+    const preuve = w.preuve
+      ? '<img src="'+CLIENT_API+'/api/photo/'+encodeURIComponent(w.preuve)+'" alt="preuve" '
+        + 'style="width:100%;max-width:260px;border-radius:10px;margin-top:10px;cursor:pointer" '
+        + 'onclick="window.open(this.src,\'_blank\')">'
+      : '<div style="font-size:11.5px;color:#dc2626;margin-top:8px">Aucune capture fournie</div>';
+    return '<div style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
+      + '<div style="display:flex;justify-content:space-between;gap:10px"><div style="font-weight:800;font-size:13.5px">'
+      + (c.name||'(sans nom)') + '</div>' + badge + '</div>'
+      + '<div style="font-size:11.5px;color:var(--text3);margin:2px 0 8px">' + (c.email||c.phone||'') + '</div>'
+      + '<div style="font-size:12.5px"><b>' + String(w.reseau||'').toUpperCase() + '</b>'
+      + (w.portefeuille ? (' &middot; ' + w.portefeuille) : '') + '</div>'
+      + '<div style="font-size:11.5px;word-break:break-all;color:var(--text3);margin-top:3px">' + (w.adresse||'') + '</div>'
+      + preuve + actions + '</div>';
+  }).join('');
+}
+
+async function deciderUsdtWallet(id, decision){
+  let motif = '';
+  if(decision === 'refuse'){
+    motif = prompt('Motif du refus (visible par le client) :') || '';
+    if(!motif.trim()) return;
+  } else if(!confirm('Valider ce portefeuille ?\n\nV&eacute;rifiez que la capture correspond bien a l\'adresse.')) return;
+  const d = await api('/api/admin/usdt-wallets/'+id+'/decision',
+    {method:'POST', body: JSON.stringify({decision: decision, motif: motif})});
+  if(d && d.ok){ showToast(decision==='valide'?'Portefeuille valide':'Portefeuille refuse'); chargerUsdtWallets('en_attente'); }
+  else showToast((d && d.error) || 'Action impossible');
 }
 
 </script>
