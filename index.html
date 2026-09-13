@@ -370,6 +370,13 @@ tbody tr:hover td{background:var(--blue-light)}
 .sub-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 .sub-item .ico-n{width:14px;height:14px;flex-shrink:0;opacity:.85}
 .cst-p.on,.dem-f.on,.uw-f.on{background:#1B6CF2;color:#fff}
+
+.cli-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
+.cli-table th{text-align:left;padding:9px 10px;font-size:10.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.04em;color:var(--text3);
+  border-bottom:1.5px solid var(--border);white-space:nowrap}
+.cli-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.cli-table tbody tr:hover{background:rgba(127,127,127,.06)}
 .cli-menu{position:relative;display:inline-block}
 .cli-dots{background:none;border:0;cursor:pointer;padding:4px;border-radius:8px;color:var(--text3)}
 .cli-dots:hover{background:rgba(127,127,127,.14);color:var(--text)}
@@ -2563,28 +2570,71 @@ async function loadClients(){
   if(!d || !d.ok){ box.innerHTML = '<div style="padding:14px;color:#dc2626">Impossible de charger les comptes.</div>'; return; }
   if(inf) inf.textContent = d.total + ' compte(s)';
   if(!d.users.length){ box.innerHTML = '<div style="padding:14px;color:var(--text3)">Aucun compte.</div>'; return; }
-  box.innerHTML = d.users.map(function(u){
-    const ident = u.email || u.phone || '—';
-    const four  = (u.providers||[]).map(function(p){return p.name+' '+p.accountId;}).join(' · ') || 'aucun fournisseur';
-    const etat  = u.active
-      ? '<span style="color:#16a34a;font-weight:700">Actif</span>'
-      : '<span style="color:#dc2626;font-weight:700">D&eacute;sactiv&eacute;</span>';
-    return '<div style="position:relative;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px;background:var(--bg)">'
-      + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
-      +   '<div style="min-width:0"><div style="font-weight:800;font-size:14px">'+(u.name||'(sans nom)')+'</div>'
-      +   '<div style="font-size:12px;color:var(--text3);word-break:break-all">'+ident+'</div>'
-      +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+(u.country||'')+(u.kmAccount?' · Comores (Fc)':'')+'</div>'
-      +   '<div style="font-size:11px;color:var(--text3);margin-top:3px">'+four+'</div></div>'
-      +   '<div style="position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:8px"><div style="font-size:12px">'+etat+'</div>'
-      +   '<div class="cli-menu"><button class="cli-dots" onclick="basculerMenuClient(event,\''+u.id+'\')" title="Actions">'
-      +     '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>'
-      +     '<div class="cli-pop" id="pop-'+u.id+'">'
-      +       '<button onclick="toggleClient(\''+u.id+'\','+(!u.active)+')">'+(u.active?'D&eacute;sactiver':'Activer')+'</button>'
-      +       '<button onclick="mdpClient(\''+u.id+'\')">R&eacute;initialiser le mot de passe</button>'
-      +       '<button class="danger" onclick="supprimerClient(\''+u.id+'\',\''+String(u.name||'').replace(/'/g,"")+'\')">Supprimer</button>'
-      +     '</div></div></div>'
+  // Tableau a defilement horizontal : douze colonnes ne tiennent pas sur un
+  // telephone, mais les masquer obligerait a ouvrir chaque fiche.
+  const OPNOM = {mvola:'Telma', orange:'Orange', airtel:'Airtel', mvola_km:'Telma Comores'};
+  const num = function(u, op){
+    const w = (u.wallets||[]).find(function(x){ return x.operator === op; });
+    return w ? w.numero : '—';
+  };
+  const prov = function(u, nom){
+    const p = (u.providers||[]).find(function(x){ return new RegExp(nom,'i').test(x.name||''); });
+    return p ? p.accountId : '—';
+  };
+  const ech = function(v){
+    return String(v == null ? '' : v).replace(/[<>&]/g, function(c){
+      return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];
+    });
+  };
+
+  const lignes = d.users.map(function(u, i){
+    const aff = affilieDispo()
+      ? (u.affilie
+        ? '<button class="btn" style="background:#7c3aed;color:#fff;padding:4px 10px;font-size:11px;font-weight:800" onclick="basculerAffilie(\''+u.id+'\',false)">Retir&eacute;</button>'
+        : '<button class="btn" style="background:rgba(124,58,237,.14);color:#7c3aed;border:1.5px solid rgba(124,58,237,.45);padding:4px 10px;font-size:11px;font-weight:800" onclick="basculerAffilie(\''+u.id+'\',true)">Affili&eacute;</button>')
+      : '—';
+    const act = affilieDispo()
+      ? (u.affilie
+        ? '<span style="color:#16a34a;font-weight:800;font-size:11px">Active</span>'
+        : '<span style="color:#dc2626;font-weight:800;font-size:11px">Bloqu&eacute;</span>')
+      : '—';
+    const etat = u.active
+      ? '<span style="color:#16a34a;font-weight:700;font-size:11px">Actif</span>'
+      : '<span style="color:#dc2626;font-weight:700;font-size:11px">D&eacute;sactiv&eacute;</span>';
+    const menu = '<div class="cli-menu"><button class="cli-dots" onclick="basculerMenuClient(event,\''+u.id+'\')" title="Actions">'
+      + '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>'
+      + '<div class="cli-pop" id="pop-'+u.id+'">'
+      + '<button onclick="toggleClient(\''+u.id+'\','+(!u.active)+')">'+(u.active?'D&eacute;sactiver':'Activer')+'</button>'
+      + '<button onclick="mdpClient(\''+u.id+'\')">R&eacute;initialiser le mot de passe</button>'
+      + '<button class="danger" onclick="supprimerClient(\''+u.id+'\',\''+String(u.name||'').replace(/\'/g,'')+'\')">Supprimer</button>'
       + '</div></div>';
+    return '<tr>'
+      + '<td>'+(i+1)+'</td>'
+      + '<td style="font-weight:700;white-space:nowrap">'+ech(u.name||'(sans nom)')+'</td>'
+      + '<td style="white-space:nowrap">'+ech(u.email||'—')+'</td>'
+      + '<td style="white-space:nowrap">'+ech(u.phone||'—')+'</td>'
+      + '<td style="white-space:nowrap">'+ech(prov(u,'deriv'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(prov(u,'1xbet|onexbet'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(prov(u,'betwinner'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(prov(u,'1win|onewin'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(num(u,'orange'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(num(u,'airtel'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(num(u,'mvola'))+'</td>'
+      + '<td style="white-space:nowrap">'+ech(num(u,'mvola_km'))+'</td>'
+      + '<td>'+etat+'</td>'
+      + '<td style="white-space:nowrap">'+aff+'</td>'
+      + '<td>'+act+'</td>'
+      + '<td>'+menu+'</td>'
+      + '</tr>';
   }).join('');
+
+  box.innerHTML = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
+    + '<table class="cli-table"><thead><tr>'
+    + '<th>#</th><th>Nom</th><th>Email</th><th>T&eacute;l&eacute;phone</th>'
+    + '<th>Deriv</th><th>1XBET</th><th>Betwinner</th><th>1WIN</th>'
+    + '<th>Orange</th><th>Airtel</th><th>Telma</th><th>Telma KM</th>'
+    + '<th>&Eacute;tat</th><th>Affili&eacute;</th><th>Action</th><th></th>'
+    + '</tr></thead><tbody>' + lignes + '</tbody></table></div>';
 }
 
 async function toggleClient(id, actif){
@@ -4392,6 +4442,23 @@ async function approuverToutesDemandes(){
     showToast(msg);
     chargerDemandes('en_attente');
   } else showToast((d && d.error) || 'Action impossible');
+}
+
+
+/* Le statut affilie n'existe que sur MATUL MADA : ailleurs, les cours dedies
+   ne sont pas configures et le bouton n'aurait aucun effet visible. */
+function affilieDispo(){
+  return /matulmada/i.test(typeof CLIENT_API !== 'undefined' ? CLIENT_API : '');
+}
+
+async function basculerAffilie(id, on){
+  if(!confirm(on
+    ? 'Passer ce client en affilie ?\n\nLe cours Deriv affilie s\'appliquera a ses depots et retraits.'
+    : 'Retirer le statut affilie ?\n\nLe client repassera au cours Deriv public.')) return;
+  const d = await apiClient('/api/admin/users/'+id+'/affilie',
+    {method:'POST', body: JSON.stringify({affilie: on})});
+  if(d && d.ok){ showToast(on ? 'Affilie active' : 'Affilie retire'); loadClients(); }
+  else showToast((d && d.error) || 'Action impossible');
 }
 
 </script>
