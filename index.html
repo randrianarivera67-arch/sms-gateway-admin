@@ -1322,6 +1322,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div style="display:flex;gap:8px;margin-bottom:12px">
             <button class="btn dem-f on" data-s="en_attente" onclick="chargerDemandes('en_attente')">En attente</button>
             <button class="btn dem-f"    data-s="toutes"     onclick="chargerDemandes('toutes')">Toutes</button>
+            <button class="btn" id="btnTout" style="margin-left:auto;background:#16a34a;color:#fff" onclick="approuverToutesDemandes()">Approuver tout</button>
           </div>
           <div id="demandesList" style="font-size:13px">Chargement...</div>
         </div>
@@ -1473,6 +1474,19 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours D&eacute;p&ocirc;t (1 USD = ? Fc)</div><input class="field-input" id="rate_depot_km" type="number" placeholder="460" style="font-family:monospace"/></div>
               <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Cours Retrait (1 USD = ? Fc)</div><input class="field-input" id="rate_retrait_km" type="number" placeholder="450" style="font-family:monospace"/></div>
+            </div>
+            <div id="blocAffilie">
+              <div style="font-size:11px;font-weight:800;color:#7c3aed;margin:10px 0 8px;text-transform:uppercase">Cours affili&eacute;s</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">Appliqu&eacute; aux clients marqu&eacute;s <b>Affili&eacute;</b> dans la liste des comptes. Laiss&eacute; &agrave; z&eacute;ro, c'est le cours public qui s'applique.</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+                <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t affili&eacute; (1 USD = ? Ar)</div><input class="field-input" id="rate_depot_aff" type="number" placeholder="0" style="font-family:monospace"/></div>
+                <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait affili&eacute; (1 USD = ? Ar)</div><input class="field-input" id="rate_retrait_aff" type="number" placeholder="0" style="font-family:monospace"/></div>
+              </div>
+              <div style="font-size:11px;font-weight:800;color:#00897B;margin:2px 0 8px;text-transform:uppercase">Comores affili&eacute;s &mdash; Fc</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+                <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">D&eacute;p&ocirc;t affili&eacute; (1 USD = ? Fc)</div><input class="field-input" id="rate_depot_km_aff" type="number" placeholder="0" style="font-family:monospace"/></div>
+                <div><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait affili&eacute; (1 USD = ? Fc)</div><input class="field-input" id="rate_retrait_km_aff" type="number" placeholder="0" style="font-family:monospace"/></div>
+              </div>
             </div>
             <button class="btn btn-primary" onclick="saveRate()" style="margin-bottom:14px">Enregistrer le cours</button>
             <div class="card-title" id="s-binance" style="margin-top:18px"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 7 7l2 2 3-3 3 3 2-2zM5 12l2-2 2 2-2 2zM17 12l2-2 2 2-2 2zM12 22l-5-5 2-2 3 3 3-3 2 2z"/></svg> API Binance (USDT)</div>
@@ -2026,10 +2040,18 @@ async function loadRate(){
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=(v||v===0)?v:'';};
   set('rate_depot',c.rate_depot); set('rate_retrait',c.rate_retrait);
   set('rate_depot_km',c.rate_depot_km); set('rate_retrait_km',c.rate_retrait_km);
+  set('rate_depot_aff',c.rate_depot_aff); set('rate_retrait_aff',c.rate_retrait_aff);
+  set('rate_depot_km_aff',c.rate_depot_km_aff); set('rate_retrait_km_aff',c.rate_retrait_km_aff);
+  // Les cours affilies sont propres a MATUL MADA : ailleurs, le bloc n'a pas
+  // de sens et resterait vide.
+  const ba=document.getElementById('blocAffilie');
+  if(ba) ba.style.display = /matulmada/i.test(typeof CLIENT_API!=='undefined'?CLIENT_API:'') ? '' : 'none';
 }
 async function saveRate(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
-  const res=await api('/api/rate',{method:'POST',body:JSON.stringify({rate_depot:g('rate_depot'),rate_retrait:g('rate_retrait'),rate_depot_km:g('rate_depot_km'),rate_retrait_km:g('rate_retrait_km')})});
+  const res=await api('/api/rate',{method:'POST',body:JSON.stringify({rate_depot:g('rate_depot'),rate_retrait:g('rate_retrait'),rate_depot_km:g('rate_depot_km'),rate_retrait_km:g('rate_retrait_km'),
+    rate_depot_aff:g('rate_depot_aff'),rate_retrait_aff:g('rate_retrait_aff'),
+    rate_depot_km_aff:g('rate_depot_km_aff'),rate_retrait_km_aff:g('rate_retrait_km_aff')})});
   if(res&&res.ok) showToast('Cours enregistre'); else showToast('Erreur: '+((res&&res.error)||'echec'));
 }
 async function loadDeriv(){
@@ -4354,6 +4376,22 @@ async function deciderUsdtWallet(id, decision){
     {method:'POST', body: JSON.stringify({decision: decision, motif: motif})});
   if(d && d.ok){ showToast(decision==='valide'?'Portefeuille valide':'Portefeuille refuse'); chargerUsdtWallets('en_attente'); }
   else showToast((d && d.error) || 'Action impossible');
+}
+
+
+/* Approbation groupee : utile quand plusieurs demandes identiques attendent.
+   Chacune est traitee separement cote serveur — une erreur sur l'une ne fait
+   pas echouer les autres, et le compte rendu dit ce qui est passe. */
+async function approuverToutesDemandes(){
+  if(!confirm('Approuver TOUTES les demandes en attente ?\n\n'
+    + 'Les numeros seront modifies ou supprimes immediatement.')) return;
+  const d = await api('/api/admin/demandes/approuver-tout', {method:'POST'});
+  if(d && d.ok){
+    let msg = d.traitees + ' / ' + d.total + ' demande(s) approuvee(s)';
+    if(d.echecs && d.echecs.length) msg += ' — ' + d.echecs.length + ' en echec';
+    showToast(msg);
+    chargerDemandes('en_attente');
+  } else showToast((d && d.error) || 'Action impossible');
 }
 
 </script>
