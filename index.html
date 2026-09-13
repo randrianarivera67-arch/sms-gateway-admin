@@ -861,6 +861,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <span>Paramètres</span>
       </button>
       <div class="sub-nav" id="subSettings">
+      <button class="sub-item" onclick="allerSection('s-maintenance')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5 5L4 17v3h3l5.7-5.7a4 4 0 0 1 5-5l2.3-2.3-3-3z"/></svg>Maintenance</button>
       <button class="sub-item" onclick="allerSection('s-serveur')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Configuration serveur</button>
       <button class="sub-item" onclick="allerSection('s-cours')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a3 3 0 0 0-3-1.5c-1.7 0-3 1-3 2.3s1.3 2 3 2.3 3 1 3 2.3-1.3 2.3-3 2.3a3 3 0 0 1-3-1.5"/></svg>Cours d'&eacute;change</button>
       <button class="sub-item" onclick="allerSection('s-deriv')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>API Deriv</button>
@@ -1369,7 +1370,23 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         </div>
 
         <div class="card">
-          <div class="card-title">Répartition par opérateur</div>
+          <div class="card-title" id="s-maintenance">
+                <svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5 5L4 17v3h3l5.7-5.7a4 4 0 0 1 5-5l2.3-2.3-3-3z"/></svg> Maintenance
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Suspend la <b>cr&eacute;ation</b> d'ordres. Les ordres d&eacute;j&agrave; en cours poursuivent leur traitement &mdash; un client qui a pay&eacute; doit &ecirc;tre servi.</div>
+              <div class="opt-row" style="margin-bottom:10px">
+                <div class="opt-info"><h4>D&eacute;p&ocirc;ts suspendus</h4><p>Le client ne peut plus cr&eacute;er de d&eacute;p&ocirc;t</p></div>
+                <button class="toggle" id="mtDepot" onclick="basculerMaintenance('depot')"><span class="knob"></span></button>
+              </div>
+              <div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Message d&eacute;p&ocirc;t (facultatif)</div><input class="field-input" id="mtDepotMsg" placeholder="Message affich&eacute; au client"/></div>
+              <div class="opt-row" style="margin-bottom:10px">
+                <div class="opt-info"><h4>Retraits suspendus</h4><p>Le client ne peut plus cr&eacute;er de retrait</p></div>
+                <button class="toggle" id="mtRetrait" onclick="basculerMaintenance('retrait')"><span class="knob"></span></button>
+              </div>
+              <div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Message retrait (facultatif)</div><input class="field-input" id="mtRetraitMsg" placeholder="Message affich&eacute; au client"/></div>
+              <button class="btn btn-primary" onclick="saveMaintenanceMsg()">Enregistrer les messages</button>
+
+              <div class="card-title">Répartition par opérateur</div>
           <div id="opBars"></div>
         </div>
       </div>
@@ -4013,7 +4030,7 @@ async function fillUssdInputs(){
 /* Sous-menu Parametres : ouvre la page puis fait defiler jusqu'a la section. */
 function allerSection(id){
   showPage('settings');
-  setTimeout(function(){ loadPasskeys(); loadDeriv(); loadRate(); loadBetwinner(); loadOrangePay(); fillUssdInputs(); loadBinance(); }, 60);
+  setTimeout(function(){ loadPasskeys(); loadDeriv(); loadRate(); loadBetwinner(); loadOrangePay(); fillUssdInputs(); loadBinance(); loadMaintenance(); }, 60);
   setTimeout(function(){
     var el=document.getElementById(id); if(!el) return;
     el.scrollIntoView({behavior:'smooth',block:'start'});
@@ -4238,6 +4255,43 @@ async function saveBinance(){
   const r=await api('/api/binance/config',{method:'POST',body:JSON.stringify(corps)});
   if(r&&r.ok){ showToast('API Binance enregistre'); document.getElementById('bn_secret').value=''; loadBinance(); }
   else showToast('Erreur: '+((r&&r.error)||'echec'));
+}
+
+
+/* Maintenance : coupe la creation d'ordres, pas leur traitement. */
+var _mtEtat = { depot:false, retrait:false };
+
+async function loadMaintenance(){
+  const d = await api('/api/stats/maintenance');
+  if(!d || !d.ok) return;
+  _mtEtat.depot = !!d.depot; _mtEtat.retrait = !!d.retrait;
+  peindreMaintenance();
+  const md=document.getElementById('mtDepotMsg'), mr=document.getElementById('mtRetraitMsg');
+  if(md) md.value = d.depot_message || '';
+  if(mr) mr.value = d.retrait_message || '';
+}
+function peindreMaintenance(){
+  [['depot','mtDepot'],['retrait','mtRetrait']].forEach(function(p){
+    const b=document.getElementById(p[1]);
+    if(b) b.classList.toggle('on', !!_mtEtat[p[0]]);
+  });
+}
+async function basculerMaintenance(type){
+  const nouveau = !_mtEtat[type];
+  if(nouveau && !confirm('Suspendre les ' + type + 's ?\n\nLes clients ne pourront plus en creer. '
+    + 'Les ordres en cours continueront normalement.')) return;
+  const corps = {}; corps[type] = nouveau;
+  const r = await api('/api/stats/maintenance', {method:'POST', body: JSON.stringify(corps)});
+  if(r && r.ok){
+    _mtEtat[type] = nouveau; peindreMaintenance();
+    showToast(nouveau ? (type + 's suspendus') : (type + 's reouverts'));
+  } else showToast((r && r.error) || 'Action impossible');
+}
+async function saveMaintenanceMsg(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const r = await api('/api/stats/maintenance', {method:'POST', body: JSON.stringify({
+    depot_message: g('mtDepotMsg'), retrait_message: g('mtRetraitMsg') })});
+  showToast(r && r.ok ? 'Messages enregistres' : 'Erreur');
 }
 
 </script>
