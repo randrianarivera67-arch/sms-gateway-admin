@@ -924,7 +924,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <button class="tb-btn" onclick="toggleTheme()" title="Thème" id="themeBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button class="tb-btn" onclick="showPage('clients');setTimeout(loadClients,80)" title="Comptes clients" style="position:relative">
+        <button class="tb-btn" onclick="showPage('clients');setTimeout(function(){loadClients();chargerNumerosBloques();},80)" title="Comptes clients" style="position:relative">
           <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.5" style="filter:drop-shadow(0 0 6px #00E5FF)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </button>
       </div>
@@ -1292,6 +1292,16 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           </div>
           <div id="cliInfo" style="font-size:12px;color:var(--text3);margin-bottom:8px"></div>
           <div id="cliList"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title">Num&eacute;ros &eacute;cart&eacute;s</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Un num&eacute;ro inscrit ici ne peut plus servir &agrave; cr&eacute;er d'ordre, quel que soit le compte qui l'emploie.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <input class="field-input" id="nbNumero" placeholder="034 12 345 67" style="flex:1;min-width:140px" inputmode="tel"/>
+            <input class="field-input" id="nbMotif" placeholder="Motif" style="flex:1;min-width:140px"/>
+            <button class="btn btn-primary" onclick="ajouterNumeroBloque()">&Eacute;carter</button>
+          </div>
+          <div id="nbList" style="font-size:13px">Chargement...</div>
         </div>
       </div>
 
@@ -4459,6 +4469,54 @@ async function basculerAffilie(id, on){
     {method:'POST', body: JSON.stringify({affilie: on})});
   if(d && d.ok){ showToast(on ? 'Affilie active' : 'Affilie retire'); loadClients(); }
   else showToast((d && d.error) || 'Action impossible');
+}
+
+
+/* Numeros ecartes : le blocage porte sur la ligne, pas sur le compte — un
+   client ecarte reviendrait sinon sous un autre compte avec le meme numero. */
+async function chargerNumerosBloques(){
+  const box = document.getElementById('nbList');
+  if(!box) return;
+  const d = await api('/api/stats/numeros-bloques');
+  if(!d || !d.ok){ box.innerHTML = '<span style="color:#dc2626">Chargement impossible.</span>'; return; }
+  if(!d.numeros.length){ box.innerHTML = '<span style="color:var(--text3)">Aucun num&eacute;ro &eacute;cart&eacute;.</span>'; return; }
+  box.innerHTML = d.numeros.map(function(n){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;'
+      + 'border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:7px;background:var(--bg)">'
+      + '<div style="min-width:0"><div style="font-weight:800;font-size:13px">'+n.numero+'</div>'
+      + '<div style="font-size:11px;color:var(--text3)">'+(n.motif||'sans motif')
+      + (n.parQui?(' · '+n.parQui):'')+'</div></div>'
+      + '<button class="btn" style="background:rgba(220,38,38,.12);color:#dc2626;padding:5px 11px;font-size:11.5px" '
+      + 'onclick="retirerNumeroBloque(\''+n._id+'\',\''+n.numero+'\')">Retirer</button></div>';
+  }).join('');
+}
+
+async function ajouterNumeroBloque(){
+  const num = (document.getElementById('nbNumero')?.value||'').trim();
+  const mot = (document.getElementById('nbMotif')?.value||'').trim();
+  if(!num){ showToast('Numero requis'); return; }
+  const d = await api('/api/stats/numeros-bloques', {method:'POST', body: JSON.stringify({numero:num, motif:mot})});
+  if(d && d.ok){
+    showToast('Numero ecarte');
+    document.getElementById('nbNumero').value='';
+    document.getElementById('nbMotif').value='';
+    chargerNumerosBloques();
+  } else showToast((d && d.error) || 'Action impossible');
+}
+
+async function retirerNumeroBloque(id, numero){
+  if(!confirm('Le numero ' + numero + ' pourra de nouveau creer des ordres.\n\nContinuer ?')) return;
+  const d = await api('/api/stats/numeros-bloques/'+id, {method:'DELETE'});
+  if(d && d.ok){ showToast('Numero retire'); chargerNumerosBloques(); }
+  else showToast((d && d.error) || 'Action impossible');
+}
+
+/* Depuis la liste des ordres : ecarter en un geste le numero fautif. */
+async function bloquerNumeroOrdre(numero){
+  const mot = prompt('Motif pour ecarter le ' + numero + ' :');
+  if(mot === null) return;
+  const d = await api('/api/stats/numeros-bloques', {method:'POST', body: JSON.stringify({numero:numero, motif:mot})});
+  showToast(d && d.ok ? 'Numero ecarte' : ((d && d.error) || 'Action impossible'));
 }
 
 </script>
