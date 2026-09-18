@@ -863,6 +863,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>SMS Templates</span>
       </button>
+      <button class="nav-item" onclick="showPage('caisse')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18v12H3z"/><path d="M3 7l2-3h14l2 3"/><path d="M12 11v5M9.5 13.5L12 16l2.5-2.5"/></svg>
+        <span>Transfert caisse</span>
+      </button>
       <button class="nav-item" onclick="basculerSousMenu()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
         <span>Paramètres</span>
@@ -939,6 +943,38 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
     <div class="content" id="content">
 
       <!-- ══ DASHBOARD ══ -->
+      <!-- Transfert de caisse : sortir l'argent d'une SIM de passerelle sans
+           interrompre son service. L'ordre emprunte le meme chemin qu'un
+           retrait client, la passerelle le compose sans qu'on y touche. -->
+      <div class="page" id="page-caisse">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Transfert de caisse</div>
+
+        <div class="card" style="max-width:520px">
+          <p style="font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 18px">
+            Sortez l'argent d'une caisse vers un autre numero. Le telephone
+            reste en service : l'ordre passe par sa file, comme un retrait.
+          </p>
+
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">Operateur</div>
+          <div id="caisseOps" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:18px"></div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Montant</div>
+          <input id="caisseMontant" type="text" inputmode="numeric" placeholder="50000"
+                 oninput="this.value=this.value.replace(/\D/g,'')"
+                 style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:14px">
+
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Numero destinataire</div>
+          <input id="caisseNumero" type="tel" inputmode="numeric" placeholder="0341234567"
+                 oninput="this.value=this.value.replace(/\D/g,'')"
+                 style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:18px">
+
+          <button id="caisseBtn" class="btn btn-primary" onclick="lancerTransfertCaisse()"
+                  style="width:100%;padding:13px;font-size:15px;font-weight:700">Retirer</button>
+
+          <div id="caisseEtat" style="display:none;margin-top:16px;padding:13px 15px;border-radius:11px;font-size:13.5px;line-height:1.55"></div>
+        </div>
+      </div>
+
       <div class="page active" id="page-dashboard">
 
         <!-- Device info bar -->
@@ -2460,6 +2496,123 @@ function updateClock(){
 }
 
 // ══ API ══
+/* ===== Transfert de caisse ==========================================
+   Vider une SIM de passerelle sans la sortir du service. On affiche d'abord
+   ce que contient chaque caisse : demander un montant sans savoir ce qui est
+   disponible fait echouer l'ordre pour rien. */
+var caisseOp = '';
+var CAISSE_NOMS = { mvola:'MVola', orange:'Orange', airtel:'Airtel', mvola_km:'MVola Comores' };
+
+async function chargerCaisses(){
+  var box = document.getElementById('caisseOps');
+  if(!box) return;
+  box.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--text3)">Lecture des caisses…</div>';
+  var d = await api('/api/retrait/soldes');
+  var soldes = (d && d.soldes) || {};
+  var cles = Object.keys(soldes);
+  if(!cles.length){ box.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--text3)">Aucune caisse.</div>'; return; }
+  if(cles.indexOf(caisseOp) < 0) caisseOp = cles[0];
+  box.innerHTML = cles.map(function(k){
+    var s = soldes[k] || {};
+    var actif = (k === caisseOp);
+    return '<button type="button" onclick="choisirCaisse(\'' + k + '\')" '
+      + 'style="padding:11px 8px;border-radius:11px;cursor:pointer;text-align:center;'
+      + 'border:1.5px solid ' + (actif ? 'var(--accent)' : 'var(--line)') + ';'
+      + 'background:' + (actif ? 'rgba(59,130,246,.10)' : 'var(--bg2)') + '">'
+      + '<div style="font-size:12.5px;font-weight:700;color:var(--text)">' + (CAISSE_NOMS[k] || k) + '</div>'
+      + '<div style="font-size:12px;font-weight:700;margin-top:3px;color:' + (actif ? 'var(--accent)' : 'var(--text2)') + '">'
+      + Number(s.montant || 0).toLocaleString('fr-FR') + ' ' + (s.devise || 'Ar') + '</div>'
+      + '</button>';
+  }).join('');
+}
+
+function choisirCaisse(k){ caisseOp = k; chargerCaisses(); }
+
+function etatCaisse(texte, genre){
+  var e = document.getElementById('caisseEtat');
+  if(!e) return;
+  var couleurs = {
+    ok:   ['rgba(34,197,94,.12)',  '#16a34a'],
+    err:  ['rgba(239,68,68,.12)',  '#dc2626'],
+    info: ['rgba(59,130,246,.12)', 'var(--accent)']
+  };
+  var c = couleurs[genre] || couleurs.info;
+  e.style.display = '';
+  e.style.background = c[0];
+  e.style.color = c[1];
+  e.innerHTML = texte;
+}
+
+async function lancerTransfertCaisse(){
+  var montant = (document.getElementById('caisseMontant') || {}).value || '';
+  var numero  = (document.getElementById('caisseNumero')  || {}).value || '';
+  var btn     = document.getElementById('caisseBtn');
+
+  if(!caisseOp)          return etatCaisse('Choisissez une caisse.', 'err');
+  if(!montant || Number(montant) <= 0) return etatCaisse('Montant manquant.', 'err');
+  if(numero.length < 7)  return etatCaisse('Numero destinataire incomplet.', 'err');
+
+  // Sortir de l'argent ne doit jamais partir d'un doigt qui glisse.
+  if(!confirm('Transferer ' + Number(montant).toLocaleString('fr-FR')
+            + ' depuis la caisse ' + (CAISSE_NOMS[caisseOp] || caisseOp)
+            + ' vers le ' + numero + ' ?')) return;
+
+  if(btn) btn.disabled = true;
+  etatCaisse('Ordre envoye a la passerelle. Composition USSD en cours…', 'info');
+
+  var d = await api('/api/retrait/transfert-caisse', {
+    method: 'POST',
+    body: JSON.stringify({ operator: caisseOp, numero: numero, montant: Number(montant) })
+  });
+
+  if(!d || d.error){
+    etatCaisse('<b>Echec</b><br>' + ((d && d.error) || 'Serveur injoignable'), 'err');
+    if(btn) btn.disabled = false;
+    return;
+  }
+
+  showToast('Transfert lance');
+  etatCaisse('<b>Ordre cree</b><br>Session ' + (d.sessionId || '—')
+           + '<br>Le resultat apparait ci-dessous des que l operateur repond.', 'info');
+  suivreTransfertCaisse(d.id, btn);
+}
+
+/* L'ordre part, puis la passerelle compose : le resultat arrive quelques
+   secondes plus tard. On interroge jusqu'a ce qu'il soit tranche, sans
+   depasser deux minutes — au-dela, c'est l'admin qui reprend la main. */
+function suivreTransfertCaisse(id, btn){
+  var debut = Date.now();
+  (function tour(){
+    setTimeout(async function(){
+      var r = await api('/api/retrait/' + id);
+      var o = (r && (r.retrait || r.data || r)) || {};
+      var st = o.status;
+
+      if(st === 'success'){
+        etatCaisse('<b>Transfert reussi</b><br>'
+                 + (o.response ? String(o.response).slice(0, 220) : 'Confirme par l operateur.'), 'ok');
+        if(btn) btn.disabled = false;
+        chargerCaisses();
+        return;
+      }
+      if(st === 'failed'){
+        etatCaisse('<b>Echec du transfert</b><br>'
+                 + (o.response ? String(o.response).slice(0, 260) : 'Refuse par l operateur.'), 'err');
+        if(btn) btn.disabled = false;
+        chargerCaisses();
+        return;
+      }
+      if(Date.now() - debut > 120000){
+        etatCaisse('<b>Toujours en cours</b><br>La passerelle n a pas encore repondu. '
+                 + 'Verifiez la page Retraits avant de relancer.', 'info');
+        if(btn) btn.disabled = false;
+        return;
+      }
+      tour();
+    }, 4000);
+  })();
+}
+
 async function api(path,opts={}){
   try{
     const ctrl=new AbortController();
@@ -2664,6 +2817,9 @@ async function mdpClient(id){
 }
 
 function showPage(name){
+  // Les caisses sont relues a chaque ouverture : un montant affiche de la
+  // veille ferait demander un transfert que la caisse ne peut plus honorer.
+  if(name === 'caisse') setTimeout(chargerCaisses, 0);
   document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.scrollTop=0;});
   document.querySelectorAll('.nav-item, .bn-item').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+name);
