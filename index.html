@@ -811,17 +811,16 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
          configuration du serveur : elle n'apparait nulle part ici, et
          personne ne peut en demander une autre. -->
     <div class="login-field" id="otpZone">
-      <button class="login-btn" id="otpDemander" onclick="demanderCodeAdmin()">RECEVOIR LE CODE</button>
+      <button class="login-btn" id="otpDemander" onclick="demanderCodeAdmin()">ENVOYER LE CODE</button>
       <div id="otpSuite" style="display:none;margin-top:12px">
         <label class="login-label">Code recu</label>
         <input class="login-input" id="otpCode" type="text" inputmode="numeric" maxlength="6"
                autocomplete="one-time-code" oninput="this.value=this.value.replace(/\D/g,'')"/>
-        <button class="login-btn" style="margin-top:10px" onclick="validerCodeAdmin()">ENTRER</button>
+        <button class="login-btn" style="margin-top:10px" onclick="validerCodeAdmin()">CONNEXION</button>
       </div>
       <div id="otpMsg" style="margin-top:10px;font-size:12.5px;line-height:1.5"></div>
     </div>
 
-    <button class="login-btn" onclick="doLogin()">CONNEXION</button>
     <button class="login-btn" id="passkeyBtn" onclick="doLoginPasskey()" style="margin-top:10px;background:transparent;border:1px solid var(--blue2);color:var(--blue2)">&#128273; PASSKEY</button>
   </div>
 </div>
@@ -2040,14 +2039,18 @@ function otpDire(texte, genre){
 async function demanderCodeAdmin(){
   var b = document.getElementById('otpDemander');
   var base = (document.getElementById('loginUrl').value || '').trim().replace(/\/+$/, '');
+  var user = (document.getElementById('loginUser').value || '').trim();
+  var pass = (document.getElementById('loginPass').value || '');
   if(!base){ otpDire("Adresse du serveur manquante.", 'err'); return; }
+  if(!user || !pass){ otpDire("Nom d'utilisateur et mot de passe requis.", 'err'); return; }
   try{ localStorage.setItem('gw_url', base); }catch(e){}
 
   if(b){ b.disabled = true; b.textContent = 'ENVOI...'; }
   otpDire("Envoi du code...", 'info');
   try{
     var r = await fetch(base + '/api/admin-otp/demander', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
     });
     var d = await r.json();
     if(!r.ok || d.error){ otpDire(d.error || 'Envoi impossible', 'err'); }
