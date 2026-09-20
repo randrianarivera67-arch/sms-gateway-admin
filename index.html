@@ -9,6 +9,11 @@
 <link rel="manifest" href="manifest.json"/>
 <title>SMS Gateway Admin</title>
 <style>
+/* Le navigateur a son propre tirer-pour-actualiser : laisse libre, il
+   doublait le notre et rechargeait la page entiere, ramenant au tableau de
+   bord. On garde le geste pour nous seuls. */
+html, body { overscroll-behavior-y: contain; }
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -4125,7 +4130,7 @@ document.addEventListener('touchend', e => {
   const ind = document.getElementById('pull-indicator');
   if(diff > 80) {
     if(ind) ind.style.top = '0px';
-    setTimeout(() => { if(ind) ind.style.top='-60px'; try{showPage('dashboard');}catch(e){} }, 300);
+    setTimeout(() => { if(ind) ind.style.top='-60px'; try{ refreshData(); }catch(e){} }, 300);
   } else {
     if(ind) ind.style.top = '-60px';
   }
