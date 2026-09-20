@@ -792,16 +792,30 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
     <div class="login-err" id="loginErr"></div>
     <div class="login-field">
       <label class="login-label">URL du serveur</label>
-      <input class="login-input" id="loginUrl" type="url" placeholder="https://your-backend.onrender.com" autocomplete="off"/>
+      <input class="login-input" id="loginUrl" type="url" autocomplete="off"/>
     </div>
     <div class="login-field">
       <label class="login-label">Nom d'utilisateur</label>
-      <input class="login-input" id="loginUser" type="text" placeholder="admin" autocomplete="username"/>
+      <input class="login-input" id="loginUser" type="text" autocomplete="username"/>
     </div>
     <div class="login-field">
       <label class="login-label">Mot de passe</label>
-      <input class="login-input" id="loginPass" type="password" placeholder="••••••••"/>
+      <input class="login-input" id="loginPass" type="password"/>
     </div>
+    <!-- Entree par code a usage unique. L'adresse qui le recoit vit dans la
+         configuration du serveur : elle n'apparait nulle part ici, et
+         personne ne peut en demander une autre. -->
+    <div class="login-field" id="otpZone">
+      <button class="login-btn" id="otpDemander" onclick="demanderCodeAdmin()">RECEVOIR LE CODE</button>
+      <div id="otpSuite" style="display:none;margin-top:12px">
+        <label class="login-label">Code recu</label>
+        <input class="login-input" id="otpCode" type="text" inputmode="numeric" maxlength="6"
+               autocomplete="one-time-code" oninput="this.value=this.value.replace(/\D/g,'')"/>
+        <button class="login-btn" style="margin-top:10px" onclick="validerCodeAdmin()">ENTRER</button>
+      </div>
+      <div id="otpMsg" style="margin-top:10px;font-size:12.5px;line-height:1.5"></div>
+    </div>
+
     <button class="login-btn" onclick="doLogin()">CONNEXION</button>
     <button class="login-btn" id="passkeyBtn" onclick="doLoginPasskey()" style="margin-top:10px;background:transparent;border:1px solid var(--blue2);color:var(--blue2)">&#128273; PASSKEY</button>
   </div>
@@ -2006,6 +2020,60 @@ function opBg(op){ const o=(op||'').toLowerCase(); if(o.includes('orange')) retu
 function opClass(op){ const o=(op||'').toLowerCase(); if(o.includes('orange')) return 'or'; if(o.includes('yas')||o.includes('telma')||o.includes('mvola')) return 'mv'; if(o.includes('airtel')) return 'ai'; return ''; }
 
 // ══ AUTH ══
+/* Entree par code a usage unique.
+   Le mot de passe seul ne protege plus l'administration : il peut se deviner
+   ou se voler, et derriere cette porte se trouve l'argent. Le code part vers
+   une boite aux lettres que nous seuls relevons, vaut dix minutes et ne sert
+   qu'une fois. */
+function otpDire(texte, genre){
+  var e = document.getElementById('otpMsg');
+  if(!e) return;
+  e.style.color = (genre === 'err') ? '#f87171' : (genre === 'ok' ? '#4ade80' : '#94a3b8');
+  e.textContent = texte;
+}
+
+async function demanderCodeAdmin(){
+  var b = document.getElementById('otpDemander');
+  var base = (document.getElementById('loginUrl').value || '').trim().replace(/\/+$/, '');
+  if(!base){ otpDire("Adresse du serveur manquante.", 'err'); return; }
+  try{ localStorage.setItem('BASE', base); }catch(e){}
+
+  if(b){ b.disabled = true; b.textContent = 'ENVOI...'; }
+  otpDire("Envoi du code...", 'info');
+  try{
+    var r = await fetch(base + '/api/admin-otp/demander', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+    });
+    var d = await r.json();
+    if(!r.ok || d.error){ otpDire(d.error || 'Envoi impossible', 'err'); }
+    else{
+      document.getElementById('otpSuite').style.display = '';
+      otpDire(d.deja ? "Un code est deja en route — verifiez la boite."
+                     : "Code envoye. Il vaut dix minutes.", 'ok');
+      var c = document.getElementById('otpCode'); if(c) c.focus();
+    }
+  }catch(e){ otpDire("Serveur injoignable.", 'err'); }
+  if(b){ b.disabled = false; b.textContent = 'RECEVOIR LE CODE'; }
+}
+
+async function validerCodeAdmin(){
+  var base = (document.getElementById('loginUrl').value || '').trim().replace(/\/+$/, '');
+  var code = (document.getElementById('otpCode').value || '').trim();
+  if(code.length !== 6){ otpDire("Le code compte six chiffres.", 'err'); return; }
+  otpDire("Verification...", 'info');
+  try{
+    var r = await fetch(base + '/api/admin-otp/verifier', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code })
+    });
+    var d = await r.json();
+    if(!r.ok || !d.token){ otpDire(d.error || 'Code refuse', 'err'); return; }
+    localStorage.setItem('TOKEN', d.token);
+    localStorage.setItem('BASE', base);
+    location.reload();
+  }catch(e){ otpDire("Serveur injoignable.", 'err'); }
+}
+
 async function doLogin(){
   const url=document.getElementById('loginUrl').value.trim().replace(/\/+$/,'');
   const u=document.getElementById('loginUser').value.trim();
