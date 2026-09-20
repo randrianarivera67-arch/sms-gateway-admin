@@ -2036,7 +2036,7 @@ async function demanderCodeAdmin(){
   var b = document.getElementById('otpDemander');
   var base = (document.getElementById('loginUrl').value || '').trim().replace(/\/+$/, '');
   if(!base){ otpDire("Adresse du serveur manquante.", 'err'); return; }
-  try{ localStorage.setItem('BASE', base); }catch(e){}
+  try{ localStorage.setItem('gw_url', base); }catch(e){}
 
   if(b){ b.disabled = true; b.textContent = 'ENVOI...'; }
   otpDire("Envoi du code...", 'info');
@@ -2068,8 +2068,8 @@ async function validerCodeAdmin(){
     });
     var d = await r.json();
     if(!r.ok || !d.token){ otpDire(d.error || 'Code refuse', 'err'); return; }
-    localStorage.setItem('TOKEN', d.token);
-    localStorage.setItem('BASE', base);
+    localStorage.setItem('gw_token', d.token);
+    localStorage.setItem('gw_url', base);
     location.reload();
   }catch(e){ otpDire("Serveur injoignable.", 'err'); }
 }
