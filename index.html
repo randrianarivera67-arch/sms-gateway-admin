@@ -1702,6 +1702,47 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
                   <div class="opt-info"><h4>TPE Retrait</h4><p>Retraits via TPE</p></div>
                   <button class="toggle" id="sopt-tpe-ret" data-optkey="tpe_ret" onclick="toggleOpt(this,'tpe_ret')"></button>
                 </div>
+
+                <!-- Reglage par operateur : une SIM MVola peut servir en TPE
+                     pendant qu'une SIM Orange reste en Grand Public. Laisse
+                     sur "General", l'operateur suit les deux reglages
+                     ci-dessus, comme avant. -->
+                <div class="opt-row">
+                  <div class="opt-info"><h4>MVola &mdash; Depot</h4><p>Voie utilisee pour les depots MVola</p></div>
+                  <select class="field-input" id="sopt-tpe-depot-mvola" style="width:auto;min-width:140px"
+                          onchange="choisirVoie('tpe_depot_mvola', this.value)">
+                    <option value="">General</option>
+                    <option value="1">TPE</option>
+                    <option value="0">Grand Public</option>
+                  </select>
+                </div>
+                <div class="opt-row">
+                  <div class="opt-info"><h4>MVola &mdash; Retrait</h4><p>Voie utilisee pour les retraits MVola</p></div>
+                  <select class="field-input" id="sopt-tpe-ret-mvola" style="width:auto;min-width:140px"
+                          onchange="choisirVoie('tpe_ret_mvola', this.value)">
+                    <option value="">General</option>
+                    <option value="1">TPE</option>
+                    <option value="0">Grand Public</option>
+                  </select>
+                </div>
+                <div class="opt-row">
+                  <div class="opt-info"><h4>Orange &mdash; Depot</h4><p>Voie utilisee pour les depots Orange</p></div>
+                  <select class="field-input" id="sopt-tpe-depot-orange" style="width:auto;min-width:140px"
+                          onchange="choisirVoie('tpe_depot_orange', this.value)">
+                    <option value="">General</option>
+                    <option value="1">TPE</option>
+                    <option value="0">Grand Public</option>
+                  </select>
+                </div>
+                <div class="opt-row">
+                  <div class="opt-info"><h4>Orange &mdash; Retrait</h4><p>Voie utilisee pour les retraits Orange</p></div>
+                  <select class="field-input" id="sopt-tpe-ret-orange" style="width:auto;min-width:140px"
+                          onchange="choisirVoie('tpe_ret_orange', this.value)">
+                    <option value="">General</option>
+                    <option value="1">TPE</option>
+                    <option value="0">Grand Public</option>
+                  </select>
+                </div>
                 <div class="opt-row">
                   <div class="opt-info"><h4>Cash Point</h4><p>Point de vente cash</p></div>
                   <button class="toggle" id="sopt-cash" data-optkey="cash" onclick="toggleOpt(this,'cash')"></button>
@@ -3565,6 +3606,7 @@ const optState={tpe_depot:false,tpe_ret:false,cash:false,ret_aut:true,ussd:true,
 async function loadOptions(){
   loadUssdConfig();
   const d=await api('/api/settings/options');
+  try{ majVoies(d); }catch(e){}
   if(!d) return;
   Object.assign(optState,d);
   // FIX: 'tpe_depot' etait ABSENT de cette liste, remplace par une cle 'tpe'
@@ -3618,6 +3660,32 @@ function toggleOpt(btn,key){
   }
   syncOptToServer(key,optState[key]);
 }
+/* Voie TPE ou Grand Public, operateur par operateur.
+   Une SIM MVola peut servir en TPE pendant qu'une SIM Orange reste en Grand
+   Public : un reglage unique forcait les deux ensemble. La valeur vide
+   signifie "suivre le reglage general", et reste le defaut. */
+async function choisirVoie(cle, valeur){
+  var v = (valeur === '') ? null : (valeur === '1');
+  optState[cle] = v;
+  try{
+    await syncOptToServer(cle, v);
+    showToast('Voie enregistree');
+  }catch(e){ showToast('Enregistrement impossible'); }
+}
+
+/* Remet les listes deroulantes sur ce que le serveur a retenu. */
+function majVoies(d){
+  [['tpe_depot_mvola','sopt-tpe-depot-mvola'],
+   ['tpe_ret_mvola','sopt-tpe-ret-mvola'],
+   ['tpe_depot_orange','sopt-tpe-depot-orange'],
+   ['tpe_ret_orange','sopt-tpe-ret-orange']].forEach(function(c){
+    var el = document.getElementById(c[1]);
+    if(!el) return;
+    var v = d ? d[c[0]] : null;
+    el.value = (v === true) ? '1' : (v === false ? '0' : '');
+  });
+}
+
 async function syncOptToServer(key,val){
   await api('/api/settings/options',{method:'POST',body:JSON.stringify({[key]:val})});
 }
