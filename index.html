@@ -893,8 +893,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
       <button class="sub-item" onclick="allerSection('s-maintenance')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 1-5 5L4 17v3h3l5.7-5.7a4 4 0 0 1 5-5l2.3-2.3-3-3z"/></svg>Maintenance</button>
       <button class="sub-item" onclick="allerSection('s-serveur')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Configuration serveur</button>
       <button class="sub-item" onclick="allerSection('s-cours')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a3 3 0 0 0-3-1.5c-1.7 0-3 1-3 2.3s1.3 2 3 2.3 3 1 3 2.3-1.3 2.3-3 2.3a3 3 0 0 1-3-1.5"/></svg>Cours d'&eacute;change</button>
+      <button class="sub-item" onclick="allerSection('s-webhook')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Webhook partenaire</button>
       <button class="sub-item" onclick="allerSection('s-deriv')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>API Deriv</button>
       <button class="sub-item" id="sub-binance" onclick="allerSection('s-binance')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 7 7l2 2 3-3 3 3 2-2zM5 12l2-2 2 2-2 2zM17 12l2-2 2 2-2 2zM12 22l-5-5 2-2 3 3 3-3 2 2z"/></svg>API Binance</button>
+      <button class="sub-item" onclick="allerSection('s-ussd')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 6h4M9 11h1M12 11h1M15 11h1M9 14h1M12 14h1M15 14h1M9 17h1M12 17h1M15 17h1"/></svg>Codes USSD</button>
       <button class="sub-item" onclick="allerSection('s-orange')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M16 12h4"/></svg>API Orange Money</button>
       <button class="sub-item" onclick="allerSection('s-betwinner')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API Betwinner</button>
       <button class="sub-item" onclick="allerSection('s-1xbet')"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 12h2M8 11v2M16 11.5h.01M18 13.5h.01"/></svg>API 1XBET</button>
@@ -1574,6 +1576,27 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Retrait (1 USDT = ? Fc)</div><input class="field-input" id="bn_rrkm" type="number" step="0.01" placeholder="0" style="font-family:monospace"/></div>
               <button class="btn btn-primary" onclick="saveBinance()">Enregistrer API Binance</button>
 
+              <!-- Avis au partenaire. Il etait prevenu en interrogeant nos ordres en
+                   boucle, et chaque lecture d'un succes pouvait le faire crediter
+                   son client une fois de plus. Nous le prevenons desormais nous-
+                   memes, une seule fois par ordre. -->
+              <div class="card-title" id="s-webhook">Webhook partenaire</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:10px">
+                Adresse appelee une seule fois quand un ordre partenaire se termine
+                (succes ou echec). Chaque avis est signe : en-tete <b>X-MM-Signature</b>.
+              </div>
+              <div style="margin-bottom:10px">
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Adresse (https)</div>
+                <input class="field-input" id="whUrl" type="url" autocomplete="off">
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <button class="btn btn-primary" onclick="enregistrerWebhook(false)">Enregistrer</button>
+                <button class="btn btn-outline" onclick="testerWebhook()">Envoyer un essai</button>
+                <button class="btn btn-outline" onclick="enregistrerWebhook(true)">Nouvelle cle</button>
+              </div>
+              <div id="whCle" style="display:none;margin-bottom:10px;padding:10px 12px;border-radius:10px;background:rgba(245,158,11,.12);font-size:12px;line-height:1.55;word-break:break-all"></div>
+              <div id="whEtat" style="font-size:12px;color:var(--text2);margin-bottom:18px"></div>
+
               <div class="card-title" id="s-deriv"><svg class="ico-n" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg> API Deriv (Payment Agent)</div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">App ID</div><input class="field-input" id="deriv_app_id" placeholder="App ID Deriv" style="font-family:monospace"/></div>
               <div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Token (scope payment)</div><input class="field-input" id="deriv_token" type="password" placeholder="Token agent" style="font-family:monospace"/><div id="deriv_token_etat" style="font-size:11px;margin-top:6px;line-height:1.5"></div></div>
@@ -1783,6 +1806,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
         </div>
 
         <!-- ══ CODES USSD (intégré dans Paramètres) ══ -->
+        <div id="s-ussd" style="scroll-margin-top:70px"></div>
         <div style="margin-top:8px">
 
         <!-- Header -->
@@ -3607,6 +3631,7 @@ async function loadOptions(){
   loadUssdConfig();
   const d=await api('/api/settings/options');
   try{ majVoies(d); }catch(e){}
+  try{ chargerWebhook(); }catch(e){}
   if(!d) return;
   Object.assign(optState,d);
   // FIX: 'tpe_depot' etait ABSENT de cette liste, remplace par une cle 'tpe'
@@ -3684,6 +3709,51 @@ function majVoies(d){
     var v = d ? d[c[0]] : null;
     el.value = (v === true) ? '1' : (v === false ? '0' : '');
   });
+}
+
+/* Webhook partenaire : adresse appelee une seule fois par ordre termine. */
+async function chargerWebhook(){
+  try{
+    var d = await api('/api/settings/webhook');
+    if(!d || d.error) return;
+    var u = document.getElementById('whUrl'); if(u && document.activeElement !== u) u.value = d.url || '';
+    var e = document.getElementById('whEtat');
+    if(e){
+      var st = d.stats24h || {};
+      e.innerHTML = (d.url ? 'Actif' : 'Inactif — aucune adresse')
+        + ' &middot; cle ' + (d.secretDefini ? 'definie' : 'absente')
+        + '<br>24 h : ' + (st.livres||0) + ' livres &middot; ' + (st.attente||0)
+        + ' en attente &middot; ' + (st.abandon||0) + ' abandonnes';
+    }
+  }catch(e){}
+}
+
+async function enregistrerWebhook(regenerer){
+  var url = (document.getElementById('whUrl').value || '').trim();
+  if(url && !/^https:\/\//i.test(url)){ showToast('Adresse https obligatoire'); return; }
+  if(regenerer && !confirm("Generer une nouvelle cle ? L'ancienne cessera d'etre valable : le partenaire devra mettre la sienne a jour.")) return;
+  var d = await api('/api/settings/webhook', { method:'POST', body: JSON.stringify({ url: url, regenerer: !!regenerer }) });
+  if(!d || d.error){ showToast('Erreur : ' + ((d && d.error) || 'serveur')); return; }
+  var k = document.getElementById('whCle');
+  if(k){
+    if(d.secret){
+      // Montree une seule fois : le serveur ne la relira plus.
+      k.style.display = '';
+      k.innerHTML = '<b>Cle de signature — a transmettre au partenaire maintenant.</b><br>'
+        + 'Elle ne sera plus affichee.<br><code style="user-select:all">' + d.secret + '</code>';
+    } else { k.style.display = 'none'; k.innerHTML = ''; }
+  }
+  showToast('Webhook enregistre');
+  chargerWebhook();
+}
+
+async function testerWebhook(){
+  showToast('Envoi de l essai...');
+  var d = await api('/api/settings/webhook/test', { method:'POST', body:'{}' });
+  if(!d){ showToast('Serveur injoignable'); return; }
+  if(d.error){ showToast('Erreur : ' + d.error); return; }
+  showToast(d.ok ? ('Essai recu par le partenaire (HTTP ' + d.code + ')')
+                 : ('Echec : ' + (d.erreur || ('HTTP ' + d.code))));
 }
 
 async function syncOptToServer(key,val){
