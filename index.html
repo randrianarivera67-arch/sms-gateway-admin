@@ -1586,12 +1586,18 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
                 (succes ou echec). Chaque avis est signe : en-tete <b>X-MM-Signature</b>.
               </div>
               <div style="margin-bottom:10px">
-                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Adresse (https)</div>
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Adresse Madagascar (https)</div>
                 <input class="field-input" id="whUrl" type="url" autocomplete="off">
+              </div>
+              <div style="margin-bottom:10px">
+                <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Adresse Comores (https) &mdash; facultative</div>
+                <input class="field-input" id="whUrlKm" type="url" autocomplete="off">
+                <div style="font-size:11px;color:var(--text3);margin-top:4px">Vide : les ordres Comores partent vers l'adresse Madagascar.</div>
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
                 <button class="btn btn-primary" onclick="enregistrerWebhook(false)">Enregistrer</button>
-                <button class="btn btn-outline" onclick="testerWebhook()">Envoyer un essai</button>
+                <button class="btn btn-outline" onclick="testerWebhook('mg')">Essai Madagascar</button>
+                <button class="btn btn-outline" onclick="testerWebhook('km')">Essai Comores</button>
                 <button class="btn btn-outline" onclick="enregistrerWebhook(true)">Nouvelle cle</button>
               </div>
               <div id="whCle" style="display:none;margin-bottom:10px;padding:10px 12px;border-radius:10px;background:rgba(245,158,11,.12);font-size:12px;line-height:1.55;word-break:break-all"></div>
@@ -3717,10 +3723,12 @@ async function chargerWebhook(){
     var d = await api('/api/settings/webhook');
     if(!d || d.error) return;
     var u = document.getElementById('whUrl'); if(u && document.activeElement !== u) u.value = d.url || '';
+    var uk = document.getElementById('whUrlKm'); if(uk && document.activeElement !== uk) uk.value = d.urlKm || '';
     var e = document.getElementById('whEtat');
     if(e){
       var st = d.stats24h || {};
-      e.innerHTML = (d.url ? 'Actif' : 'Inactif — aucune adresse')
+      e.innerHTML = (d.url ? 'Madagascar : actif' : 'Madagascar : aucune adresse')
+        + ' &middot; ' + (d.urlKm ? 'Comores : actif' : 'Comores : via Madagascar')
         + ' &middot; cle ' + (d.secretDefini ? 'definie' : 'absente')
         + '<br>24 h : ' + (st.livres||0) + ' livres &middot; ' + (st.attente||0)
         + ' en attente &middot; ' + (st.abandon||0) + ' abandonnes';
@@ -3731,8 +3739,10 @@ async function chargerWebhook(){
 async function enregistrerWebhook(regenerer){
   var url = (document.getElementById('whUrl').value || '').trim();
   if(url && !/^https:\/\//i.test(url)){ showToast('Adresse https obligatoire'); return; }
+  var urlKm = (document.getElementById('whUrlKm').value || '').trim();
+  if(urlKm && !/^https:\/\//i.test(urlKm)){ showToast('Adresse Comores : https obligatoire'); return; }
   if(regenerer && !confirm("Generer une nouvelle cle ? L'ancienne cessera d'etre valable : le partenaire devra mettre la sienne a jour.")) return;
-  var d = await api('/api/settings/webhook', { method:'POST', body: JSON.stringify({ url: url, regenerer: !!regenerer }) });
+  var d = await api('/api/settings/webhook', { method:'POST', body: JSON.stringify({ url: url, urlKm: urlKm, regenerer: !!regenerer }) });
   if(!d || d.error){ showToast('Erreur : ' + ((d && d.error) || 'serveur')); return; }
   var k = document.getElementById('whCle');
   if(k){
@@ -3747,9 +3757,9 @@ async function enregistrerWebhook(regenerer){
   chargerWebhook();
 }
 
-async function testerWebhook(){
-  showToast('Envoi de l essai...');
-  var d = await api('/api/settings/webhook/test', { method:'POST', body:'{}' });
+async function testerWebhook(pays){
+  showToast('Envoi de l essai ' + (pays === 'km' ? 'Comores' : 'Madagascar') + '...');
+  var d = await api('/api/settings/webhook/test', { method:'POST', body: JSON.stringify({ pays: pays || 'mg' }) });
   if(!d){ showToast('Serveur injoignable'); return; }
   if(d.error){ showToast('Erreur : ' + d.error); return; }
   showToast(d.ok ? ('Essai recu par le partenaire (HTTP ' + d.code + ')')
