@@ -3177,9 +3177,9 @@ function renderDepots(list){
     return `<tr style="cursor:pointer" onclick="showDepotDetail('${r._id}')">
       <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${opIcon(r.operator)}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
-      <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
+      <td style="font-weight:800;color:var(--orange2)">${fmtDev(r)}</td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue2)">${esc(r.sessionId||'—')}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${celluleId(r)}</td>
       <td>${receptionBadge(r.receptionStatus)}</td>
       <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
       <td style="color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace">${fmtDate(r.createdAt)}</td>
@@ -3194,7 +3194,7 @@ function filterDepots(q){
   renderDepots(_depots.filter(r=>
     (r.numero||'').toLowerCase().includes(q) ||
     (r.sessionId||'').toLowerCase().includes(q) ||
-    String(r.clientId||'').toLowerCase().includes(q)
+    (String(r.clientId||'')+' '+String(r.providerId||'')+' '+String(r.provider||'')).toLowerCase().includes(q)
   ));
 }
 function filterDepotsOp(v){ depotOpFilter=v; depotPage=1; loadDepots(); }
@@ -3207,8 +3207,10 @@ function showDepotDetail(id){
   const rows=[
     ['Opérateur', r.operator||'—'],
     ['Numéro gateway utilisé', r.numero||'—'],
-    ['Montant', fmtAr(r.montant)],
+    ['Montant', fmtDev(r)],
     ['N° session', r.sessionId||'—'],
+    ['Fournisseur', r.provider||'—'],
+    ['ID fournisseur / pseudo', r.providerId||'—'],
     ['ID client (CR)', r.clientId||'—'],
     ['Réception', r.receptionStatus||'en_attente'],
     ['Statut', r.status||'—'],
@@ -3246,9 +3248,9 @@ function renderRetraits(list){
     return `<tr style="cursor:pointer" onclick="showRetraitDetail('${r._id}')">
       <td><span class="badge ${opClass(r.operator)}" style="display:inline-flex;align-items:center;gap:5px"><img src="${opIcon(r.operator)}" style="width:16px;height:16px;border-radius:50%;object-fit:cover">${esc(r.operator||'?')}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px">${esc(r.numero||'—')}</td>
-      <td style="font-weight:800;color:var(--orange2)">${fmtAr(r.montant)}</td>
+      <td style="font-weight:800;color:var(--orange2)">${fmtDev(r)}</td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#B388FF">${esc(r.sessionId||'—')}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${cidShort}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${celluleId(r)}</td>
       <td>${receptionBadge(r.receptionStatus)}</td>
       <td style="font-size:11px;color:var(--text2)">${esc(deriv)}</td>
       <td><span class="badge ${statusBadge(r.status)}">${r.status||'?'}</span></td>
@@ -3264,7 +3266,7 @@ function filterRetraits(q){
   renderRetraits(_retraits.filter(r=>
     (r.numero||'').toLowerCase().includes(q) ||
     (r.sessionId||'').toLowerCase().includes(q) ||
-    String(r.clientId||'').toLowerCase().includes(q)
+    (String(r.clientId||'')+' '+String(r.providerId||'')+' '+String(r.provider||'')).toLowerCase().includes(q)
   ));
 }
 function filterRetraitsOp(v){ retraitOpFilter=v; retraitPage=1; loadRetraits(); }
@@ -3284,7 +3286,7 @@ function showRetraitDetail(id){
   const rows=[
     ['Opérateur', r.operator||'—'],
     ['Numéro client (autorisé)', r.numero||'—'],
-    ['Montant', fmtAr(r.montant)],
+    ['Montant', fmtDev(r)],
     ['N° session', r.sessionId||'—'],
     ['ID client', r.clientId||'—'],
     ['Réception', r.receptionStatus||'en_attente'],
@@ -4144,6 +4146,26 @@ async function resetUssd(opKey){
 function statusBadge(s){return{success:'ok',sent:'sent',pending:'pend',failed:'fail',processing:'proc',matched:'match',ignored:'ign'}[s]||'pend';}
 function fmtAr(n){return Number(n||0).toLocaleString('fr-FR')+' Ar';}
 function fmtFc(n){return Number(n||0).toLocaleString('fr-FR')+' Fc';}
+/* Un ordre comorien est libelle en francs : afficher « Ar » partout donnait
+   un montant faux a l'oeil. La devise enregistree fait foi ; a defaut on
+   retombe sur l'operateur (_km). */
+function fmtDev(r){
+  var d = String((r && r.devise) || '').toLowerCase();
+  var km = (d === 'fc' || d === 'kmf') || /_km$/i.test(String((r && r.operator) || ''));
+  return km ? fmtFc(r && r.montant) : fmtAr(r && r.montant);
+}
+/* Ce que l'exploitant cherche des yeux, c'est le compte de jeu : l'ID 1xBet,
+   Betwinner ou 1win, et pour Deriv le pseudo. L'ID client interne ne sert que
+   lorsqu'aucun compte fournisseur n'est rattache a l'ordre. */
+function celluleId(r){
+  var pid = String((r && r.providerId) || '').trim();
+  var prov = String((r && r.provider) || '').trim();
+  var txt = pid || String((r && r.clientId) || '').trim();
+  if (!txt) return '—';
+  var court = txt.length > 18 ? txt.slice(0, 18) + '…' : txt;
+  var tete = (pid && prov) ? '<span style="opacity:.55">' + esc(prov) + '</span> ' : '';
+  return '<span title="' + esc(txt) + '">' + tete + esc(court) + '</span>';
+}
 function fmtDate(d){if(!d)return '—';return new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function timeAgo(d){if(!d)return '—';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'j';}
 function trunc(s,n){return s&&s.length>n?s.slice(0,n)+'…':s||'';}
