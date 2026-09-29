@@ -2668,7 +2668,8 @@ async function chargerCaisses(){
       + 'background:' + (actif ? 'rgba(59,130,246,.10)' : 'var(--bg2)') + '">'
       + '<div style="font-size:12.5px;font-weight:700;color:var(--text)">' + (CAISSE_NOMS[k] || k) + '</div>'
       + '<div style="font-size:12px;font-weight:700;margin-top:3px;color:' + (actif ? 'var(--accent)' : 'var(--text2)') + '">'
-      + Number(s.montant || 0).toLocaleString('fr-FR') + ' ' + (s.devise || 'Ar') + '</div>'
+      + Number(s.montant || 0).toLocaleString('fr-FR') + ' '
+        + (s.devise || (/_km$/i.test(String(k || '')) ? 'Fc' : 'Ar')) + '</div>'
       + '</button>';
   }).join('');
 }
