@@ -3072,7 +3072,7 @@ async function loadActSms(){
       <div class="act-ic" style="background:${opBg(r.operator)}">${opImgCircle(r.operator)}</div>
       <div class="act-txt">
         <div class="act-from">${esc(r.numero||'—')}</div>
-        <div class="act-msg">${esc(r.smsTemplate?trunc(r.smsTemplate,40):fmtAr(r.montant))}</div>
+        <div class="act-msg">${esc(r.smsTemplate?trunc(r.smsTemplate,40):fmtDev(r))}</div>
       </div>
       <span class="badge ${statusBadge(r.status)}">${r.status}</span>
     </div>`).join('');
@@ -3086,7 +3086,7 @@ async function loadActRet(){
       <div class="act-ic" style="background:${opBg(r.operator)}">${opImgCircle(r.operator)}</div>
       <div class="act-txt">
         <div class="act-from">${esc(r.numero||'—')}</div>
-        <div class="act-msg">${fmtAr(r.montant)}</div>
+        <div class="act-msg">${fmtDev(r)}</div>
       </div>
       <span class="badge ${statusBadge(r.status)}">${r.status}</span>
     </div>`).join('');
