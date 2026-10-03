@@ -3215,8 +3215,11 @@ function showDepotDetail(id){
     ['ID client (CR)', r.clientId||'—'],
     ['Réception', r.receptionStatus||'en_attente'],
     ['Statut', r.status||'—'],
-    ['Code USSD', r.ussdCode||'—'],
-    ['Template (SMS opérateur)', r.smsTemplate||'—'],
+    ['Code USSD', r.ussdCode || ((r.omStatus||r.omPayUrl||r.omPayToken) ? 'Lien de paiement Orange' : '—')],
+    // FIX 2026-10-03 : depot valide par l'API Orange Money (pas de SMS ni d'USSD).
+    ['Template (SMS opérateur)', r.omStatus
+      ? ('API Orange Money (' + r.omStatus + (r.omMontant ? ' · ' + Number(r.omMontant).toLocaleString('fr-FR') + ' Ar' : '') + ')')
+      : (r.smsTemplate||'—')],
     ['Date', fmtDate(r.createdAt)]
   ];
   showDetailModal('Détail dépôt', rows, '#00E5FF');
