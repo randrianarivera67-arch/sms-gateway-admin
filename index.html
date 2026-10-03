@@ -3479,6 +3479,10 @@ async function loadStats(){
     {v:retOk,     l:'Réussis',         c:'var(--green)',  ico:'M20 6L9 17l-5-5'},
     {v:soldeTotal,l:'Solde Total (Ar)',c:'var(--blue2)',  ico:'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
     {v:devOnline, l:'Appareils en ligne',c:'var(--green)',ico:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1-13h2v6h-2zm0 8h2v2h-2z'},
+    // FIX 2026-10-03 : transactions matulmada.net (clients du site).
+    {v:(d.site?.depot?.success||0)+' / '+(d.site?.depot?.total||0), l:'Dépôts matulmada.net', c:'var(--blue2)', ico:'M12 5v14M5 12l7 7 7-7'},
+    {v:(d.site?.retrait?.success||0)+' / '+(d.site?.retrait?.total||0), l:'Retraits matulmada.net', c:'var(--orange2)', ico:'M12 19V5M5 12l7-7 7 7'},
+    {v:(d.site?.depot?.today||0)+(d.site?.retrait?.today||0), l:"matulmada.net aujourd'hui", c:'var(--green)', ico:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20'}
   ].map(x=>`
     <div class="stat-big">
       <div class="stat-big-icon" style="background:var(--surface2)">
