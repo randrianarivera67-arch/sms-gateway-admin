@@ -4851,7 +4851,7 @@ async function deciderUsdtWallet(id, decision){
 async function approuverToutesDemandes(){
   if(!confirm('Approuver TOUTES les demandes en attente ?\n\n'
     + 'Les numeros seront modifies ou supprimes immediatement.')) return;
-  const d = await api('/api/admin/demandes/approuver-tout', {method:'POST'});
+  const d = await apiClient('/api/admin/demandes/approuver-tout', {method:'POST'});
   if(d && d.ok){
     let msg = d.traitees + ' / ' + d.total + ' demande(s) approuvee(s)';
     if(d.echecs && d.echecs.length) msg += ' — ' + d.echecs.length + ' en echec';
