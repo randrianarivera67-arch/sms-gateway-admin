@@ -767,6 +767,11 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .btn-neon.ok:hover{background:#00B24A;box-shadow:0 4px 16px rgba(0,200,83,.7)}
 .btn-neon.no{background:#F23645;color:#fff;border:1px solid #D81B2C;box-shadow:0 2px 9px rgba(242,54,69,.5)}
 .btn-neon.no:hover{background:#E11D2E;box-shadow:0 4px 16px rgba(242,54,69,.7)}
+/* Patch 18 : menu lateral en tiroir sur tous les ecrans (PC compris) */
+.sidebar{position:fixed !important;left:0;right:auto;top:0;bottom:0;transform:translateX(-100%);z-index:1000;background:var(--sidebar) !important;transition:transform .25s ease}
+.sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
+.main{position:relative;z-index:1}
+.tb-menu:not(#tbBack){display:flex !important}
 </style>
 </head>
 <body>
@@ -1257,8 +1262,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
             <div style="flex:1;min-width:200px;position:relative">
               <svg viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #00E5FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input id="dSearch" type="text" oninput="filterDepots(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
+              <input id="dSearch" type="text" onkeydown="if(event.key==='Enter'){event.preventDefault();rechercherDepots();}" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
             </div>
+            <button type="button" class="btn btn-primary" onclick="rechercherDepots()" style="height:40px;padding:0 16px;font-size:13px;font-weight:700">Rechercher</button>
+            <button type="button" id="dSearchClear" class="btn btn-outline" onclick="effacerRechercheDepots()" title="Effacer la recherche" style="height:40px;padding:0 12px;display:none">&#10005;</button>
             <select id="dOpFilter" onchange="filterDepotsOp(this.value)" style="height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
               <option value="">Tous les opérateurs</option>
               <option value="orange">Orange Money</option>
@@ -1303,8 +1310,10 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
             <div style="flex:1;min-width:200px;position:relative">
               <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="2" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 0 4px #B388FF)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input id="rSearch" type="text" oninput="filterRetraits(this.value)" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
+              <input id="rSearch" type="text" onkeydown="if(event.key==='Enter'){event.preventDefault();rechercherRetraits();}" placeholder="Rechercher : numéro, n° session, ID client…" style="width:100%;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none">
             </div>
+            <button type="button" class="btn btn-primary" onclick="rechercherRetraits()" style="height:40px;padding:0 16px;font-size:13px;font-weight:700">Rechercher</button>
+            <button type="button" id="rSearchClear" class="btn btn-outline" onclick="effacerRechercheRetraits()" title="Effacer la recherche" style="height:40px;padding:0 12px;display:none">&#10005;</button>
             <select id="rOpFilter" onchange="filterRetraitsOp(this.value)" style="height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;color:var(--text);outline:none">
               <option value="">Tous les opérateurs</option>
               <option value="orange">Orange Money</option>
@@ -1368,6 +1377,7 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
           <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">Comptes cr&eacute;&eacute;s depuis le site. La cl&eacute; d'acc&egrave;s est demand&eacute;e une seule fois et rest&eacute;e sur cet appareil.</div>
           <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
             <input class="field-input" id="cliSearch" placeholder="Nom, email, telephone, r&eacute;f. DC-..." style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter')loadClients()"/>
+            <button type="button" class="btn btn-primary" onclick="loadClients()" style="padding:0 16px;font-size:13px;font-weight:700">Rechercher</button>
             <select id="cliActif" class="field-input" style="max-width:150px" onchange="loadClients()">
               <option value="">Tous</option>
               <option value="true">Actifs</option>
@@ -3289,13 +3299,13 @@ function escAttr(v){return String(v||'').replace(/'/g,"\\'");}
 // ══ SMS DEPOT (Retrait type=depot) ══
 let _depots=[]; let depotPage=1; let depotOpFilter='';
 async function loadDepots(){
-  const d=await api(`/api/retrait?type=depot&page=${depotPage}&limit=50${depotOpFilter?'&operator='+depotOpFilter:''}`);
+  const d=await api(depotQ ? `/api/retrait?type=depot&page=1&limit=50&q=${encodeURIComponent(depotQ)}` : `/api/retrait?type=depot&page=${depotPage}&limit=50${depotOpFilter?'&operator='+depotOpFilter:''}`);
   const tb=document.getElementById('dTbody');
   if(!d){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
   if(!d.data?.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Aucun dépôt</td></tr>';return;}
   _depots = d.data;
   renderDepots(_depots);
-  document.getElementById('dPag').textContent = `Page ${depotPage} — ${d.total} dépôt(s)`;
+  document.getElementById('dPag').textContent = depotQ ? `${d.total} résultat(s) exact(s) pour « ${depotQ} »` : `Page ${depotPage} — ${d.total} dépôt(s)`;
 }
 function renderDepots(list){
   const tb=document.getElementById('dTbody');
@@ -3327,6 +3337,15 @@ function filterDepots(q){
   ));
 }
 function filterDepotsOp(v){ depotOpFilter=v; depotPage=1; loadDepots(); }
+
+let depotQ='';
+function rechercherDepots(){
+  depotQ = (document.getElementById('dSearch').value || '').trim();
+  depotPage = 1;
+  var c = document.getElementById('dSearchClear'); if(c) c.style.display = depotQ ? '' : 'none';
+  loadDepots();
+}
+function effacerRechercheDepots(){ var i = document.getElementById('dSearch'); if(i) i.value = ''; rechercherDepots(); }
 function _isoDay(d){const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
 function filterDepotsDate(v){ if(!v){renderDepots(_depots);return;} renderDepots(_depots.filter(r=>_isoDay(r.createdAt)===v)); }
 function depotPrev(){ if(depotPage>1){depotPage--;loadDepots();} }
@@ -3356,13 +3375,13 @@ function showDepotDetail(id){
 // ══ SMS RETRAIT (Retrait type=retrait) ══
 let _retraits=[]; let retraitPage=1; let retraitOpFilter='';
 async function loadRetraits(){
-  const d=await api(`/api/retrait?type=retrait&page=${retraitPage}&limit=50${retraitOpFilter?'&operator='+retraitOpFilter:''}`);
+  const d=await api(retraitQ ? `/api/retrait?type=retrait&page=1&limit=50&q=${encodeURIComponent(retraitQ)}` : `/api/retrait?type=retrait&page=${retraitPage}&limit=50${retraitOpFilter?'&operator='+retraitOpFilter:''}`);
   const tb=document.getElementById('rTbody');
   if(!d){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--error)">Erreur serveur — réessayez</td></tr>';return;}
   if(!d.data?.length){tb.innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text3)">Aucun retrait</td></tr>';return;}
   _retraits = d.data;
   renderRetraits(_retraits);
-  document.getElementById('rPag').textContent = `Page ${retraitPage} — ${d.total} retrait(s)`;
+  document.getElementById('rPag').textContent = retraitQ ? `${d.total} résultat(s) exact(s) pour « ${retraitQ} »` : `Page ${retraitPage} — ${d.total} retrait(s)`;
 }
 function renderRetraits(list){
   const tb=document.getElementById('rTbody');
@@ -3402,6 +3421,16 @@ function filterRetraits(q){
   ));
 }
 function filterRetraitsOp(v){ retraitOpFilter=v; retraitPage=1; loadRetraits(); }
+
+let retraitQ='';
+function rechercherRetraits(){
+  retraitQ = (document.getElementById('rSearch').value || '').trim();
+  retraitPage = 1;
+  var c = document.getElementById('rSearchClear'); if(c) c.style.display = retraitQ ? '' : 'none';
+  loadRetraits();
+}
+function effacerRechercheRetraits(){ var i = document.getElementById('rSearch'); if(i) i.value = ''; rechercherRetraits(); }
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && typeof closeSidebar === 'function') closeSidebar(); });
 function filterRetraitsDate(v){ if(!v){renderRetraits(_retraits);return;} renderRetraits(_retraits.filter(r=>_isoDay(r.createdAt)===v)); }
 function retraitPrev(){ if(retraitPage>1){retraitPage--;loadRetraits();} }
 function retraitNext(){ retraitPage++; loadRetraits(); }
