@@ -983,15 +983,44 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
                  oninput="this.value=this.value.replace(/\D/g,'')"
                  style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:14px">
 
-          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Numero destinataire</div>
-          <input id="caisseNumero" type="tel" inputmode="numeric" placeholder="0341234567"
-                 oninput="this.value=this.value.replace(/\D/g,'')"
-                 style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:18px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">Numero destinataire <span style="font-weight:500;color:var(--text3)">(r&eacute;pertoire autoris&eacute;)</span></div>
+          <select id="caisseNumero" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:18px"><option value="">Chargement&hellip;</option></select>
 
           <button id="caisseBtn" class="btn btn-primary" onclick="lancerTransfertCaisse()"
                   style="width:100%;padding:13px;font-size:15px;font-weight:700">Retirer</button>
 
           <div id="caisseEtat" style="display:none;margin-top:16px;padding:13px 15px;border-radius:11px;font-size:13.5px;line-height:1.55"></div>
+        </div>
+
+        <!-- Patch 17 : repertoire des numeros autorises. Le serveur refuse tout
+             transfert vers un numero absent de cette liste. -->
+        <div class="card" id="repCaisseCard" style="max-width:520px;margin-top:16px">
+          <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px">R&eacute;pertoire des num&eacute;ros autoris&eacute;s</div>
+          <div id="repInfo" style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px"></div>
+          <div id="repListe" style="margin-bottom:14px"></div>
+
+          <div id="repTitre" style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">Ajouter un num&eacute;ro</div>
+          <input id="repNom" type="text" maxlength="60" placeholder="Nom (ex : Tolotra Orange)" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:8px">
+          <select id="repOp" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:8px">
+            <option value="mvola">MVola</option><option value="orange">Orange</option>
+            <option value="airtel">Airtel</option><option value="mvola_km">MVola Comores</option>
+          </select>
+          <input id="repNum" type="tel" inputmode="numeric" placeholder="Num&eacute;ro (ex : 0341234567)" oninput="this.value=this.value.replace(/\D/g,'')" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;margin-bottom:10px">
+          <div style="display:flex;gap:8px">
+            <button id="repBtn" class="btn btn-primary" onclick="repSoumettre()" style="flex:1;padding:11px;font-weight:700">Enregistrer</button>
+            <button id="repAnnuler" class="btn btn-outline" onclick="repReset()" style="display:none;padding:11px 14px">Annuler</button>
+          </div>
+
+          <div id="repCodeZone" style="display:none;margin-top:14px;padding:13px 14px;border-radius:11px;border:1.5px solid var(--accent);background:rgba(59,130,246,.08)">
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px">Code envoy&eacute; par email</div>
+            <div id="repCodeTexte" style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5"></div>
+            <input id="repCode" type="text" inputmode="numeric" maxlength="6" placeholder="Code &agrave; 6 chiffres" oninput="this.value=this.value.replace(/\D/g,'')" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg2);color:var(--text);font-size:15px;letter-spacing:4px;text-align:center;margin-bottom:8px">
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="repConfirmer()" style="flex:1;padding:11px;font-weight:700">Confirmer</button>
+              <button class="btn btn-outline" onclick="repFermerCode()" style="padding:11px 14px">Fermer</button>
+            </div>
+          </div>
+          <div id="repEtat" style="display:none;margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.5"></div>
         </div>
       </div>
 
@@ -2653,6 +2682,7 @@ var CAISSE_NOMS = { mvola:'MVola', orange:'Orange', airtel:'Airtel', mvola_km:'M
 async function chargerCaisses(){
   var box = document.getElementById('caisseOps');
   if(!box) return;
+  chargerRepertoire();
   box.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--text3)">Lecture des caisses…</div>';
   var d = await api('/api/retrait/soldes');
   var soldes = (d && d.soldes) || {};
@@ -2672,9 +2702,107 @@ async function chargerCaisses(){
         + (s.devise || (/_km$/i.test(String(k || '')) ? 'Fc' : 'Ar')) + '</div>'
       + '</button>';
   }).join('');
+  remplirSelectNumeros();
 }
 
 function choisirCaisse(k){ caisseOp = k; chargerCaisses(); }
+
+/* ===== Patch 17 : repertoire des numeros autorises ===================
+   Le transfert ne propose que ces numeros et le serveur refuse les autres.
+   Sur MATULMADA, chaque ajout / modification / suppression demande un code
+   envoye par email ; sur DiamCash l'action s'applique directement. */
+var _repCaisse = [], _repOtp = false, _repEditId = null, _repAttente = null;
+function repEsc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function repDire(texte, genre){
+  var e = document.getElementById('repEtat'); if(!e) return;
+  var c = { ok:['rgba(34,197,94,.12)','#16a34a'], err:['rgba(239,68,68,.12)','#dc2626'], info:['rgba(59,130,246,.12)','var(--accent)'] }[genre || 'info'];
+  e.style.display = texte ? '' : 'none'; e.style.background = c[0]; e.style.color = c[1]; e.innerHTML = texte || '';
+}
+async function chargerRepertoire(){
+  var d = await api('/api/caisse-numeros');
+  if(!d || d.error){ var l0 = document.getElementById('repListe'); if(l0) l0.innerHTML = '<div style="font-size:12.5px;color:#dc2626">R&eacute;pertoire indisponible' + (d && d.error ? ' : ' + repEsc(d.error) : '') + '</div>'; return; }
+  _repCaisse = d.numeros || []; _repOtp = !!d.otpRequis;
+  var info = document.getElementById('repInfo');
+  if(info) info.innerHTML = _repOtp
+    ? 'Seuls ces num&eacute;ros peuvent recevoir une caisse. Ajout, modification et suppression demandent un code envoy&eacute; par email.'
+    : 'Seuls ces num&eacute;ros peuvent recevoir une caisse.';
+  afficherRepertoire(); remplirSelectNumeros();
+}
+function remplirSelectNumeros(){
+  var s = document.getElementById('caisseNumero'); if(!s || s.tagName !== 'SELECT') return;
+  var avant = s.value;
+  var l = _repCaisse.filter(function(n){ return n.actif !== false && n.operator === caisseOp; });
+  s.innerHTML = '<option value="">' + (l.length ? '&mdash; Choisir un num&eacute;ro &mdash;' : 'Aucun num&eacute;ro autoris&eacute; pour cette caisse') + '</option>'
+    + l.map(function(n){ return '<option value="' + repEsc(n.numero) + '">' + repEsc(n.nom) + ' &mdash; ' + repEsc(n.numero) + '</option>'; }).join('');
+  if(l.some(function(n){ return n.numero === avant; })) s.value = avant;
+}
+function afficherRepertoire(){
+  var box = document.getElementById('repListe'); if(!box) return;
+  if(!_repCaisse.length){ box.innerHTML = '<div style="font-size:12.5px;color:var(--text3);padding:4px 0">Aucun num&eacute;ro. Ajoutez-en un ci-dessous.</div>'; return; }
+  box.innerHTML = _repCaisse.map(function(n){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)">'
+      + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + repEsc(n.nom) + '</div>'
+      + '<div style="font-size:12px;color:var(--text2)">' + repEsc(CAISSE_NOMS[n.operator] || n.operator) + ' &middot; ' + repEsc(n.numero) + '</div></div>'
+      + '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="repEditer(\'' + n._id + '\')">Modifier</button>'
+      + '<button class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:#e74c3c;border-color:#e74c3c" onclick="repSupprimer(\'' + n._id + '\')">Supprimer</button>'
+      + '</div>';
+  }).join('');
+}
+function repReset(){
+  _repEditId = null;
+  ['repNom','repNum'].forEach(function(i){ var e = document.getElementById(i); if(e) e.value = ''; });
+  var t = document.getElementById('repTitre'); if(t) t.innerHTML = 'Ajouter un num&eacute;ro';
+  var a = document.getElementById('repAnnuler'); if(a) a.style.display = 'none';
+}
+function repEditer(id){
+  var n = _repCaisse.find(function(x){ return x._id === id; }); if(!n) return;
+  _repEditId = id;
+  document.getElementById('repNom').value = n.nom;
+  document.getElementById('repOp').value = n.operator;
+  document.getElementById('repNum').value = n.numero;
+  document.getElementById('repTitre').textContent = 'Modifier : ' + n.nom;
+  document.getElementById('repAnnuler').style.display = '';
+  document.getElementById('repNom').focus();
+}
+async function repSoumettre(){
+  var nom = (document.getElementById('repNom').value || '').trim();
+  var op  = document.getElementById('repOp').value;
+  var num = (document.getElementById('repNum').value || '').replace(/\D/g, '');
+  if(!nom) return repDire('Nom manquant.', 'err');
+  if(num.length < 7) return repDire('Num&eacute;ro incomplet.', 'err');
+  var corps = { action: _repEditId ? 'modif' : 'ajout', nom: nom, operator: op, numero: num };
+  if(_repEditId) corps.id = _repEditId;
+  await repDemander(corps);
+}
+async function repSupprimer(id){
+  var n = _repCaisse.find(function(x){ return x._id === id; }); if(!n) return;
+  if(!confirm('Supprimer ' + n.nom + ' (' + n.numero + ') du r\u00e9pertoire ?')) return;
+  await repDemander({ action: 'suppr', id: id });
+}
+async function repDemander(corps){
+  var b = document.getElementById('repBtn'); if(b) b.disabled = true;
+  repDire(_repOtp ? 'Envoi du code par email&hellip;' : 'Enregistrement&hellip;', 'info');
+  var d = await api('/api/caisse-numeros/demander', { method: 'POST', body: JSON.stringify(corps) });
+  if(b) b.disabled = false;
+  if(!d || d.error){ repDire('<b>Refus&eacute;</b><br>' + repEsc((d && d.error) || 'Serveur injoignable'), 'err'); return; }
+  if(d.applique){ repDire('<b>Enregistr&eacute;</b><br>' + repEsc(d.texte || ''), 'ok'); repReset(); repFermerCode(); chargerRepertoire(); return; }
+  _repAttente = { otpId: d.otpId };
+  document.getElementById('repCodeTexte').textContent = d.texte || '';
+  document.getElementById('repCodeZone').style.display = '';
+  var c = document.getElementById('repCode'); c.value = ''; c.focus();
+  repDire('Code envoy&eacute;. Il vaut dix minutes, pour cette action uniquement.', 'info');
+}
+async function repConfirmer(){
+  var code = (document.getElementById('repCode').value || '').trim();
+  if(!/^[0-9]{6}$/.test(code)) return repDire('Le code compte six chiffres.', 'err');
+  if(!_repAttente) return repDire('Aucune demande en cours.', 'err');
+  repDire('V&eacute;rification&hellip;', 'info');
+  var d = await api('/api/caisse-numeros/confirmer', { method: 'POST', body: JSON.stringify({ otpId: _repAttente.otpId, code: code }) });
+  if(!d || d.error){ repDire('<b>Refus&eacute;</b><br>' + repEsc((d && d.error) || 'Serveur injoignable'), 'err'); if(d && d.fin) repFermerCode(); return; }
+  repDire('<b>Confirm&eacute;</b><br>' + repEsc(d.texte || ''), 'ok');
+  repFermerCode(); repReset(); chargerRepertoire();
+}
+function repFermerCode(){ _repAttente = null; var z = document.getElementById('repCodeZone'); if(z) z.style.display = 'none'; }
 
 function etatCaisse(texte, genre){
   var e = document.getElementById('caisseEtat');
@@ -2698,7 +2826,7 @@ async function lancerTransfertCaisse(){
 
   if(!caisseOp)          return etatCaisse('Choisissez une caisse.', 'err');
   if(!montant || Number(montant) <= 0) return etatCaisse('Montant manquant.', 'err');
-  if(numero.length < 7)  return etatCaisse('Numero destinataire incomplet.', 'err');
+  if(numero.length < 7)  return etatCaisse('Choisissez un numero du repertoire.', 'err');
 
   // Sortir de l'argent ne doit jamais partir d'un doigt qui glisse.
   if(!confirm('Transferer ' + Number(montant).toLocaleString('fr-FR')
