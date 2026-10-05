@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="manifest.json"/>
-<title>SMS Gateway Admin</title>
+<title>Espace privé</title>
 <style>
 /* Le navigateur a son propre tirer-pour-actualiser : laisse libre, il
    doublait le notre et rechargeait la page entiere, ramenant au tableau de
@@ -795,12 +795,12 @@ td[onclick]{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 </svg>
       </div>
       <div>
-        <div class="login-title">SMS Gateway</div>
-        <div class="login-sub">Admin Panel · by MATUL MADA</div>
+        <div class="login-title">Espace privé</div>
+        <div class="login-sub">Connexion sécurisée</div>
       </div>
     </div>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-field">
+    <div class="login-field" style="display:none"><!-- PATCH31 : adresse fixe -->
       <label class="login-label">URL du serveur</label>
       <input class="login-input" id="loginUrl" type="url" autocomplete="off"/>
     </div>
@@ -2646,7 +2646,7 @@ function doLogout(){localStorage.removeItem('gw_token');location.reload();}
 // ══ INIT ══
 window.onload=()=>{
   document.getElementById('cfgUrl').value=BASE;
-  document.getElementById('loginUrl').value=BASE;
+  document.getElementById('loginUrl').value='https://api.matulmada.net';
   document.getElementById('cfgKey').value=localStorage.getItem('gw_apikey')||'';
   document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
   applyTheme(currentTheme);
